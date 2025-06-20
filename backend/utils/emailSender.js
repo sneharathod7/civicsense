@@ -2,17 +2,15 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
+    service: 'gmail',
+    auth: {
+        user: 'realitysucksfs007@gmail.com',
+        pass: process.env.SMTP_PASS // keep password in env for security
+    }
 });
 
 // Generate email content
-function generateEmailContent(complaint) {
+const generateEmailContent = (complaint) => {
     return `
         <h2>New Civic Issue Reported</h2>
         <p><strong>Ticket ID:</strong> ${complaint.ticketId}</p>
@@ -23,13 +21,13 @@ function generateEmailContent(complaint) {
         <p><strong>Reported At:</strong> ${new Date(complaint.createdAt).toLocaleString()}</p>
         <p>Please take necessary action to resolve this issue.</p>
     `;
-}
+};
 
 // Send email notification
 exports.sendEmail = async (complaint) => {
     try {
         const mailOptions = {
-            from: process.env.SMTP_FROM || process.env.SMTP_USER,
+            from: 'realitysucksfs007@gmail.com',
             to: 'guptadevu321@gmail.com',
             subject: `New Civic Issue Report - ${complaint.ticketId}`,
             html: generateEmailContent(complaint)
@@ -41,13 +39,4 @@ exports.sendEmail = async (complaint) => {
         console.error('Error sending email:', error);
         throw error;
     }
-};
-exports.sendOtp = async (to, otp) => {
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to,
-      subject: 'CivicSense – Your OTP Code',
-      html: `<p>Your six-digit OTP is <strong>${otp}</strong>.</p>`
-    };
-    await transporter.sendMail(mailOptions);
-  };
+}; 

@@ -6,7 +6,6 @@ const multer = require('multer');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const sequelize = require('./config/db');
 require('./models/Complaint');
-require('./models'); // Ensure User model is imported and synced
 const axios = require('axios');
 
 dotenv.config();
@@ -29,29 +28,16 @@ sequelize.authenticate()
     console.error('Sequelize error:', err);
   });
 
-const fs = require('fs');
-const LOG_FILE = __dirname + '/server.log';
-function logToFile(msg) {
-  const line = `[${new Date().toISOString()}] ${msg}\n`;
-  fs.appendFileSync(LOG_FILE, line, { encoding: 'utf8' });
-}
-
 function startApp() {
   const app = express();
-
-  // Import routes
-  const authRoutes = require('./routes/auth');
 
   // Middleware
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Auth API routes
-  app.use('/api/auth', authRoutes);
-
-  // Serve static files but disable automatic index.html so we control the root route
-  app.use(express.static(path.join(__dirname, '../public'), { index: false }));
+  // Serve static files
+  app.use(express.static(path.join(__dirname, '../public')));
 
   // Configure multer for file uploads
   const storage = multer.diskStorage({
@@ -63,9 +49,6 @@ function startApp() {
     }
   });
   const upload = multer({ storage: storage });
-
-  // Auth API
-  app.use('/api/auth', require('./routes/auth'));
 
   // Proxy requests to ML API
   app.use('/api/predict-department', createProxyMiddleware({
@@ -104,17 +87,7 @@ function startApp() {
     res.sendFile(path.join(__dirname, '../public/report.html'));
   });
 
-  // Default root -> login/signup page
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/login-signup.html'));
-  });
-
-  // Serve login-signup.html for /login-signup
-  app.get(['/login-signup', '/login-signup/'], (req, res) =>
-    res.sendFile(path.join(__dirname, '../public/login-signup.html'))
-  );
-
-  // Serve index.html for all other routes (SPA)
+  // Serve index.html for all routes (SPA)
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
   });
@@ -122,14 +95,12 @@ function startApp() {
   // Error handling middleware
   app.use((err, req, res, next) => {
     console.error(err.stack);
-    logToFile(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(500).json({ message: 'Something went wrong!' });
   });
 
   // Start server
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-    logToFile(`Server is running on port ${PORT}`);
   });
 }
