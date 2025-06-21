@@ -1,11 +1,12 @@
 const twilio = require('twilio');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const fromPhone = process.env.TWILIO_PHONE;
+// Load credentials from environment variables (set in .env file, not committed)
+const accountSid = 'AC11f60f5ab297bcc3f7cdc131e7d38c88';
+const authToken  = '290bfa67d64d532eab1cf02efa1e238d';
+const fromPhone  = '+18078053080';
 
 let client;
-if (accountSid && authToken) {
+if (accountSid.startsWith('AC') && authToken && fromPhone) {
   client = twilio(accountSid, authToken);
 } else {
   console.warn('Twilio credentials are not set in environment variables. SMS sending disabled.');
