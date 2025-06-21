@@ -31,7 +31,9 @@
             <label class="form-check-label" for="viaSms">SMS</label>
           </div>
         </div>
-        <div class="d-flex justify-content-center mb-3 gap-1">
+        <button class="btn btn-primary w-100 mb-3" id="sendOtpBtn" type="button">Send OTP</button>
+        <div id="otpWrapper" style="display:none">
+          <div class="d-flex justify-content-center mb-3 gap-1">
           <input type="text" maxlength="1" class="form-control otp-input" id="otp1" />
           <input type="text" maxlength="1" class="form-control otp-input" id="otp2" />
           <input type="text" maxlength="1" class="form-control otp-input" id="otp3" />
@@ -39,8 +41,9 @@
           <input type="text" maxlength="1" class="form-control otp-input" id="otp5" />
           <input type="text" maxlength="1" class="form-control otp-input" id="otp6" />
         </div>
-        <button class="btn btn-success w-100 mb-2" id="verifyOtpBtn" type="button">Verify OTP</button>
-        <button class="btn btn-link resend-btn" id="resendOtpBtn">Send OTP <span id="otpTimer" class="d-none"></span></button>
+          <button class="btn btn-success w-100 mb-2" id="verifyOtpBtn" type="button">Verify OTP</button>
+        <button class="btn btn-link resend-btn" id="resendOtpBtn" disabled type="button">Resend OTP (<span id="otpTimer">15</span>s)</button>
+        </div>
         <div id="otpMsg"></div>
       </form>
       <p class="mt-3 text-center small">Already have an account? <a href="/citizen-login.html">Login here</a></p>

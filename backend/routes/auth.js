@@ -9,7 +9,10 @@ const { sendOtp } = require('../utils/emailSender');
 const { sendOtpSms } = require('../utils/smsSender');
 
 // In-memory OTPs (for demo; use Redis or DB in prod)
-const otps = {}; // { emailOrMobile: otp }
+// Pending signups before verification { key: { details, otp } }
+const pendingUsers = {};
+// OTP map for verified flow keyed by contact for quick check
+const otps = {};
 
 
 
@@ -24,19 +27,10 @@ router.post('/signup', async (req, res) => {
     if (existing) {
       return res.status(400).json({ success: false, message: 'User already exists.' });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
-    otps[email] = otp;
-    otps[mobile] = otp;
-    const newUser = await User.create({ firstName, lastName, email, mobile, address, password: hashedPassword, role, verified: false });
-    // Create role specific profile
-    if (role === 'Citizen') {
-      await CitizenProfile.create({ userId: newUser.id });
-    } else if (role === 'Admin') {
-      await MunicipalOfficial.create({ userId: newUser.id });
-    }
-    
-    res.json({ success: true, message: 'Signup successful. Please choose OTP delivery method.', userId: newUser.id });
+        const hashedPassword = await bcrypt.hash(password, 10);
+    // Save details to pending store, wait for OTP verification
+    pendingUsers[email] = { firstName, lastName, email, mobile, address, password: hashedPassword, role };
+    return res.json({ success: true, message: 'Registration saved. Click “Send OTP” to receive your code.', pending: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -44,17 +38,49 @@ router.post('/signup', async (req, res) => {
 });
 
 // OTP verification route
+// Route to send OTP on demand
+router.post('/send-otp', async (req, res) => {
+  const { email, mobile, method = 'email' } = req.body;
+  const pending = pendingUsers[email];
+  if (!pending) return res.status(400).json({ success: false, message: 'No pending registration found.' });
+  const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
+  otps[email] = otp;
+  otps[mobile] = otp;
+  try {
+    if (method === 'sms') {
+      await sendOtpSms(mobile, otp);
+    } else {
+      await sendOtp(email, otp);
+    }
+    res.json({ success: true, message: 'OTP sent.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to send OTP.' });
+  }
+});
+
 router.post('/verify-otp', async (req, res) => {
   const { email, mobile, otp } = req.body;
   const key = email || mobile;
   if (!key || !otp) return res.status(400).json({ success: false, message: 'Contact and OTP required.' });
   if (otps[key] !== otp) return res.status(400).json({ success: false, message: 'Invalid OTP.' });
   try {
-    const whereClause = email ? { email } : { mobile };
-    const user = await User.findOne({ where: whereClause });
-    if (!user) return res.status(400).json({ success: false, message: 'User not found.' });
-    user.verified = true;
-    await user.save();
+        // If user already exists (shouldn\'t), update; otherwise create from pending
+    let user = await User.findOne({ where: { email } });
+    if (!user) {
+      const pending = pendingUsers[email];
+      if (!pending) return res.status(400).json({ success: false, message: 'No pending registration.' });
+      user = await User.create({ ...pending, verified: true });
+      if (pending.role === 'Citizen') {
+        await CitizenProfile.create({ userId: user.id });
+      } else if (pending.role === 'Admin') {
+        await MunicipalOfficial.create({ userId: user.id });
+      }
+      delete pendingUsers[email];
+    } else {
+      user.verified = true;
+      await user.save();
+    }
     delete otps[key];
     res.json({ success: true, message: 'OTP verified.' });
   } catch (err) {
@@ -90,21 +116,30 @@ router.post('/login', async (req, res) => {
 
 // Resend OTP
 router.post('/resend-otp', async (req, res) => {
-  const { email, mobile, method } = req.body;
-  if (!email && !mobile) return res.status(400).json({ success: false, message: 'Email or mobile required.' });
+    const { email, mobile, method = 'email' } = req.body;
+  if (method === 'sms') {
+    if (!mobile) return res.status(400).json({ success: false, message: 'Mobile required.' });
+  } else {
+    if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
+  }
   try {
-    const whereClause = email ? { email } : { mobile };
-    const user = await User.findOne({ where: whereClause });
-    if (!user) return res.status(400).json({ success: false, message: 'User not found.' });
+    const key = method === 'sms' ? mobile : email;
+    let user = await User.findOne({ where: { email } });
+    const pending = pendingUsers[email];
+    if (!user && !pending) return res.status(400).json({ success: false, message: 'No user or pending registration found.' });
     const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
-    const key = email || mobile;
     otps[key] = otp;
-    if (method === 'sms') {
-      await sendOtpSms(user.mobile, otp);
-    } else {
-      await sendOtp(user.email, otp);
+    try {
+      if (method === 'sms') {
+        await sendOtpSms(mobile, otp);
+      } else {
+        await sendOtp(email, otp);
+      }
+      res.json({ success: true, message: 'OTP resent.' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: 'Failed to resend OTP.' });
     }
-    res.json({ success: true, message: 'OTP resent.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error.' });
