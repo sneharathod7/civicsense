@@ -1,0 +1,15 @@
+{
+  "Delhi": {
+    "New Delhi": ["Central Delhi", "East Delhi", "North Delhi", "South Delhi", "West Delhi"]
+  },
+  "Maharashtra": {
+    "Mumbai": ["Mumbai City", "Mumbai Suburban"],
+    "Pune": ["Pune City", "Pune Rural"]
+  },
+  "Karnataka": {
+    "Bangalore": ["Bangalore Urban", "Bangalore Rural"]
+  },
+  "Tamil Nadu": {
+    "Chennai": ["North Chennai", "South Chennai", "Central Chennai"]
+  }
+}

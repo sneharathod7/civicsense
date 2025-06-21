@@ -7,8 +7,10 @@ body {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+    border: 1px solid #e5eaf5;
     padding: 2rem 2.5rem;
-    max-width: 420px;
+    max-width: 640px;
+    width: 100%;
     margin: 2rem auto;
     animation: fadeIn 0.7s;
 }

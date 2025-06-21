@@ -1,0 +1,12 @@
+/* Landing page styles */
+.hero {
+  background: linear-gradient(135deg, #4268ff 0%, #61afff 100%);
+  color:#fff;
+  padding:120px 0 100px;
+  position: relative;
+  overflow:hidden;
+}
+.hero h1{font-weight:700;}
+.hero p.lead{font-size:1.25rem;}
+.section-title{font-weight:700;margin-bottom:1.5rem;}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,.12);}

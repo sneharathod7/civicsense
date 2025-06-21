@@ -13,6 +13,16 @@ let otpInterval;
 (() => {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
+    const roleParam = params.get('role');
+
+    // Pre-select role if provided via query string
+    if (roleParam) {
+        const loginRoleSelect = document.getElementById('loginRole');
+        const signupRoleSelect = document.getElementById('signupRole');
+        if (loginRoleSelect) loginRoleSelect.value = roleParam;
+        if (signupRoleSelect) signupRoleSelect.value = roleParam;
+    }
+
     if (mode === 'signup') {
         showSignup(false);
     } else {
@@ -124,6 +134,9 @@ loginForm.addEventListener('submit', async function(e) {
             }
             return;
         }
+        // Save in localStorage for later use
+        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('role', data.role);
         showLoginMsg('Login successful! Redirecting...', true);
         setTimeout(() => {
             window.location.href = role === 'Admin' ? '/admin-dashboard' : '/citizen-dashboard';
