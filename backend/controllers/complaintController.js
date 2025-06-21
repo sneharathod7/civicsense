@@ -60,7 +60,11 @@ exports.getComplaints = async (req, res) => {
     console.log('getComplaints: Received request');
     try {
         console.log('getComplaints: About to query database');
-        const complaints = await Complaint.findAll({ order: [['createdAt', 'DESC']] });
+        const whereClause = {};
+        if (req.query.userId) {
+            whereClause.userId = req.query.userId;
+        }
+        const complaints = await Complaint.findAll({ where: whereClause, order: [['createdAt', 'DESC']] });
         console.log('getComplaints: Database query successful, complaints count:', complaints.length);
         res.status(200).json({
             success: true,

@@ -4,10 +4,12 @@ const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { CitizenProfile, MunicipalOfficial } = require('../models');
 const { sendOtp } = require('../utils/emailSender');
+const { sendOtpSms } = require('../utils/smsSender');
 
 // In-memory OTPs (for demo; use Redis or DB in prod)
-const otps = {};
+const otps = {}; // { emailOrMobile: otp }
 
 
 
@@ -25,9 +27,16 @@ router.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
     otps[email] = otp;
-    await User.create({ firstName, lastName, email, mobile, address, password: hashedPassword, role, verified: false });
-    await await sendOtp(email, otp);
-    res.json({ success: true, message: 'OTP sent to email/mobile.' });
+    otps[mobile] = otp;
+    const newUser = await User.create({ firstName, lastName, email, mobile, address, password: hashedPassword, role, verified: false });
+    // Create role specific profile
+    if (role === 'Citizen') {
+      await CitizenProfile.create({ userId: newUser.id });
+    } else if (role === 'Admin') {
+      await MunicipalOfficial.create({ userId: newUser.id });
+    }
+    
+    res.json({ success: true, message: 'Signup successful. Please choose OTP delivery method.', userId: newUser.id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -36,15 +45,17 @@ router.post('/signup', async (req, res) => {
 
 // OTP verification route
 router.post('/verify-otp', async (req, res) => {
-  const { email, otp } = req.body;
-  if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP required.' });
-  if (otps[email] !== otp) return res.status(400).json({ success: false, message: 'Invalid OTP.' });
+  const { email, mobile, otp } = req.body;
+  const key = email || mobile;
+  if (!key || !otp) return res.status(400).json({ success: false, message: 'Contact and OTP required.' });
+  if (otps[key] !== otp) return res.status(400).json({ success: false, message: 'Invalid OTP.' });
   try {
-    const user = await User.findOne({ where: { email } });
+    const whereClause = email ? { email } : { mobile };
+    const user = await User.findOne({ where: whereClause });
     if (!user) return res.status(400).json({ success: false, message: 'User not found.' });
     user.verified = true;
     await user.save();
-    delete otps[email];
+    delete otps[key];
     res.json({ success: true, message: 'OTP verified.' });
   } catch (err) {
     console.error(err);
@@ -70,7 +81,7 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ success: false, message: 'Incorrect password.' });
     // For demo, skip JWT/session
-    res.json({ success: true, message: 'Login successful.', role: user.role });
+    res.json({ success: true, message: 'Login successful.', role: user.role, userId: user.id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -79,14 +90,20 @@ router.post('/login', async (req, res) => {
 
 // Resend OTP
 router.post('/resend-otp', async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
+  const { email, mobile, method } = req.body;
+  if (!email && !mobile) return res.status(400).json({ success: false, message: 'Email or mobile required.' });
   try {
-    const user = await User.findOne({ where: { email } });
+    const whereClause = email ? { email } : { mobile };
+    const user = await User.findOne({ where: whereClause });
     if (!user) return res.status(400).json({ success: false, message: 'User not found.' });
     const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
-    otps[email] = otp;
-    await sendOtp(email, otp);
+    const key = email || mobile;
+    otps[key] = otp;
+    if (method === 'sms') {
+      await sendOtpSms(user.mobile, otp);
+    } else {
+      await sendOtp(user.email, otp);
+    }
     res.json({ success: true, message: 'OTP resent.' });
   } catch (err) {
     console.error(err);

@@ -104,14 +104,22 @@ function startApp() {
     res.sendFile(path.join(__dirname, '../public/report.html'));
   });
 
-  // Default root -> login/signup page
+  // Default root -> landing page
   app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/login-signup.html'));
+    res.sendFile(path.join(__dirname, '../public/landing.html'));
   });
 
   // Serve login-signup.html for /login-signup
-  app.get(['/login-signup', '/login-signup/'], (req, res) =>
+  app.get('/login-signup', (req, res) =>
     res.sendFile(path.join(__dirname, '../public/login-signup.html'))
+  );
+
+  // Citizen and Admin dashboard routes
+  app.get('/citizen-dashboard', (req, res) =>
+    res.sendFile(path.join(__dirname, '../public/citizen-dashboard.html'))
+  );
+  app.get('/admin-dashboard', (req, res) =>
+    res.sendFile(path.join(__dirname, '../public/admin-dashboard.html'))
   );
 
   // Serve index.html for all other routes (SPA)

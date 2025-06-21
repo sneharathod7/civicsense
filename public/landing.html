@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicSense – Welcome</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/landing.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- inline style removed -->
+        body {
+            background: linear-gradient(135deg, #e3eafc 0%, #f7fafd 100%);
+            min-height: 100vh;
+        }
+        .hero-box {
+            background: #ffffffcc;
+            backdrop-filter: blur(6px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">CivicSense</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navBar" aria-controls="navBar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navBar">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#statsSection">Stats</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/map.html">Map</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-primary ms-lg-3" href="/citizen-login.html">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-primary ms-lg-2" href="/citizen-signup.html">Sign Up</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero text-center d-flex align-items-center" style="padding-top:140px" id="hero">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3 text-white">Your Voice. Your City. Your Change.</h1>
+            <p class="lead mb-4 text-white-50">Report civic issues instantly with AI-powered complaint generation and real-time tracking.</p>
+            <a href="#getStarted" class="btn btn-lg btn-light fw-semibold">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Get Started -->
+    <section class="py-5" id="getStarted">
+        <div class="container">
+            <h2 class="section-title text-center">Get Started</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 card-hover">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">I’m a Citizen</h5>
+                            <p class="card-text small">Report and track civic issues in your neighbourhood.</p>
+                            <a href="/citizen-login.html" class="btn btn-primary w-100 mb-2"><i class="fas fa-sign-in-alt me-2"></i>CITIZEN LOGIN</a>
+                            <a href="/citizen-signup.html" class="btn btn-outline-primary w-100"><i class="fas fa-user-plus me-2"></i>REGISTER NOW</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 card-hover">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">I’m a Municipal Official</h5>
+                            <p class="card-text small">Manage and resolve civic issues efficiently.</p>
+                            <a href="/official-login.html" class="btn btn-success w-100"><i class="fas fa-tools me-2"></i>OFFICIAL LOGIN</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 card-hover">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Browse Public Issues</h5>
+                            <p class="card-text small">View reported issues without signing in.</p>
+                            <a href="/map.html" class="btn btn-secondary w-100"><i class="fas fa-map-marked-alt me-2"></i>VIEW ISSUES MAP</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats / Activity / Stories -->
+    <section class="py-5 bg-light" id="statsSection">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-header fw-bold">Platform Stats</div>
+                        <div class="card-body" id="statsBox">
+                            <p class="mb-1"><span class="fw-bold" id="statTotal">--</span> Issues Reported</p>
+                            <p class="mb-1"><span class="fw-bold" id="statResolved">--</span> Resolved</p>
+                            <p class="mb-1"><span class="fw-bold" id="statAvg">--</span> Avg Days</p>
+                            <p class="mb-0"><span class="fw-bold" id="statSatisfaction">--</span>% Satisfaction</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header fw-bold text-center">Recent Activity</div>
+                        <ul class="list-group list-group-flush small" id="recentActivity">
+                            <li class="list-group-item text-muted">Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header fw-bold text-center">Success Stories</div>
+                        <ul class="list-group list-group-flush small" id="successStories">
+                            <li class="list-group-item">Park renovated, road repaired, LED lights installed!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-5" id="howItWorks">
+        <div class="container">
+            <h2 class="section-title text-center">How It Works</h2>
+            <div class="row text-center g-4">
+                <div class="col-md-3">
+                    <i class="fas fa-camera fa-2x text-primary mb-2"></i>
+                    <h6>Step 1: Report</h6>
+                    <p class="small">Take photo & describe the civic issue.</p>
+                </div>
+                <div class="col-md-3">
+                    <i class="fas fa-pen-fancy fa-2x text-info mb-2"></i>
+                    <h6>Step 2: AI Enhance</h6>
+                    <p class="small">AI creates formal complaint text.</p>
+                </div>
+                <div class="col-md-3">
+                    <i class="fas fa-users-cog fa-2x text-success mb-2"></i>
+                    <h6>Step 3: Official Review</h6>
+                    <p class="small">Municipality takes action & updates status.</p>
+                </div>
+                <div class="col-md-3">
+                    <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                    <h6>Step 4: Track Progress</h6>
+                    <p class="small">Get updates via email/SMS.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-light" id="contact">
+        <div class="container text-center small">
+            <p class="mb-1">© 2025 CivicSense | 📞 +91-11-2345-6789 | 📧 support@civicsense.in</p>
+            <a href="#" class="link-light text-decoration-none me-2">Privacy Policy</a>
+            <a href="#" class="link-light text-decoration-none me-2">Terms of Service</a>
+            <a href="#" class="link-light text-decoration-none me-2">Help Center</a>
+            <a href="#" class="link-light text-decoration-none">Contact Us</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/landing.js"></script>
+</body>
+</html>
