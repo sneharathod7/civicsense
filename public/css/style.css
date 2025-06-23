@@ -90,6 +90,39 @@ body {
     color: #fff;
 }
 
+/* Custom styles here */
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  background: #16a6b6;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  overflow: hidden;
+  padding: 0;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+/* Hide default caret on avatar dropdown toggle */
+.navbar .dropdown-toggle::after {
+  display: none !important;
+}
+/* Ensure avatar nav item sticks to far right */
+.navbar .nav-avatar {
+  margin-left: 0.75rem;
+}
+
 /* Form Styles */
 .form-container {
     max-width: 800px;
@@ -171,4 +204,72 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-} 
+}
+
+/* === Civic Trust Theme Enhancements === */
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --dark: #1f2937;
+  --light: #f3f4f6;
+}
+
+body {
+  background-color: var(--light);
+  color: var(--dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Elevation & Motion ------------------------------------------- */
+.card,
+.feature-card,
+.issue-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover,
+.feature-card:hover,
+.issue-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.slide-left {
+  animation: slideLeft 0.6s cubic-bezier(.25,.46,.45,.94) both;
+}
+@keyframes slideLeft {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Buttons ------------------------------------------------------- */
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 14px rgba(29, 78, 216, 0.35);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 3px 8px rgba(29, 78, 216, 0.3);
+}
+
+.shadow-sm { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important; }
+.shadow-lg { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important; }
+ 

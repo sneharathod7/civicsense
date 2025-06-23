@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('role', 'Admin');
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('user', JSON.stringify({ name: data.name || data.firstName || '', email: data.email || '' }));
       showMsg('Login successful! Redirecting...', true);
       setTimeout(() => {
         window.location.href = '/admin-dashboard';

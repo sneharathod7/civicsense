@@ -16,18 +16,42 @@
             <a class="navbar-brand" href="/citizen-dashboard.html">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="/citizen-dashboard.html">
                 <i class="fas fa-city"></i> CivicSense+
             </a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/report.html">Report Issue</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/map.html">Map View</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/landing.html" id="logoutLink">Logout</a></li>
+                    <li class="nav-item nav-logged-in" style="display:none"><a class="nav-link" href="/report.html" id="reportIssueLink">Report Issue</a></li>
+                    <li class="nav-item nav-logged-in" style="display:none"><a class="nav-link active" href="/map.html">Map View</a></li>
+                    <li class="nav-item dropdown nav-logged-in" style="display:none">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <div id="userAvatar" class="avatar-circle me-2"></div>
+</a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+  <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user"></i> Profile</a></li>
+  <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+  <li><a class="dropdown-item" href="/rating.html"><i class="fas fa-star"></i> My Rating</a></li>
+  <li><hr class="dropdown-divider"></li>
+  <li><a class="dropdown-item logout-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+</ul>
+                    </li>
+                    <li class="nav-item nav-logged-out"><a class="nav-link" href="/login-signup.html">Login/Signup</a></li>
                 </ul>
             </div>
         </div>
     </nav>
+    <script src="/js/auth.js"></script>
+    <script>
+    // Protect the Report Issue link
+    const reportLink = document.getElementById('reportIssueLink');
+    if (reportLink) {
+        reportLink.addEventListener('click', function(e) {
+            if (!window.requireLogin('/report.html')) {
+                e.preventDefault();
+            }
+        });
+    }
+    </script>
     <main class="container my-4">
         <!-- Filters & Search -->
         <div class="card p-3 mb-3">
@@ -67,6 +91,8 @@
             <small class="text-muted" id="lastUpdatedLabel">Last updated: --</small>
         </div>
         <h2 class="mb-4">Map View</h2>
+        <h3 class="mt-3">Issues</h3>
+        <div id="issuesList" class="mb-3"></div>
         <div id="map" style="height: 500px;"></div>
     </main>
     <footer class="bg-dark text-light mt-5 py-4">
