@@ -96,6 +96,11 @@ function setupFormHandlers() {
         try {
             // Create FormData object
             const formData = new FormData(form);
+            // Attach userId so backend can link complaint to user
+            const storedUserId = localStorage.getItem('userId');
+            if (storedUserId) {
+                formData.append('userId', storedUserId);
+            }
             // Log FormData content
             for (let pair of formData.entries()) {
                 console.log('FormData:', pair[0], pair[1]);

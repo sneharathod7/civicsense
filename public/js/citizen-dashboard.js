@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Debug: Show user info from localStorage
+  console.log('User in localStorage:', localStorage.getItem('user'));
+
   const userId = localStorage.getItem('userId');
   if (!userId) {
     // Not logged in – redirect to login

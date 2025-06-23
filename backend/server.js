@@ -52,6 +52,8 @@ function startApp() {
 
   // Serve static files but disable automatic index.html so we control the root route
   app.use(express.static(path.join(__dirname, '../public'), { index: false }));
+  // Serve uploads folder (icons, user uploads)
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
   // Configure multer for file uploads
   const storage = multer.diskStorage({

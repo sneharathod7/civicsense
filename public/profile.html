@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile - CivicSense+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar (same structure as other pages) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/citizen-dashboard.html">CivicSense+</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item nav-logged-in" style="display:none"><a class="nav-link" href="/report.html">Report Issue</a></li>
+          <li class="nav-item nav-logged-in" style="display:none"><a class="nav-link" href="/map.html">Map View</a></li>
+          <li class="nav-item dropdown nav-logged-in" style="display:none">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div id="userAvatar" class="avatar-circle me-2"></div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+              <li><a class="dropdown-item active" href="/profile.html"><i class="fas fa-user"></i> Profile</a></li>
+              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+              <li><a class="dropdown-item" href="/rating.html"><i class="fas fa-star"></i> My Rating</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item logout-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+          </li>
+          <li class="nav-item nav-logged-out"><a class="nav-link" href="/login-signup.html">Login/Signup</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <h2 class="mb-4">My Profile</h2>
+
+    <!-- Profile card -->
+    <div class="card p-4 shadow-sm">
+      <div class="d-flex align-items-center mb-4">
+        <div id="profileAvatar" class="avatar-circle me-3" style="width:64px;height:64px;font-size:2rem;"></div>
+        <div>
+          <h4 id="profileName" class="mb-0"></h4>
+          <small id="profileEmail" class="text-muted"></small>
+        </div>
+      </div>
+
+      <h5>Change Profile Picture</h5>
+      <input type="file" id="avatarInput" accept="image/*" class="form-control mb-3" />
+      <button class="btn btn-primary" id="saveAvatarBtn">Upload</button>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Populate profile info from localStorage
+    function populateProfile() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      document.getElementById('profileName').textContent = user.name || 'Anonymous';
+      document.getElementById('profileEmail').textContent = user.email || '';
+      const avatarCircle = document.getElementById('profileAvatar');
+      avatarCircle.innerHTML = '';
+      if (user.profileImage) {
+        const img = document.createElement('img');
+        img.src = user.profileImage;
+        img.alt = 'Profile';
+        img.className = 'avatar-img';
+        avatarCircle.appendChild(img);
+      } else {
+        const initial = (user.name || user.email || '?').trim()[0].toUpperCase();
+        avatarCircle.textContent = initial;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', populateProfile);
+
+    // Handle avatar upload
+    document.getElementById('saveAvatarBtn').addEventListener('click', async () => {
+      const file = document.getElementById('avatarInput').files[0];
+      if (!file) return alert('Please choose an image.');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        user.profileImage = base64; // Store as base64 for demo; ideally upload to server
+        localStorage.setItem('user', JSON.stringify(user));
+        populateProfile();
+        setUserAvatar();
+        alert('Profile picture updated!');
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
