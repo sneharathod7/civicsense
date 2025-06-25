@@ -1,0 +1,194 @@
+/* Profile Page Specific Styles */
+
+/* Profile Header */
+.profile-header {
+  position: relative;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+  color: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.profile-avatar-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.avatar-upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #4e73df;
+  color: white;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.avatar-upload-btn:hover {
+  background: #2e59d9;
+  transform: scale(1.1);
+}
+
+/* Stats Cards */
+.stat-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #5a5c69;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #858796;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Progress Bars */
+.skill-item {
+  margin-bottom: 1.5rem;
+}
+
+.skill-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.skill-name {
+  font-weight: 600;
+  color: #5a5c69;
+}
+
+.skill-percent {
+  color: #858796;
+  font-weight: 600;
+}
+
+/* Form Controls */
+.form-control:disabled, .form-control[readonly] {
+  background-color: #f8f9fc;
+  border-color: #d1d3e2;
+  color: #6e707e;
+  cursor: not-allowed;
+}
+
+/* Verification Badges */
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.verification-badge.verified {
+  background-color: #e6f7ee;
+  color: #1cc88a;
+}
+
+.verification-badge.pending {
+  background-color: #fdf6e3;
+  color: #f6c23e;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .profile-header {
+    text-align: center;
+  }
+  
+  .profile-actions {
+    justify-content: center !important;
+    margin-top: 1rem;
+  }
+}
+
+/* Specialization Progress Bars */
+.specialization-progress {
+  height: 10px;
+  border-radius: 5px;
+  background-color: #eaecf4;
+  margin-top: 0.5rem;
+}
+
+.specialization-progress-bar {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #4e73df, #224abe);
+  transition: width 0.6s ease;
+}
+
+/* Edit Mode */
+.edit-mode .form-control:not(:disabled),
+.edit-mode .form-select:not(:disabled) {
+  background-color: #fff;
+  border-color: #b7b9cc;
+}
+
+.edit-mode .form-control:focus,
+.edit-mode .form-select:focus {
+  border-color: #bac8f3;
+  box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Profile Navigation */
+.profile-nav {
+  border-bottom: 1px solid #e3e6f0;
+  margin-bottom: 1.5rem;
+}
+
+.profile-nav .nav-link {
+  color: #6e707e;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.profile-nav .nav-link.active {
+  color: #4e73df;
+  border-bottom-color: #4e73df;
+  background-color: transparent;
+}
+
+.profile-nav .nav-link:hover:not(.active) {
+  color: #4e73df;
+  border-bottom-color: #e3e6f0;
+}

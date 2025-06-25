@@ -1,148 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Issue - CivicSense+</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="/css/style.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📝 New Report - CivicVerse</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --transition: all 0.3s ease;
+    }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Header styles */
+    .sticky-top {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255, 255, 255, 0.95);
+      transition: var(--transition);
+    }
+    
+    /* Navigation links */
+    .nav-link {
+      color: #495057;
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 1rem;
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--primary-color);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 1rem;
+      background-color: var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: calc(100% - 2rem);
+    }
+    
+    /* Category icons */
+    .category-icon {
+      width: 108px;
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+      border-radius: .5rem;
+      transition: all .2s ease;
+    }
+    
+    .category-icon.selected,
+    .dropdown-item.active {
+      border-color: var(--bs-primary);
+      background-color: rgba(13,110,253,.15);
+    }
+    
+    #map { height: 450px; }
+    .dropdown.mb-3 { display: none !important; }
+    
+    /* Avatar */
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/citizen-dashboard.html">
-                <i class="fas fa-city"></i> CivicSense+
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+  <!-- Header -->
+  <header class="sticky-top bg-white shadow-sm">
+    <div class="container-fluid">
+      <div class="row align-items-center py-2">
+        <!-- Left Section (25%) -->
+        <div class="col-lg-3 d-flex align-items-center">
+          <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-landmark fs-3 text-primary me-2"></i>
+              <div>
+                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
+                <div class="small text-muted">Smart Governance</div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Center Navigation (50%) -->
+        <div class="col-lg-6">
+          <div class="d-flex flex-column">
+            <div class="d-flex justify-content-center gap-2">
+              <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
+              <a href="/report.html" class="nav-link active">New Report</a>
+              <a href="/my-reports.html" class="nav-link">My Reports</a>
+              <a href="/achievements.html" class="nav-link">Achievements</a>
+              <a href="/rewards.html" class="nav-link">Rewards</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Section (25%) -->
+        <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
+          <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              3
+            </span>
+          </button>
+          <div class="form-check form-switch my-0">
+            <input class="form-check-input" type="checkbox" id="themeSwitch">
+            <label class="form-check-label" for="themeSwitch">
+              <i class="fas fa-moon"></i>
+            </label>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" 
+                    type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="avatar-circle">
+                <img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar">
+              </div>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown nav-logged-in" style="display:none">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-  <div id="userAvatar" class="avatar-circle me-2"></div>
-</a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
-              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user"></i> Profile</a></li>
-              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
-              <li><a class="dropdown-item" href="/rating.html"><i class="fas fa-star"></i> My Rating</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item logout-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+              <li class="px-3 py-2 border-bottom">
+                <div class="fw-semibold" id="ddUserName">Username</div>
+                <small class="text-muted" id="ddUserEmail">user@email.com</small>
+              </li>
+              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
+              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
+              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
+              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
+              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
+              <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-danger logout-link" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
             </ul>
-                    </li>
-                    <li class="nav-item nav-logged-out">
-                        <a class="nav-link" href="/login-signup.html">Login/Signup</a>
-                    </li>
-                    <li class="nav-item nav-logged-in" style="display:none">
-                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/report"><i class="fas fa-plus-circle"></i> Report Issue</a>
-                    </li>
-                    <li class="nav-item nav-logged-in" style="display:none">
-                         <a class="nav-link" href="/my-reports.html"><i class="fas fa-list"></i> My Reports</a>
-                    </li>
-                    <li class="nav-item nav-logged-in" style="display:none">
-                         <a class="nav-link" href="/map.html"><i class="fas fa-map-marked-alt"></i> Map View</a>
-                    </li>
-                </ul>
-            </div>
+          </div>
         </div>
-    </nav>
+      </div>
+    </div>
+  </header>
+  <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
+  <div class="container py-4">
+<!-- 
+  <h1 class="text- mb-4">📝 New Report</h1> -->
 
-    <!-- Main Content -->
-    <main class="container my-4">
-        <div class="form-container">
-            <h2 class="text-center mb-4">Report a Civic Issue</h2>
-            
-            <form id="reportForm" enctype="multipart/form-data">
-                <!-- Issue Type -->
-                <div class="mb-4">
-                    <label for="issueType" class="form-label">Issue Type</label>
-                    <select class="form-select" id="issueType" name="issueType" required>
-                        <option value="">Select issue type</option>
-                        <option value="pothole">Pothole</option>
-                        <option value="garbage">Garbage</option>
-                        <option value="streetlight">Street Light</option>
-                        <option value="water">Water Issue</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
+  <!-- Category Selection -->
+  <section class="mb-5" id="categorySection">
+    <h2 class="h5 mb-3">Category Selection</h2>
+    <div class="dropdown mb-3">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Select Category ▼
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
+        <li><a class="dropdown-item d-flex align-items-center" data-value="roads" href="#"><span class="me-2">🛣️</span> Roads</a></li>
+        <li><a class="dropdown-item d-flex align-items-center" data-value="water" href="#"><span class="me-2">💧</span> Water</a></li>
+        <li><a class="dropdown-item d-flex align-items-center" data-value="electric" href="#"><span class="me-2">⚡</span> Electric</a></li>
+        <li><a class="dropdown-item d-flex align-items-center" data-value="environment" href="#"><span class="me-2">🌳</span> Environment</a></li>
+        <li><a class="dropdown-item d-flex align-items-center" data-value="sanitation" href="#"><span class="me-2">🚛</span> Sanitation</a></li>
+        <li><a class="dropdown-item d-flex align-items-center" data-value="infrastructure" href="#"><span class="me-2">🏗️</span> Infrastructure</a></li>
+      </ul>
+    </div>
+    <div class="d-flex flex-wrap gap-3" id="categoryIcons">
+      <button class="btn btn-light category-icon" data-value="roads"><span class="fs-3">🛣️</span><small>Roads</small></button>
+      <button class="btn btn-light category-icon" data-value="water"><span class="fs-3">💧</span><small>Water</small></button>
+      <button class="btn btn-light category-icon" data-value="electric"><span class="fs-3">⚡</span><small>Electric</small></button>
+      <button class="btn btn-light category-icon" data-value="environment"><span class="fs-3">🌳</span><small>Environment</small></button>
+      <button class="btn btn-light category-icon" data-value="sanitation"><span class="fs-3">🚛</span><small>Sanitation</small></button>
+      <button class="btn btn-light category-icon" data-value="infrastructure"><span class="fs-3">🏗️</span><small>Infrastructure</small></button>
+    </div>
+  </section>
 
-                <!-- Photo Upload -->
-                <div class="mb-4">
-                    <label class="form-label">Upload Photo</label>
-                    <div class="input-group">
-                        <input type="file" class="form-control" id="photo" name="photo" accept="image/*" required>
-                        <button class="btn btn-outline-secondary" type="button" id="capturePhoto">
-                            <i class="fas fa-camera"></i> Take Photo
-                        </button>
-                    </div>
-                    <div id="photoPreview" class="mt-2"></div>
-                </div>
-
-                <!-- Location -->
-                <div class="mb-4">
-                    <label class="form-label">Location</label>
-                    <div id="map" class="mb-2"></div>
-                    <input type="hidden" id="latitude" name="latitude">
-                    <input type="hidden" id="longitude" name="longitude">
-                    <input type="text" class="form-control" id="address" name="address" placeholder="Address" required>
-                </div>
-
-                <!-- Description -->
-                <div class="mb-4">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required
-                        placeholder="Please describe the issue in detail..."></textarea>
-                </div>
-
-                <!-- Department (Auto-detected) -->
-                <div class="mb-4">
-                    <label for="department" class="form-label">Department</label>
-                    <input type="text" class="form-control" id="department" name="department" readonly>
-                    <div class="form-text">Department will be automatically detected based on the issue type and location.</div>
-                </div>
-
-                <!-- Hidden userId for testing -->
-                <input type="hidden" id="userId" name="userId" value="1">
-
-                <!-- Submit Button -->
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-paper-plane"></i> Submit Report
-                    </button>
-                </div>
-            </form>
+  <!-- Smart Location Services -->
+  <section class="mb-5" id="locationSection">
+    <h2 class="h5 mb-3">📍 PRECISE LOCATION</h2>
+    <div class="card">
+      <div class="card-body">
+        <div id="map" class="mb-3"></div>
+        <input type="text" id="addressBox" class="form-control mb-3" placeholder="Detecting address...">
+        <p id="currentLocation" class="small text-muted mb-3">📍 Current: Locating…</p>
+        <textarea id="additionalAddress" class="form-control mb-3" rows="2" placeholder="Nearby landmarks, additional details"></textarea>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success" id="confirmLocation">🎯 Confirm Location</button>
+          <button class="btn btn-outline-secondary" id="adjustLocation">📍 Adjust Location</button>
         </div>
-    </main>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light mt-5 py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>CivicSense+</h5>
-                    <p>Making communities better, one issue at a time.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2024 CivicSense+. All rights reserved.</p>
-                </div>
-            </div>
+  <!-- Image Upload & AI Analysis -->
+  <section class="mb-5" id="imageSection">
+    <h2 class="h5 mb-1">Image Upload & AI Analysis</h2>
+    <p class="text-muted">🤖 AI will analyze your image automatically</p>
+    <div class="d-flex gap-2 mb-3">
+      <button class="btn btn-primary" id="cameraUpload"><i class="fas fa-camera me-2"></i>Camera</button>
+      <button class="btn btn-secondary" id="galleryUpload"><i class="fas fa-folder-open me-2"></i>Gallery</button>
+      <input type="file" id="hiddenFileInput" accept="image/*" capture="environment" style="display:none;">
+    </div>
+    <div id="imagePreview" class="mb-3"></div>
+    <div id="aiResults" class="card d-none">
+      <div class="card-body">
+        <h6 class="card-title mb-3">AI Analysis Results</h6>
+        <ul class="list-group list-group-flush mb-3">
+          <li class="list-group-item"><strong>Detected Issue:</strong> <span id="aiIssueType">-</span></li>
+          <li class="list-group-item"><strong>Auto Category:</strong> <span id="aiCategory">-</span></li>
+          <li class="list-group-item"><strong>GPS:</strong> <span id="aiGps">-</span></li>
+          <li class="list-group-item"><strong>Priority:</strong> <span id="aiPriority">-</span></li>
+          <li class="list-group-item"><strong>Description:</strong><br><textarea id="aiDescription" class="form-control mt-2" rows="3"></textarea></li>
+        </ul>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success" id="acceptAi">✅ Accept</button>
+          <button class="btn btn-outline-primary" id="editDescription">✏️ Edit description</button>
         </div>
-    </footer>
+      </div>
+    </div>
+  </section>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="/js/auth.js"></script>
-    <script src="/js/report.js"></script>
+  <!-- Submission Settings -->
+  <section class="mb-5" id="settingsSection">
+    <h2 class="h5 mb-3">Submission Settings</h2>
+    <div class="card">
+      <div class="card-body">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="identityToggle">
+          <label class="form-check-label" for="identityToggle">Submit anonymously</label>
+        </div>
+
+        <!-- Notifications -->
+        <div class="mb-3">
+          <label class="form-label">Notifications</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="notifyEmail" checked>
+            <label class="form-check-label" for="notifyEmail">Email</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="notifySms" checked>
+            <label class="form-check-label" for="notifySms">SMS</label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Expected Timeline:</label>
+          <span id="expectedTimeline" class="ms-2">72 hours</span>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Civic Points:</label>
+          <span id="civicPoints" class="ms-2">+10</span>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary" id="previewReport">👁️ Preview Report</button>
+          <button class="btn btn-success" id="submitReport">🚀 Submit Report</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Footer -->
+  <footer class="bg-light border-top mt-5">
+    <div class="container py-3">
+      <div class="row">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Legal</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
+            <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Quick Links</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
+            <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-center text-muted small mt-2">Last Updated On: 25 June 2025 | v-2.1.6</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/report.js"></script>
 </body>
-</html> 
+</html>

@@ -7,96 +7,821 @@
   <title>My Profile - CivicSense+</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/profile.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --transition: all 0.3s ease;
+    }
+    html { scroll-behavior: smooth; }
+    .sticky-top { backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.95); transition: var(--transition); }
+    .nav-link { color: #495057; font-weight: 500; position: relative; padding: 0.5rem 1rem; transition: var(--transition); }
+    .nav-link:hover, .nav-link.active { color: var(--primary-color); }
+    .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 1rem; background-color: var(--primary-color); transition: var(--transition); }
+    .nav-link:hover::after, .nav-link.active::after { width: calc(100% - 2rem); }
+    .btn { transition: var(--transition); }
+    .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+    .btn-primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); transform: translateY(-1px); }
+    .card { transition: var(--transition); border: 1px solid rgba(0,0,0,0.1); }
+    .footer { margin-top: 2rem; }
+    .footer .container { padding: 1rem; }
+    .footer h6 { font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .footer ul { margin-bottom: 0; }
+    .footer li { margin-bottom: 0.5rem; }
+    .footer a { font-size: 0.875rem; }
+    .card:hover { box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .dropdown-menu { border: none; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1); border-radius: 0.5rem; padding: 0.5rem; }
+    .dropdown-item { border-radius: 0.375rem; padding: 0.5rem 1rem; transition: var(--transition); }
+    .form-check-input:checked { background-color: var(--primary-color); border-color: var(--primary-color); }
+    .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+  </style>
 </head>
 <body>
-  <!-- Navbar (same structure as other pages) -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Header -->
+  <header class="sticky-top bg-white shadow-sm">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/citizen-dashboard.html">CivicSense+</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item nav-logged-in" style="display:none"><a class="nav-link" href="/report.html">Report Issue</a></li>
-          <li class="nav-item nav-logged-in" style="display:none"><a class="nav-link" href="/map.html">Map View</a></li>
-          <li class="nav-item dropdown nav-logged-in" style="display:none">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <div id="userAvatar" class="avatar-circle me-2"></div>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
-              <li><a class="dropdown-item active" href="/profile.html"><i class="fas fa-user"></i> Profile</a></li>
-              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
-              <li><a class="dropdown-item" href="/rating.html"><i class="fas fa-star"></i> My Rating</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item logout-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      <div class="row align-items-center py-2">
+        <!-- Left Section -->
+        <div class="col-lg-3 d-flex align-items-center">
+          <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-landmark fs-3 text-primary me-2"></i>
+              <div>
+                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
+                <div class="small text-muted">Smart Governance</div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <!-- Center Navigation -->
+        <div class="col-lg-6">
+          <div class="d-flex flex-column">
+            <div class="d-flex justify-content-center gap-2">
+              <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
+              <a href="/report.html" class="nav-link">New Report</a>
+              <a href="/my-reports.html" class="nav-link">My Reports</a>
+              <a href="/achievements.html" class="nav-link">Achievements</a>
+              <a href="/rewards.html" class="nav-link">Rewards</a>
+            </div>
+          </div>
+        </div>
+        <!-- Right Section -->
+        <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
+          <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
+          </button>
+          <div class="form-check form-switch my-0">
+            <input class="form-check-input" type="checkbox" id="themeSwitch">
+            <label class="form-check-label" for="themeSwitch"><i class="fas fa-moon"></i></label>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="avatar-circle"><img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar"></div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+              <li class="px-3 py-2 border-bottom">
+                <div class="fw-semibold" id="ddUserName">Username</div>
+                <small class="text-muted" id="ddUserEmail">user@email.com</small>
+              </li>
+              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
+              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
+              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
+              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
+              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
+              <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-danger logout-link" id="logoutBtn" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
             </ul>
-          </li>
-          <li class="nav-item nav-logged-out"><a class="nav-link" href="/login-signup.html">Login/Signup</a></li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
-  </nav>
+  </header>
+  <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
 
   <main class="container py-4">
-    <h2 class="mb-4">My Profile</h2>
+    <!-- Profile Header -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+          <div class="profile-avatar-container me-md-4 mb-3 mb-md-0">
+            <img src="/img/avatar-placeholder.png" alt="Profile Photo" class="profile-avatar rounded-circle" id="profileAvatar">
+            <div class="avatar-upload-btn" id="avatarUploadBtn">
+              <i class="fas fa-camera"></i>
+              <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            </div>
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start mb-2">
+              <h1 class="h3 mb-0 me-3" id="profileName">John Doe</h1>
+              <span class="badge bg-success bg-opacity-10 text-success mb-2">
+                <i class="fas fa-star text-warning"></i> 4.8
+              </span>
+            </div>
+            <div class="text-muted mb-2">
+              <i class="fas fa-award text-primary me-1"></i> Civic Champion
+              <span class="mx-2">•</span>
+              <i class="far fa-calendar-alt text-primary me-1"></i> Member since Jan 2023
+            </div>
+            <div class="text-muted">
+              <i class="fas fa-map-marker-alt text-primary me-1"></i> <span id="userLocation">New Delhi, India</span>
+            </div>
+          </div>
+          <div class="mt-3 mt-md-0 d-flex gap-2">
+            <button class="btn btn-outline-primary" id="editProfileBtn">
+              <i class="fas fa-edit me-1"></i> Edit Profile
+            </button>
+            <button class="btn btn-primary" id="saveProfileBtn" style="display: none;">
+              <i class="fas fa-save me-1"></i> Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Profile card -->
-    <div class="card p-4 shadow-sm">
-      <div class="d-flex align-items-center mb-4">
-        <div id="profileAvatar" class="avatar-circle me-3" style="width:64px;height:64px;font-size:2rem;"></div>
-        <div>
-          <h4 id="profileName" class="mb-0"></h4>
-          <small id="profileEmail" class="text-muted"></small>
+    <div class="row">
+      <!-- Left Column -->
+      <div class="col-lg-8">
+        <!-- Contact Information -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-address-card me-2"></i>Contact Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-envelope me-2 text-primary"></i>
+                  <span>Email</span>
+                  <span class="verification-badge verified">
+                    <i class="fas fa-check-circle me-1"></i> Verified
+                  </span>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
+                  Change
+                </button>
+              </div>
+              <div class="ms-4 ps-3 text-muted" id="userEmail">john.doe@example.com</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-phone me-2 text-primary"></i>
+                  <span>Phone</span>
+                  <span class="verification-badge verified">
+                    <i class="fas fa-check-circle me-1"></i> Verified
+                  </span>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePhoneModal">
+                  Change
+                </button>
+              </div>
+              <div class="ms-4 ps-3 text-muted" id="userPhone">+91 98765 43210</div>
+            </div>
+
+
+          </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted small mb-1">First Name</label>
+                <input type="text" class="form-control" id="firstName" value="John" disabled>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted small mb-1">Last Name</label>
+                <input type="text" class="form-control" id="lastName" value="Doe" disabled>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted small mb-1">Date of Birth</label>
+                <input type="date" class="form-control" id="dateOfBirth" value="1985-06-15" disabled>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted small mb-1">Gender</label>
+                <select class="form-select" id="gender" disabled>
+                  <option value="male" selected>Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+              </div>
+              <div class="col-12 mb-3">
+                <label class="form-label text-muted small mb-1">Address</label>
+                <input type="text" class="form-control" id="address" value="123 Main Street, Connaught Place" disabled>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label text-muted small mb-1">City</label>
+                <input type="text" class="form-control" id="city" value="New Delhi" disabled>
+              </div>
+
+              <div class="col-md-4 mb-0">
+                <label class="form-label text-muted small mb-1">State</label>
+                <input type="text" class="form-control" id="state" value="Delhi" disabled>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <h5>Change Profile Picture</h5>
-      <input type="file" id="avatarInput" accept="image/*" class="form-control mb-3" />
-      <button class="btn btn-primary" id="saveAvatarBtn">Upload</button>
+      <!-- Right Column -->
+      <div class="col-lg-4">
+        <!-- Civic Stats -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Civic Stats</h5>
+          </div>
+          <div class="card-body">
+            <div class="text-center mb-4">
+              <div class="display-4 fw-bold text-primary">47</div>
+              <div class="text-muted">Total Reports</div>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <span class="text-muted">Resolved</span>
+              <span class="fw-bold">89%</span>
+            </div>
+            <div class="progress mb-4" style="height: 8px;">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 89%;" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <div>
+                <i class="fas fa-star text-warning"></i>
+                <span class="ms-1">Citizen Score</span>
+              </div>
+              <span class="fw-bold">4.8/5.0</span>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+              <div>
+                <i class="fas fa-trophy text-warning"></i>
+                <span class="ms-1">Points</span>
+              </div>
+              <span class="fw-bold">1,245</span>
+            </div>
+            <div class="d-grid">
+              <button class="btn btn-outline-primary">View Detailed Stats</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specialization Areas -->
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-tags me-2"></i>Specialization Areas</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><i class="fas fa-trash-alt text-danger me-1"></i> Waste Management</span>
+                <small class="text-muted">85%</small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span><i class="fas fa-road text-primary me-1"></i> Road Maintenance</span>
+                <small class="text-muted">72%</small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: 72%;" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="mb-0">
+              <div class="d-flex justify-content-between mb-1">
+                <span><i class="fas fa-lightbulb text-warning me-1"></i> Street Lighting</span>
+                <small class="text-muted">63%</small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 63%;" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Settings Section -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Account Security</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Change Password</h6>
+                <p class="small text-muted mb-0">Last changed 3 months ago</p>
+              </div>
+              <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                Change
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Login Activity</h6>
+                <p class="small text-muted mb-0">View recent login attempts</p>
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" id="viewLoginActivityBtn">
+                View
+              </button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Connected Devices</h6>
+                <p class="small text-muted mb-0">2 devices active</p>
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" id="manageDevicesBtn">
+                Manage
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+  </div>
     </div>
   </main>
 
+  <!-- Change Email Modal -->
+  <div class="modal fade" id="changeEmailModal" tabindex="-1" aria-labelledby="changeEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changeEmailModalLabel">Change Email Address</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changeEmailForm">
+            <div class="mb-3">
+              <label for="currentEmail" class="form-label">Current Email</label>
+              <input type="email" class="form-control" id="currentEmail" value="john.doe@example.com" disabled>
+            </div>
+            <div class="mb-3">
+              <label for="newEmail" class="form-label">New Email Address</label>
+              <input type="email" class="form-control" id="newEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="confirmEmail" class="form-label">Confirm New Email</label>
+              <input type="email" class="form-control" id="confirmEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="currentPasswordEmail" class="form-label">Current Password</label>
+              <input type="password" class="form-control" id="currentPasswordEmail" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="changeEmailForm" class="btn btn-primary">Update Email</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Phone Modal -->
+  <div class="modal fade" id="changePhoneModal" tabindex="-1" aria-labelledby="changePhoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePhoneModalLabel">Change Phone Number</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changePhoneForm">
+            <div class="mb-3">
+              <label for="currentPhone" class="form-label">Current Phone</label>
+              <input type="tel" class="form-control" id="currentPhone" value="+91 98765 43210" disabled>
+            </div>
+            <div class="mb-3">
+              <label for="newPhone" class="form-label">New Phone Number</label>
+              <input type="tel" class="form-control" id="newPhone" required>
+            </div>
+            <div class="mb-3">
+              <label for="verificationCode" class="form-label">Verification Code</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="verificationCode" placeholder="Enter code" required>
+                <button class="btn btn-outline-secondary" type="button" id="sendVerificationCode">Send Code</button>
+              </div>
+              <small class="text-muted">We'll send a verification code to your new number</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="changePhoneForm" class="btn btn-primary">Update Phone</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword" required>
+            </div>
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" required>
+              <div class="form-text">Must be at least 8 characters long and contain a number</div>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="changePasswordForm" class="btn btn-primary">Update Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Activity Modal -->
+  <div class="modal fade" id="loginActivityModal" tabindex="-1" aria-labelledby="loginActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginActivityModalLabel">Recent Login Activity</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Device</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Just now</td>
+                  <td>
+                    <i class="fas fa-desktop me-2"></i> Windows 10, Chrome
+                  </td>
+                  <td>New Delhi, India</td>
+                  <td><span class="badge bg-success">Active</span></td>
+                </tr>
+                <tr>
+                  <td>2 hours ago</td>
+                  <td>
+                    <i class="fas fa-mobile-alt me-2"></i> Android, Chrome
+                  </td>
+                  <td>New Delhi, India</td>
+                  <td><span class="badge bg-secondary">Inactive</span></td>
+                </tr>
+                <tr>
+                  <td>Yesterday, 14:32</td>
+                  <td>
+                    <i class="fas fa-mobile-alt me-2"></i> iPhone, Safari
+                  </td>
+                  <td>Gurgaon, India</td>
+                  <td><span class="badge bg-secondary">Inactive</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-danger">Sign out all other devices</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connected Devices Modal -->
+  <div class="modal fade" id="connectedDevicesModal" tabindex="-1" aria-labelledby="connectedDevicesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="connectedDevicesModalLabel">Connected Devices</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="device-item border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">Windows 10, Chrome</div>
+                <div class="text-muted small">Current session • New Delhi, India</div>
+                <div class="text-muted small">Last active: Just now</div>
+              </div>
+              <button class="btn btn-sm btn-outline-danger">Sign out</button>
+            </div>
+          </div>
+          <div class="device-item border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">Android, Chrome</div>
+                <div class="text-muted small">Active 2 hours ago • New Delhi, India</div>
+                <div class="text-muted small">Last active: 2 hours ago</div>
+              </div>
+              <button class="btn btn-sm btn-outline-danger">Sign out</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-danger">Sign out all other devices</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light border-top mt-5">
+    <div class="container py-3">
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Legal</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
+            <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
+          </ul>
+        </div>
+        <!-- Right Column -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Quick Links</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
+            <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-center text-muted small mt-2">Last Updated On: 24 June 2025 | v-2.1.5</div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Auth JavaScript -->
   <script src="/js/auth.js"></script>
+  
+  <!-- Profile JavaScript -->
+  <script src="/js/profile.js"></script>
+  <script>
+    // Theme toggle & nav highlight copied from dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeSwitch = document.getElementById('themeSwitch');
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        if (themeSwitch) themeSwitch.checked = true;
+      }
+      if (themeSwitch) {
+        themeSwitch.addEventListener('change', function() {
+          if (this.checked) {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            localStorage.setItem('theme', 'light');
+          }
+        });
+      }
+      const currentPage = window.location.pathname.split('/').pop();
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = '/landing.html';
+        });
+      }
+    });
+  </script>
+  
   <script>
     // Populate profile info from localStorage
     function populateProfile() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      document.getElementById('profileName').textContent = user.name || 'Anonymous';
-      document.getElementById('profileEmail').textContent = user.email || '';
-      const avatarCircle = document.getElementById('profileAvatar');
-      avatarCircle.innerHTML = '';
-      if (user.profileImage) {
+      if (!user) return;
+      
+      // Set user name and email
+      if (user.name) document.getElementById('profileName').textContent = user.name;
+      if (user.email) document.getElementById('profileEmail').textContent = user.email;
+      
+      // Set avatar
+      const avatar = document.getElementById('profileAvatar');
+      if (user.avatar || user.profileImage) {
         const img = document.createElement('img');
-        img.src = user.profileImage;
+        img.src = user.avatar || user.profileImage;
         img.alt = 'Profile';
         img.className = 'avatar-img';
-        avatarCircle.appendChild(img);
+        avatar.innerHTML = '';
+        avatar.appendChild(img);
       } else {
-        const initial = (user.name || user.email || '?').trim()[0].toUpperCase();
-        avatarCircle.textContent = initial;
+        // Show initials if no avatar
+        const name = user.name || user.email || '';
+        const initials = name.trim() ? 
+          name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
+        avatar.innerHTML = '';
+        avatar.textContent = initials;
+        avatar.style.backgroundColor = '#4e73df';
+        avatar.style.display = 'flex';
+        avatar.style.alignItems = 'center';
+        avatar.style.justifyContent = 'center';
+        avatar.style.color = 'white';
+        avatar.style.fontWeight = 'bold';
       }
     }
 
     document.addEventListener('DOMContentLoaded', populateProfile);
 
-    // Handle avatar upload
-    document.getElementById('saveAvatarBtn').addEventListener('click', async () => {
-      const file = document.getElementById('avatarInput').files[0];
-      if (!file) return alert('Please choose an image.');
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64 = e.target.result;
-        let user = JSON.parse(localStorage.getItem('user') || '{}');
-        user.profileImage = base64; // Store as base64 for demo; ideally upload to server
-        localStorage.setItem('user', JSON.stringify(user));
-        populateProfile();
-        setUserAvatar();
-        alert('Profile picture updated!');
-      };
-      reader.readAsDataURL(file);
+    // Helper function to show alerts
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      const main = document.querySelector('main');
+      if (main) {
+        main.insertBefore(alertDiv, main.firstChild);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+          const alert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+          if (alert) {
+            alert.close();
+          }
+        }, 5000);
+      }
+    }
+
+    // Handle avatar upload through the camera icon
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadBtn = document.querySelector('.avatar-upload-btn');
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('avatarInput').click();
+        });
+      }
+      
+      const avatarInput = document.getElementById('avatarInput');
+      if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          // Check file type
+          if (!file.type.match('image.*')) {
+            showAlert('Please select a valid image file (JPG, PNG, GIF)', 'danger');
+            return;
+          }
+          
+          // Check file size (max 2MB)
+          if (file.size > 2 * 1024 * 1024) {
+            showAlert('Image size should be less than 2MB', 'danger');
+            return;
+          }
+          
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const avatar = document.getElementById('profileAvatar');
+            if (avatar) {
+              avatar.src = e.target.result;
+              
+              // In a real app, upload the file to your server here
+              const userData = JSON.parse(localStorage.getItem('user') || '{}');
+              userData.avatar = e.target.result;
+              localStorage.setItem('user', JSON.stringify(userData));
+              
+              showAlert('Profile picture updated successfully!', 'success');
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+
+    // Initialize modals
+    document.addEventListener('DOMContentLoaded', function() {
+      // Login Activity Modal
+      const viewLoginActivityBtn = document.getElementById('viewLoginActivityBtn');
+      if (viewLoginActivityBtn) {
+        viewLoginActivityBtn.addEventListener('click', function() {
+          const loginActivityModal = new bootstrap.Modal(document.getElementById('loginActivityModal'));
+          loginActivityModal.show();
+        });
+      }
+      
+      // Connected Devices Modal
+      const manageDevicesBtn = document.getElementById('manageDevicesBtn');
+      if (manageDevicesBtn) {
+        manageDevicesBtn.addEventListener('click', function() {
+          const connectedDevicesModal = new bootstrap.Modal(document.getElementById('connectedDevicesModal'));
+          connectedDevicesModal.show();
+        });
+      }
+      
+      // Form submissions
+      const changeEmailForm = document.getElementById('changeEmailForm');
+      if (changeEmailForm) {
+        changeEmailForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // Add email change logic here
+          const modal = bootstrap.Modal.getInstance(document.getElementById('changeEmailModal'));
+          modal.hide();
+          alert('A verification email has been sent to your new email address.');
+        });
+      }
+      
+      const changePhoneForm = document.getElementById('changePhoneForm');
+      if (changePhoneForm) {
+        changePhoneForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // Add phone change logic here
+          const modal = bootstrap.Modal.getInstance(document.getElementById('changePhoneModal'));
+          modal.hide();
+          alert('Your phone number has been updated successfully!');
+        });
+      }
+      
+      const changePasswordForm = document.getElementById('changePasswordForm');
+      if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // Add password change logic here
+          const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+          modal.hide();
+          alert('Your password has been updated successfully!');
+        });
+      }
+      
+      // Send verification code for phone
+      const sendVerificationCodeBtn = document.getElementById('sendVerificationCode');
+      if (sendVerificationCodeBtn) {
+        sendVerificationCodeBtn.addEventListener('click', function() {
+          // Add send verification code logic here
+          this.disabled = true;
+          this.textContent = 'Sending...';
+          
+          // Simulate API call
+          setTimeout(() => {
+            this.textContent = 'Resend Code (60)';
+            let countdown = 60;
+            const timer = setInterval(() => {
+              countdown--;
+              this.textContent = `Resend Code (${countdown})`;
+              if (countdown <= 0) {
+                clearInterval(timer);
+                this.textContent = 'Resend Code';
+                this.disabled = false;
+              }
+            }, 1000);
+            
+            alert('Verification code sent to your phone number.');
+          }, 1000);
+        });
+      }
     });
   </script>
 </body>
