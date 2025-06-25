@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report Submitted - CivicVerse</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --transition: all 0.3s ease;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Header styles */
+    .sticky-top {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255, 255, 255, 0.95);
+      transition: var(--transition);
+    }
+    
+    /* Navigation links */
+    .nav-link {
+      color: #495057;
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 1rem;
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--primary-color);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 1rem;
+      background-color: var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: calc(100% - 2rem);
+    }
+    
+    /* Avatar */
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Success Section */
+    .success-section {
+      text-align: center;
+      padding: 3rem 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .success-icon {
+      font-size: 5rem;
+      color: #28a745;
+      margin-bottom: 1.5rem;
+      animation: bounce 1s ease infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    /* Process Timeline */
+    .process-step {
+      position: relative;
+      padding-left: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .process-step-number {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    /* Issue Details Card */
+    .issue-details-card {
+      border-left: 4px solid var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .issue-details-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Quick Actions */
+    .quick-actions .btn {
+      min-width: 150px;
+      margin: 0.25rem;
+    }
+    
+    /* Community Impact */
+    .impact-badge {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .quick-actions .btn {
+        width: 100%;
+        margin: 0.25rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="sticky-top bg-white shadow-sm">
+    <div class="container-fluid">
+      <div class="row align-items-center py-2">
+        <!-- Left Section (25%) -->
+        <div class="col-lg-3 d-flex align-items-center">
+          <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-landmark fs-3 text-primary me-2"></i>
+              <div>
+                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
+                <div class="small text-muted">Smart Governance</div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Center Navigation (50%) -->
+        <div class="col-lg-6">
+          <div class="d-flex flex-column">
+            <div class="d-flex justify-content-center">
+              <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
+              <a href="/report.html" class="nav-link">New Report</a>
+              <a href="/my-reports.html" class="nav-link active">My Reports</a>
+              <a href="/achievements.html" class="nav-link">Achievements</a>
+              <a href="/rewards.html" class="nav-link">Rewards</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Section (25%) -->
+        <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
+          <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
+          </button>
+          <div class="form-check form-switch my-0">
+            <input class="form-check-input" type="checkbox" id="themeSwitch">
+            <label class="form-check-label" for="themeSwitch">
+              <i class="fas fa-moon"></i>
+            </label>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" 
+                    type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="avatar-circle">
+                <img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar">
+              </div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+              <li class="px-3 py-2 border-bottom">
+                <div class="fw-semibold" id="ddUserName">Username</div>
+                <small class="text-muted" id="ddUserEmail">user@email.com</small>
+              </li>
+              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
+              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
+              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
+              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
+              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
+              <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-danger logout-link" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
+
+  <div class="container py-4">
+    <!-- Success Message Section -->
+    <section class="success-section mb-5">
+      <div class="container">
+        <div class="success-icon">✅</div>
+        <h1 class="display-5 fw-bold mb-3">Report Successfully Submitted!</h1>
+        <p class="lead text-muted mb-4">Thank you for helping improve our community</p>
+        <div class="alert alert-success d-inline-flex align-items-center" role="alert">
+          <i class="fas fa-info-circle me-2"></i>
+          <div>Your report ID: <strong>CV-0855</strong> has been received and is being processed.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="row g-4">
+      <!-- Left Column -->
+      <div class="col-lg-8">
+        <div class="d-flex flex-column h-100">
+        <!-- Issue Details -->
+        <div class="card issue-details-card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Issue Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p class="mb-1"><strong>Report ID:</strong> CV-0855</p>
+                <p class="mb-1"><strong>Date & Time:</strong> <span id="reportDateTime">25 Jun 2025, 16:22 IST</span></p>
+                <p class="mb-1"><strong>Location:</strong> Sector 14, Gurgaon</p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1"><strong>Category:</strong> Road & Infrastructure</p>
+                <p class="mb-0"><strong>Status:</strong> <span class="badge bg-info">Under Review</span></p>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description:</label>
+              <div class="p-3 bg-light rounded">
+                <p class="mb-0" id="reportDescription">Large pothole near the intersection causing traffic congestion and safety hazards for two-wheelers.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Process Timeline -->
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-clock me-2 text-primary"></i>What Happens Next?</h5>
+          </div>
+          <div class="card-body">
+            <div class="process-step">
+              <div class="process-step-number">1</div>
+              <h6>🔍 Verification (Within 2 hours)</h6>
+              <p class="text-muted mb-0">Our team will review your report and photos</p>
+            </div>
+            <div class="process-step">
+              <div class="process-step-number">2</div>
+              <h6>📋 Assignment (Within 4 hours)</h6>
+              <p class="text-muted mb-0">Issue will be assigned to the relevant department</p>
+            </div>
+            <div class="process-step">
+              <div class="process-step-number">3</div>
+              <h6>🔧 Action (Within 72 hours)</h6>
+              <p class="text-muted mb-0">Municipal team will work to resolve the issue</p>
+            </div>
+            <div class="process-step">
+              <div class="process-step-number">4</div>
+              <h6>✅ Confirmation</h6>
+              <p class="text-muted mb-0">You'll receive updates via email and SMS</p>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-lg-4">
+        <div class="d-flex flex-column gap-4">
+        <!-- Tracking Information -->
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Tracking Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <p class="mb-1"><i class="fas fa-envelope me-2 text-primary"></i> <strong>Email:</strong> rajesh.kumar@gmail.com</p>
+              <p class="mb-1"><i class="fas fa-mobile-alt me-2 text-primary"></i> <strong>SMS:</strong> +91-9876543210</p>
+              <p class="mb-3"><i class="fas fa-link me-2 text-primary"></i> <strong>Track Online:</strong> <a href="#" class="text-decoration-none">civicverse.in/track/CV-0855</a></p>
+              
+              <div class="alert alert-info">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold">SLA Timer:</span>
+                  <span class="badge bg-primary" id="slaTimer">71:15:00</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-bold">Civic Points:</span>
+                  <span class="badge bg-success">+10 points</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-bolt me-2 text-primary"></i>Quick Actions</h5>
+          </div>
+          <div class="card-body text-center quick-actions">
+            <div class="d-flex flex-wrap justify-content-center">
+              <a href="#" class="btn btn-outline-primary mb-2 me-2">
+                <i class="fas fa-chart-line me-1"></i> Track
+              </a>
+              <a href="/report.html" class="btn btn-outline-success mb-2 me-2">
+                <i class="fas fa-plus-circle me-1"></i> New
+              </a>
+              <a href="#" class="btn btn-outline-info mb-2 me-2">
+                <i class="fas fa-map-marked-alt me-1"></i> Map
+              </a>
+              <a href="#" class="btn btn-outline-secondary mb-2" onclick="shareReport()">
+                <i class="fas fa-share-alt me-1"></i> Share
+              </a>
+            </div>
+            <a href="/citizen-dashboard.html" class="btn btn-primary w-100 mt-2">
+              <i class="fas fa-home me-1"></i> Return to Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community Impact -->
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5 class="mb-2"><i class="fas fa-users me-2 text-primary"></i>Community Impact</h5>
+    </div>
+    <div class="card-body text-center">
+      <div class="impact-badge">🌟</div>
+      <p class="mb-2">You've now reported <strong>8 issues</strong> this year!</p>
+      <p class="mb-2">Your contribution rank: <strong>Top 12%</strong> in Gurgaon</p>
+      <p class="mb-3">Join <strong>1,247</strong> active citizens making positive change</p>
+      
+      <div class="alert alert-warning">
+        <i class="fas fa-trophy me-1"></i> <strong>Achievement Unlocked:</strong> "Road Warrior"
+        <div class="small">Reported 5+ road issues</div>
+      </div>
+    </div>
+  </div>
+  <!-- Footer -->
+  <footer class="bg-light border-top mt-5">
+    <div class="container py-3">
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Legal</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
+            <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
+          </ul>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Quick Links</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
+            <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-center text-muted small mt-2">
+        Last Updated On: 25 June 2025 | v-2.1.5
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Extract URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Report details from URL parameters
+    const reportDetails = {
+      id: urlParams.get('id') || 'RPT-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+      category: urlParams.get('category') || 'General',
+      description: decodeURIComponent(urlParams.get('description') || 'No description provided'),
+      address: decodeURIComponent(urlParams.get('address') || 'Location not specified'),
+      lat: parseFloat(urlParams.get('lat')) || 0,
+      lng: parseFloat(urlParams.get('lng')) || 0,
+      timestamp: urlParams.get('timestamp') || new Date().toISOString(),
+      status: urlParams.get('status') || 'submitted'
+    };
+
+    // Category icons mapping
+    const categoryIcons = {
+      'pothole': '🚧',
+      'garbage': '🗑️',
+      'streetlight': '💡',
+      'water': '💧',
+      'traffic': '🚦',
+      'other': '❓'
+    };
+
+    // Format timestamp
+    function formatDate(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Update the DOM with report details
+    document.addEventListener('DOMContentLoaded', function() {
+      // Update report ID and timestamp
+      document.getElementById('reportId').textContent = reportDetails.id;
+      document.getElementById('reportTimestamp').textContent = formatDate(reportDetails.timestamp);
+      
+      // Update category with icon
+      const categoryIcon = categoryIcons[reportDetails.category.toLowerCase()] || '📝';
+      document.getElementById('reportCategory').innerHTML = `${categoryIcon} ${reportDetails.category.charAt(0).toUpperCase() + reportDetails.category.slice(1)}`;
+      
+      // Update description and address
+      document.getElementById('reportDescription').textContent = reportDetails.description;
+      document.getElementById('reportAddress').textContent = reportDetails.address;
+      
+      // Update status
+      document.getElementById('reportStatus').textContent = reportDetails.status.charAt(0).toUpperCase() + reportDetails.status.slice(1);
+      
+      // Initialize map if coordinates are available
+      if (reportDetails.lat && reportDetails.lng) {
+        initMap(reportDetails.lat, reportDetails.lng);
+      }
+    });
+    
+    // Initialize map with report location
+    function initMap(lat, lng) {
+      const map = L.map('reportMap').setView([lat, lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      
+      // Add marker at report location
+      L.marker([lat, lng], {
+        icon: L.divIcon({
+          html: '📍',
+          iconSize: [30, 30],
+          className: 'map-marker'
+        })
+      }).addTo(map);
+    }
+  </script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set current date and time
+      const now = new Date();
+      const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      };
+      document.getElementById('reportDateTime').textContent = now.toLocaleString('en-IN', options) + ' IST';
+      
+      // Start SLA countdown timer (71 hours 15 minutes in seconds)
+      startCountdown(71 * 3600 + 15 * 60);
+      
+      // Theme switcher
+      const themeSwitch = document.getElementById('themeSwitch');
+      const html = document.documentElement;
+      
+      // Apply saved theme or system preference
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        if (themeSwitch) themeSwitch.checked = true;
+      }
+
+      // Toggle theme
+      if (themeSwitch) {
+        themeSwitch.addEventListener('change', function() {
+          if (this.checked) {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            localStorage.setItem('theme', 'light');
+          }
+        });
+      }
+
+      // Set active nav link
+      const currentPage = 'report-success.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    });
+    
+    // SLA Countdown Timer
+    function startCountdown(duration) {
+      const timerElement = document.getElementById('slaTimer');
+      let timer = duration, hours, minutes, seconds;
+      
+      const interval = setInterval(function() {
+        // Calculate time units
+        hours = Math.floor(timer / 3600);
+        minutes = Math.floor((timer % 3600) / 60);
+        seconds = timer % 60;
+        
+        // Display the result
+        timerElement.textContent = 
+          (hours < 10 ? '0' + hours : hours) + ':' + 
+          (minutes < 10 ? '0' + minutes : minutes) + ':' + 
+          (seconds < 10 ? '0' + seconds : seconds);
+        
+        // If the countdown is finished, clear the interval
+        if (--timer < 0) {
+          clearInterval(interval);
+          timerElement.textContent = 'Expired';
+          timerElement.className = 'badge bg-danger';
+        }
+      }, 1000);
+    }
+    
+    // Share functionality
+    function shareReport() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Report #CV-0855 - Road Issue',
+          text: 'I just reported an issue on CivicVerse. Track its progress here:',
+          url: 'https://civicverse.in/track/CV-0855'
+        }).catch(console.error);
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        const shareUrl = 'https://civicverse.in/track/CV-0855';
+        navigator.clipboard.writeText(shareUrl).then(function() {
+          alert('Link copied to clipboard!');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

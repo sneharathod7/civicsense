@@ -1,52 +1,245 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CivicSense – Citizen Dashboard</title>
+  <title>CivicVerse – Citizen Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/citizen-dashboard.css" />
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --transition: all 0.3s ease;
+    }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Header styles */
+    .sticky-top {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255, 255, 255, 0.95);
+      transition: var(--transition);
+    }
+    
+    /* Navigation links */
+    .nav-link {
+      color: #495057;
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 1rem;
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--primary-color);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 1rem;
+      background-color: var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: calc(100% - 2rem);
+    }
+    
+    /* Buttons */
+    .btn {
+      transition: var(--transition);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    /* Cards */
+    .card {
+      transition: var(--transition);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Footer styles */
+    .footer {
+      margin-top: 2rem;
+    }
+    
+    .footer .container {
+      padding: 1rem;
+    }
+    
+    .footer h6 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .footer ul {
+      margin-bottom: 0;
+    }
+    
+    .footer li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .footer a {
+      font-size: 0.875rem;
+    }
+    
+    .card:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Dropdowns */
+    .dropdown-menu {
+      border: none;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+    
+    .dropdown-item {
+      border-radius: 0.375rem;
+      padding: 0.5rem 1rem;
+      transition: var(--transition);
+    }
+    
+    /* Theme toggle */
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    /* Avatar */
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <!-- Header -->
+  <header class="sticky-top bg-white shadow-sm">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">CivicSense</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item nav-logged-in" style="display:none">
-            <a class="nav-link" href="/report.html">Report Issue</a>
-          </li>
-          <li class="nav-item nav-logged-in" style="display:none">
-            <a class="nav-link" href="/map.html">Map View</a>
-          </li>
-          <li class="nav-item dropdown nav-avatar nav-logged-in" style="display:none">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <div id="userAvatar" class="avatar-circle me-2"></div>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
-                            <li><a class="dropdown-item logout-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      <div class="row align-items-center py-2">
+        <!-- Left Section (25%) -->
+        <div class="col-lg-3 d-flex align-items-center">
+          <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-landmark fs-3 text-primary me-2"></i>
+              <div>
+                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
+                <div class="small text-muted">Smart Governance</div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Center Navigation (50%) -->
+        <div class="col-lg-6">
+          <div class="d-flex flex-column">
+            <div class="d-flex justify-content-center gap-2">
+              <a href="/citizen-dashboard.html" class="nav-link active">Dashboard</a>
+              <a href="/report.html" class="nav-link">New Report</a>
+              <a href="/my-reports.html" class="nav-link">My Reports</a>
+              <a href="/achievements.html" class="nav-link">Achievements</a>
+              <a href="/rewards.html" class="nav-link">Rewards</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Section (25%) -->
+        <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
+          <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
+            <i class="fas fa-bell fs-5"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              3
+            </span>
+          </button>
+          <div class="form-check form-switch my-0">
+            <input class="form-check-input" type="checkbox" id="themeSwitch">
+            <label class="form-check-label" for="themeSwitch">
+              <i class="fas fa-moon"></i>
+            </label>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" 
+                    type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="avatar-circle">
+                <img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar">
+              </div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+              <li class="px-3 py-2 border-bottom">
+                <div class="fw-semibold" id="ddUserName">Username</div>
+                <small class="text-muted" id="ddUserEmail">user@email.com</small>
+              </li>
+              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
+              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
+              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
+              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
+              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
+              <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
+              <li><hr class="dropdown-divider m-1"></li>
+              <li><a class="dropdown-item text-danger logout-link" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
             </ul>
-          </li>
-          <li class="nav-item nav-logged-out">
-            <a class="nav-link" href="/login-signup.html">Login/Signup</a>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
-  </nav>
+  </header>
+  <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
 
-  <div class="container py-4">
-    <h2 id="greeting" class="mb-4">Welcome to your dashboard</h2>
+  <div class="container-fluid px-3 px-md-3">
+    <!-- Welcome Banner -->
+    <div class="card mb-4 p-4 shadow-sm">
+      <h3 id="greeting" class="mb-2 fw-semibold">🎉 Welcome back, Citizen! 👋</h3>
+      <p id="achievementHighlight" class="mb-1 text-primary fw-semibold">🌟 You've made 0 reports this month – Keep it up! 🏆</p>
+      <p id="impactSummary" class="mb-1 text-muted">📊 Your impact: --</p>
+      <p class="mb-0 small text-muted">
+        <span id="locationInfo"><i class="fas fa-map-marker-alt text-danger"></i> --</span>
+        <span id="urgentAlerts" class="ms-3 badge bg-danger d-none"><i class="fas fa-exclamation-circle"></i> <span id="urgentCount">0</span> urgent issues</span>
+      </p>
+    </div>
 
     <!-- Quick Actions -->
-    <div class="row mb-4">
+    <div class="row mb-4" id="quickActions">
+      <!-- three cards copied from previous markup -->
       <div class="col-md-4 mb-3">
         <a href="/report.html" class="text-decoration-none">
           <div class="card text-center feature-card h-100">
@@ -64,13 +257,13 @@
             <div class="card-body">
               <i class="fas fa-map-marked-alt fa-3x mb-3 text-success"></i>
               <h5 class="card-title">View Issues Near You</h5>
-              <p class="card-text small">Explore reported issues on an interactive map.</p>
+              <p class="card-text small">Explore nearby civic problems on map.</p>
             </div>
           </div>
         </a>
       </div>
       <div class="col-md-4 mb-3">
-        <a href="#statsSection" class="text-decoration-none">
+        <a href="#statsCard" class="text-decoration-none">
           <div class="card text-center feature-card h-100">
             <div class="card-body">
               <i class="fas fa-chart-bar fa-3x mb-3 text-info"></i>
@@ -82,63 +275,182 @@
       </div>
     </div>
 
-    <!-- Stats -->
-    <h3 id="statsSection" class="mb-3">Your Statistics</h3>
-    <div class="row mb-5">
-      <div class="col-6 col-md-3 mb-3">
-        <div class="card text-center stat-card">
-          <div class="card-body">
-            <h2 id="statTotal">0</h2>
-            <p class="mb-0">Total Reports</p>
-          </div>
-        </div>
+    <!-- Statistics -->
+    <div class="card mb-4" id="statsCard">
+      <div class="card-header bg-light fw-bold">Your Statistics (This Month)</div>
+      <div class="card-body">
+        <p class="mb-2">
+          🎯 Issues Reported: <strong id="statReported">0</strong>
+          <span class="ms-3">✅ Resolved: <strong id="statResolved">0</strong></span>
+          <span class="ms-3">⏳ In Progress: <strong id="statProgress">0</strong></span>
+          <span class="ms-3">🔴 New: <strong id="statNew">0</strong></span>
+        </p>
+        <p class="mb-0">
+          📈 Resolution Rate: <strong id="statRate">0%</strong>
+          <span class="ms-3">⭐ Community Rating: <strong id="statRating">0</strong></span>
+          <span class="ms-3">🏆 Civic Points: <strong id="statPoints">0</strong></span>
+        </p>
       </div>
-      <div class="col-6 col-md-3 mb-3">
-        <div class="card text-center stat-card">
-          <div class="card-body">
-            <h2 id="statPending">0</h2>
-            <p class="mb-0">Pending</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3 mb-3">
-        <div class="card text-center stat-card">
-          <div class="card-body">
-            <h2 id="statProgress">0</h2>
-            <p class="mb-0">In Progress</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3 mb-3">
-        <div class="card text-center stat-card">
-          <div class="card-body">
-            <h2 id="statResolved">0</h2>
-            <p class="mb-0">Resolved</p>
-          </div>
+    </div>
+
+    <!-- Impact Metrics -->
+    <div class="card mb-4" id="impactCard">
+      <div class="card-header bg-light fw-bold">Impact Metrics</div>
+      <ul class="list-group list-group-flush" id="impactMetrics">
+        <li class="list-group-item">⚡ 5 streetlights fixed improving safety</li>
+        <li class="list-group-item">🌳 2 park issues resolved benefiting families</li>
+      </ul>
+      <div class="card-footer">
+        <div class="d-flex justify-content-between gap-2">
+          <a href="/impact.html" class="btn btn-primary flex-grow-1">📊 Analytics</a>
+          <a href="/achievements.html" class="btn btn-outline-secondary flex-grow-1">🎖️ Achievements</a>
         </div>
       </div>
     </div>
 
-    <!-- My Reports Table -->
-    <h3 class="mb-3">My Reported Issues</h3>
-    <div class="table-responsive">
-      <table class="table table-striped" id="complaintsTable">
-        <thead>
-          <tr>
-            <th>Ticket ID</th>
-            <th>Issue Type</th>
-            <th>Department</th>
-            <th>Status</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
-        <tbody id="complaintsTableBody"></tbody>
-      </table>
+    <!-- Badges & Achievements -->
+    <div class="card mb-4" id="badgesCard">
+      <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
+        <span>Your Badges</span>
+        <a href="/achievements.html" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-3 mb-3" id="badgesGrid">
+          <div class="text-center">
+            <div class="badge-icon mb-1">🏅</div>
+            <small class="d-block">First Report</small>
+          </div>
+          <div class="text-center">
+            <div class="badge-icon mb-1">🌟</div>
+            <small class="d-block">5 Reports</small>
+          </div>
+          <div class="text-center">
+            <div class="badge-icon mb-1">🏆</div>
+            <small class="d-block">Issue Resolved</small>
+          </div>
+          <div class="text-center">
+            <div class="badge-icon mb-1">💡</div>
+            <small class="d-block">Idea Contributor</small>
+          </div>
+        </div>
+        <div class="alert alert-info mb-0 py-2">
+          <small>🌟 <strong>Next Milestone:</strong> 3 more reports to unlock "Community Champion" badge</small>
+        </div>
+      </div>
     </div>
+
+    <!-- Recent Activity -->
+    <div class="card mb-4" id="recentCard">
+      <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
+        <span>Recent Activity</span>
+        <a href="/my-issues.html" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="list-group list-group-flush" id="recentList">
+        <div class="list-group-item border-0 py-2">
+          <div class="d-flex w-100 justify-content-between">
+            <span>✅ <strong>#CR-1245</strong> - Pothole fixed</span>
+            <small class="text-muted">2h ago</small>
+          </div>
+          <small class="text-muted d-block ps-3">Near Central Park</small>
+        </div>
+        <div class="list-group-item border-0 py-2">
+          <div class="d-flex w-100 justify-content-between">
+            <span>🔄 <strong>#CR-1238</strong> - Streetlight repair in progress</span>
+            <small class="text-muted">1d ago</small>
+          </div>
+          <small class="text-muted d-block ps-3">Maple Street</small>
+        </div>
+        <div class="list-group-item border-0 py-2">
+          <div class="d-flex w-100 justify-content-between">
+            <span>📝 <strong>#CR-1221</strong> - New report submitted</span>
+            <small class="text-muted">2d ago</small>
+          </div>
+          <small class="text-muted d-block ps-3">Community Park</small>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 
+  <!-- Footer -->
+  <footer class="bg-light border-top mt-5">
+    <div class="container py-3">
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Legal</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
+            <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
+          </ul>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="fw-bold mb-3">Quick Links</h6>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
+            <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-center text-muted small mt-2">
+        Last Updated On: 24 June 2025 | v-2.1.5
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/citizen-dashboard.js"></script>
+  <script>
+    // Theme Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeSwitch = document.getElementById('themeSwitch');
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      
+      // Apply saved theme
+      if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        if (themeSwitch) themeSwitch.checked = true;
+      }
+
+      // Toggle theme
+      if (themeSwitch) {
+        themeSwitch.addEventListener('change', function() {
+          if (this.checked) {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            localStorage.setItem('theme', 'light');
+          }
+        });
+      }
+
+      // Set active nav link
+      const currentPage = window.location.pathname.split('/').pop() || 'citizen-dashboard.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      // Logout functionality
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Add your logout logic here
+          window.location.href = '/landing.html';
+        });
+      }
+    });
+  </script>
 </body>
 </html>
