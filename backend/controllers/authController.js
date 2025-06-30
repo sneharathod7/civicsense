@@ -15,7 +15,7 @@ const otps = {};
 // Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
+    expiresIn: process.env.JWT_EXPIRES_IN || '30d'
   });
 };
 
@@ -26,10 +26,20 @@ exports.register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, mobile, address, password, role = 'Citizen' } = req.body;
 
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
+    const normalizedEmail = email.toString().toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ 
+    const existingUser = await User.findOne({
       $or: [
-        { email: email.toLowerCase() },
+        { email: normalizedEmail },
         { mobile }
       ]
     });
