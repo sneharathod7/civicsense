@@ -1,0 +1,138 @@
+{"level":"INFO","timestamp":"2025-06-29T06:08:27.239Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:11:50.451Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:14:24.574Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:14:32.414Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:14:46.367Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:15:11.877Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:16:14.178Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:17:47.700Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:21:46.023Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:21:57.150Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:22:15.924Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:22:59.534Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:23:15.624Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:23:34.998Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:23:34.998Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:204:9)"}}
+{"level":"INFO","timestamp":"2025-06-29T06:27:49.966Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:28:38.805Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:29:09.474Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:204:9)"}}
+{"level":"ERROR","timestamp":"2025-06-29T06:29:09.473Z","message":"Error loading email template","error":{}}
+{"level":"INFO","timestamp":"2025-06-29T06:29:52.399Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:29:55.949Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:204:9)"}}
+{"level":"ERROR","timestamp":"2025-06-29T06:29:55.949Z","message":"Error loading email template","error":{}}
+{"level":"INFO","timestamp":"2025-06-29T06:31:13.796Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:31:40.742Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:31:46.009Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:32:12.001Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:32:25.163Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:32:25.163Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"ERROR","timestamp":"2025-06-29T06:34:25.608Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:34:25.609Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"INFO","timestamp":"2025-06-29T06:36:37.532Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:36:43.584Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:36:43.585Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"INFO","timestamp":"2025-06-29T06:37:29.999Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:37:38.101Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:37:44.521Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:38:02.442Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:38:02.442Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"ERROR","timestamp":"2025-06-29T06:38:03.902Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"ERROR","timestamp":"2025-06-29T06:38:03.902Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:38:07.047Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:38:07.048Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"INFO","timestamp":"2025-06-29T06:39:41.689Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:40:22.583Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T06:56:20.601Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T06:56:26.688Z","message":"Error loading email template","error":{}}
+{"level":"ERROR","timestamp":"2025-06-29T06:56:26.688Z","message":"Error sending email","error":{"stack":"Error: Failed to load email template: otp\n    at loadTemplate (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:58:11)\n    at async sendEmail (D:\\CivicSense\\civicsense\\backend\\utils\\emailSender.js:119:19)\n    at async exports.sendOtp (D:\\CivicSense\\civicsense\\backend\\controllers\\authController.js:205:9)"}}
+{"level":"INFO","timestamp":"2025-06-29T07:02:08.967Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:03:12.022Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:06:49.305Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:08:42.520Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:13:29.226Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:16:25.834Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:18:02.469Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T07:19:57.977Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:09:32.198Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:10:23.233Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:10:55.122Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:11:06.653Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:11:12.740Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:13:39.787Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:13:49.067Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:16:57.591Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:19:14.728Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:21:06.775Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:21:20.334Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:21:53.959Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:24:07.186Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:25:04.403Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:25:18.002Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:26:28.634Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:26:41.146Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:28:43.985Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:29:01.407Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:31:01.586Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:31:39.471Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:32:21.520Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:33:00.866Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:33:08.328Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:36:38.335Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:37:15.080Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:38:35.352Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:39:17.747Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:40:28.638Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:41:34.684Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:41:51.197Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:43:34.796Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:44:21.484Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:44:39.638Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:45:54.718Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:46:55.338Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:47:13.833Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:47:29.735Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:47:51.918Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:50:12.413Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:50:42.692Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:51:32.140Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:52:28.057Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:52:44.603Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:53:35.140Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:53:54.355Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T09:56:22.197Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:04:49.423Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:06:48.431Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:08:17.718Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:09:07.581Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:10:05.426Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:11:16.544Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:11:58.477Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:13:26.114Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:13:52.297Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:14:09.247Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:14:31.268Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:14:52.969Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:15:05.279Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:15:14.473Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:15:33.713Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:19:29.970Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:28:20.525Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:32:48.051Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:35:31.007Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T10:40:17.445Z","message":"SMTP Server is ready to take our messages"}
+{"level":"ERROR","timestamp":"2025-06-29T10:45:36.609Z","message":"SMTP Connection Error","error":{"name":"Error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-74af541b627sm6050855b3a.38 - gsmtp","stack":"Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-74af541b627sm6050855b3a.38 - gsmtp\n    at SMTPConnection._formatError (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:518:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)\n    at Readable.push (node:internal/streams/readable:392:5)"}}
+{"level":"ERROR","timestamp":"2025-06-29T10:46:37.523Z","message":"SMTP Connection Error","error":{"name":"Error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23acb3b7986sm59150765ad.164 - gsmtp","stack":"Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23acb3b7986sm59150765ad.164 - gsmtp\n    at SMTPConnection._formatError (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:518:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)\n    at Readable.push (node:internal/streams/readable:392:5)"}}
+{"level":"ERROR","timestamp":"2025-06-29T11:08:55.005Z","message":"SMTP Connection Error","error":{"name":"Error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23acb2e3c27sm59557195ad.51 - gsmtp","stack":"Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23acb2e3c27sm59557195ad.51 - gsmtp\n    at SMTPConnection._formatError (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:518:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)\n    at Readable.push (node:internal/streams/readable:392:5)"}}
+{"level":"ERROR","timestamp":"2025-06-29T11:11:11.424Z","message":"SMTP Connection Error","error":{"name":"Error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23acb39b8f5sm56752025ad.126 - gsmtp","stack":"Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23acb39b8f5sm56752025ad.126 - gsmtp\n    at SMTPConnection._formatError (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:518:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)\n    at Readable.push (node:internal/streams/readable:392:5)"}}
+{"level":"ERROR","timestamp":"2025-06-29T11:13:43.791Z","message":"SMTP Connection Error","error":{"name":"Error","message":"Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-315f543bdc3sm11529382a91.41 - gsmtp","stack":"Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-315f543bdc3sm11529382a91.41 - gsmtp\n    at SMTPConnection._formatError (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\CivicSense\\civicsense\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:518:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)\n    at Readable.push (node:internal/streams/readable:392:5)"}}
+{"level":"INFO","timestamp":"2025-06-29T11:14:19.415Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T11:18:45.569Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T11:37:58.162Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T11:45:19.100Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T11:49:26.290Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T11:49:39.783Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-29T11:57:34.615Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-30T04:21:06.782Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-30T04:33:35.403Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-30T04:34:46.361Z","message":"SMTP Server is ready to take our messages"}
+{"level":"INFO","timestamp":"2025-06-30T04:36:35.925Z","message":"SMTP Server is ready to take our messages"}

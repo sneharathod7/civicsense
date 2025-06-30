@@ -60,10 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
   sendBtn.addEventListener('click', async () => {
     const method = document.querySelector('input[name="otpMethod"]:checked').value;
     try {
-      const res = await fetch('/api/auth/send-otp', {
+      const res = await fetch('/api/v1/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, mobile, method })
+        body: JSON.stringify({ 
+          email, 
+          mobile, 
+          method,
+          purpose: 'verification' 
+        })
       });
       const data = await res.json();
       if (!data.success) {
@@ -94,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      const res = await fetch('/api/v1/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, mobile, otp })
@@ -117,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const method = document.querySelector('input[name="otpMethod"]:checked').value;
     startTimer();
     try {
-      const res = await fetch('/api/auth/resend-otp', {
+      const res = await fetch('/api/v1/auth/resend-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, mobile, method })

@@ -1,0 +1,11 @@
+<%- include('layout', { subject: 'Your Verification Code' }) %>
+
+<h2>Your Verification Code</h2>
+<p>Hello,</p>
+<p>Your verification code for <strong><%= appName %></strong> is:</p>
+<div class="otp" style="font-size: 24px; font-weight: bold; padding: 10px; background: #f4f4f4; text-align: center; margin: 20px 0;">
+  <%= data.otp %>
+</div>
+<p>This code will expire in 10 minutes.</p>
+<p>If you didn't request this code, you can safely ignore this email.</p>
+<p>Thanks,<br>The <%= appName %> Team</p>

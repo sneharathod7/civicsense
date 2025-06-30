@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Fetch complaints for this user
   try {
-    const res = await fetch(`/api/complaints?userId=${userId}`);
+    const res = await fetch(`/api/reports?userId=${userId}`);
     const data = await res.json();
     if (!data.success) {
       alert('Failed to load complaints.');

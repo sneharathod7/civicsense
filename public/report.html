@@ -17,19 +17,16 @@
       --transition: all 0.3s ease;
     }
     
-    /* Smooth scrolling */
     html {
       scroll-behavior: smooth;
     }
     
-    /* Header styles */
     .sticky-top {
       backdrop-filter: blur(10px);
       background-color: rgba(255, 255, 255, 0.95);
       transition: var(--transition);
     }
     
-    /* Navigation links */
     .nav-link {
       color: #495057;
       font-weight: 500;
@@ -43,23 +40,6 @@
       color: var(--primary-color);
     }
     
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: 0;
-      left: 1rem;
-      background-color: var(--primary-color);
-      transition: var(--transition);
-    }
-    
-    .nav-link:hover::after,
-    .nav-link.active::after {
-      width: calc(100% - 2rem);
-    }
-    
-    /* Category icons */
     .category-icon {
       width: 108px;
       height: 90px;
@@ -78,10 +58,12 @@
       background-color: rgba(13,110,253,.15);
     }
     
-    #map { height: 450px; }
-    .dropdown.mb-3 { display: none !important; }
+    #map { 
+      height: 450px; 
+      border-radius: 0.5rem;
+      border: 1px solid #dee2e6;
+    }
     
-    /* Avatar */
     .avatar-circle {
       width: 36px;
       height: 36px;
@@ -93,10 +75,11 @@
       overflow: hidden;
     }
     
-    .avatar-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .ai-result {
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -105,7 +88,6 @@
   <header class="sticky-top bg-white shadow-sm">
     <div class="container-fluid">
       <div class="row align-items-center py-2">
-        <!-- Left Section (25%) -->
         <div class="col-lg-3 d-flex align-items-center">
           <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
             <div class="d-flex align-items-center">
@@ -118,7 +100,6 @@
           </a>
         </div>
 
-        <!-- Center Navigation (50%) -->
         <div class="col-lg-6">
           <div class="d-flex flex-column">
             <div class="d-flex justify-content-center gap-2">
@@ -131,7 +112,6 @@
           </div>
         </div>
 
-        <!-- Right Section (25%) -->
         <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
           <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
             <i class="fas fa-bell fs-5"></i>
@@ -173,151 +153,153 @@
       </div>
     </div>
   </header>
+  
   <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
+  
   <div class="container py-4">
-<!-- 
-  <h1 class="text- mb-4">📝 New Report</h1> -->
-
-  <!-- Category Selection -->
-  <section class="mb-5" id="categorySection">
-    <h2 class="h5 mb-3">Category Selection</h2>
-    <div class="dropdown mb-3">
-      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        Select Category ▼
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
-        <li><a class="dropdown-item d-flex align-items-center" data-value="roads" href="#"><span class="me-2">🛣️</span> Roads</a></li>
-        <li><a class="dropdown-item d-flex align-items-center" data-value="water" href="#"><span class="me-2">💧</span> Water</a></li>
-        <li><a class="dropdown-item d-flex align-items-center" data-value="electric" href="#"><span class="me-2">⚡</span> Electric</a></li>
-        <li><a class="dropdown-item d-flex align-items-center" data-value="environment" href="#"><span class="me-2">🌳</span> Environment</a></li>
-        <li><a class="dropdown-item d-flex align-items-center" data-value="sanitation" href="#"><span class="me-2">🚛</span> Sanitation</a></li>
-        <li><a class="dropdown-item d-flex align-items-center" data-value="infrastructure" href="#"><span class="me-2">🏗️</span> Infrastructure</a></li>
-      </ul>
-    </div>
-    <div class="d-flex flex-wrap gap-3" id="categoryIcons">
-      <button class="btn btn-light category-icon" data-value="roads"><span class="fs-3">🛣️</span><small>Roads</small></button>
-      <button class="btn btn-light category-icon" data-value="water"><span class="fs-3">💧</span><small>Water</small></button>
-      <button class="btn btn-light category-icon" data-value="electric"><span class="fs-3">⚡</span><small>Electric</small></button>
-      <button class="btn btn-light category-icon" data-value="environment"><span class="fs-3">🌳</span><small>Environment</small></button>
-      <button class="btn btn-light category-icon" data-value="sanitation"><span class="fs-3">🚛</span><small>Sanitation</small></button>
-      <button class="btn btn-light category-icon" data-value="infrastructure"><span class="fs-3">🏗️</span><small>Infrastructure</small></button>
-    </div>
-  </section>
-
-  <!-- Smart Location Services -->
-  <section class="mb-5" id="locationSection">
-    <h2 class="h5 mb-3">📍 PRECISE LOCATION</h2>
-    <div class="card">
-      <div class="card-body">
-        <div id="map" class="mb-3"></div>
-        <input type="text" id="addressBox" class="form-control mb-3" placeholder="Detecting address...">
-        <p id="currentLocation" class="small text-muted mb-3">📍 Current: Locating…</p>
-        <textarea id="additionalAddress" class="form-control mb-3" rows="2" placeholder="Nearby landmarks, additional details"></textarea>
-        <div class="d-flex gap-2">
-          <button class="btn btn-success" id="confirmLocation">🎯 Confirm Location</button>
-          <button class="btn btn-outline-secondary" id="adjustLocation">📍 Adjust Location</button>
+    <form id="reportForm" enctype="multipart/form-data">
+      <!-- Category Selection -->
+      <section class="mb-5" id="categorySection">
+        <h2 class="h5 mb-3">Category Selection</h2>
+        <div class="dropdown mb-3">
+          <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Category ▼
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="roads"><span class="me-2">🛣️</span> Roads</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="water"><span class="me-2">💧</span> Water</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="electric"><span class="me-2">⚡</span> Electric</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="environment"><span class="me-2">🌳</span> Environment</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="sanitation"><span class="me-2">🚛</span> Sanitation</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="infrastructure"><span class="me-2">🏗️</span> Infrastructure</a></li>
+          </ul>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Image Upload & AI Analysis -->
-  <section class="mb-5" id="imageSection">
-    <h2 class="h5 mb-1">Image Upload & AI Analysis</h2>
-    <p class="text-muted">🤖 AI will analyze your image automatically</p>
-    <div class="d-flex gap-2 mb-3">
-      <button class="btn btn-primary" id="cameraUpload"><i class="fas fa-camera me-2"></i>Camera</button>
-      <button class="btn btn-secondary" id="galleryUpload"><i class="fas fa-folder-open me-2"></i>Gallery</button>
-      <input type="file" id="hiddenFileInput" accept="image/*" capture="environment" style="display:none;">
-    </div>
-    <div id="imagePreview" class="mb-3"></div>
-    <div id="aiResults" class="card d-none">
-      <div class="card-body">
-        <h6 class="card-title mb-3">AI Analysis Results</h6>
-        <ul class="list-group list-group-flush mb-3">
-          <li class="list-group-item"><strong>Detected Issue:</strong> <span id="aiIssueType">-</span></li>
-          <li class="list-group-item"><strong>Auto Category:</strong> <span id="aiCategory">-</span></li>
-          <li class="list-group-item"><strong>GPS:</strong> <span id="aiGps">-</span></li>
-          <li class="list-group-item"><strong>Priority:</strong> <span id="aiPriority">-</span></li>
-          <li class="list-group-item"><strong>Description:</strong><br><textarea id="aiDescription" class="form-control mt-2" rows="3"></textarea></li>
-        </ul>
-        <div class="d-flex gap-2">
-          <button class="btn btn-success" id="acceptAi">✅ Accept</button>
-          <button class="btn btn-outline-primary" id="editDescription">✏️ Edit description</button>
+        <div class="d-flex flex-wrap gap-3" id="categoryIcons">
+          <button type="button" class="btn btn-light category-icon" data-value="roads"><span class="fs-3">🛣️</span><small>Roads</small></button>
+          <button type="button" class="btn btn-light category-icon" data-value="water"><span class="fs-3">💧</span><small>Water</small></button>
+          <button type="button" class="btn btn-light category-icon" data-value="electric"><span class="fs-3">⚡</span><small>Electric</small></button>
+          <button type="button" class="btn btn-light category-icon" data-value="environment"><span class="fs-3">🌳</span><small>Environment</small></button>
+          <button type="button" class="btn btn-light category-icon" data-value="sanitation"><span class="fs-3">🚛</span><small>Sanitation</small></button>
+          <button type="button" class="btn btn-light category-icon" data-value="infrastructure"><span class="fs-3">🏗️</span><small>Infrastructure</small></button>
         </div>
-      </div>
-    </div>
-  </section>
+        <input type="hidden" id="selectedCategory" name="category" required>
+      </section>
 
-  <!-- Submission Settings -->
-  <section class="mb-5" id="settingsSection">
-    <h2 class="h5 mb-3">Submission Settings</h2>
-    <div class="card">
-      <div class="card-body">
-        <div class="form-check form-switch mb-3">
-          <input class="form-check-input" type="checkbox" id="identityToggle">
-          <label class="form-check-label" for="identityToggle">Submit anonymously</label>
+      <!-- Location Selection -->
+      <section class="mb-5" id="locationSection">
+        <h2 class="h5 mb-3">Location</h2>
+        <p class="text-muted mb-3">📍 <span id="currentLocation">Click on the map to select a location</span></p>
+        <div id="map"></div>
+        <div class="mt-3">
+          <label for="addressBox" class="form-label">Address</label>
+          <input type="text" class="form-control" id="addressBox" name="address" placeholder="Enter address" required>
         </div>
+        <div class="mt-2">
+          <label for="additionalAddress" class="form-label">Additional Details (Optional)</label>
+          <input type="text" class="form-control" id="additionalAddress" name="additionalAddress" placeholder="Floor, Landmark, etc.">
+        </div>
+      </section>
 
-        <!-- Notifications -->
-        <div class="mb-3">
-          <label class="form-label">Notifications</label>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="notifyEmail" checked>
-            <label class="form-check-label" for="notifyEmail">Email</label>
+      <!-- Image Upload -->
+      <section class="mb-5" id="imageSection">
+        <h2 class="h5 mb-1">Image Upload & AI Analysis</h2>
+        <p class="text-muted">🤖 AI will analyze your image automatically</p>
+        <div class="d-flex gap-2 mb-3">
+          <button type="button" class="btn btn-primary" id="cameraUpload"><i class="fas fa-camera me-2"></i>Camera</button>
+          <button type="button" class="btn btn-outline-primary" id="galleryUpload"><i class="fas fa-images me-2"></i>Gallery</button>
+          <input type="file" id="hiddenFileInput" accept="image/*" class="d-none">
+        </div>
+        <div id="imagePreview" class="mb-3"></div>
+        
+        <!-- AI Analysis Results -->
+        <div id="aiResults" class="ai-result d-none">
+          <h5 class="h6 mb-3">🤖 AI Analysis Results</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Issue Type:</strong> <span id="aiIssueType">-</span></p>
+              <p class="mb-1"><strong>Category:</strong> <span id="aiCategory">-</span></p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1"><strong>GPS Location:</strong> <span id="aiGps">-</span></p>
+              <p class="mb-1"><strong>Priority:</strong> <span id="aiPriority">-</span></p>
+            </div>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="notifySms" checked>
-            <label class="form-check-label" for="notifySms">SMS</label>
+          <div class="mt-3">
+            <label for="aiDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="aiDescription" name="description" rows="3" required></textarea>
           </div>
         </div>
+      </section>
 
-        <div class="mb-3">
-          <label class="form-label">Expected Timeline:</label>
-          <span id="expectedTimeline" class="ms-2">72 hours</span>
+      <!-- Submission Settings -->
+      <section class="mb-5" id="settingsSection">
+        <h2 class="h5 mb-3">Submission Settings</h2>
+        <div class="card">
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="identityToggle" name="isAnonymous">
+              <label class="form-check-label" for="identityToggle">Submit Anonymously</label>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="notificationToggle" checked>
+              <label class="form-check-label" for="notificationToggle">Notify me about updates</label>
+            </div>
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              Expected resolution time: <strong>3-5 business days</strong>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="mb-3">
-          <label class="form-label">Civic Points:</label>
-          <span id="civicPoints" class="ms-2">+10</span>
-        </div>
-
-        <div class="d-flex gap-2">
-          <button class="btn btn-outline-primary" id="previewReport">👁️ Preview Report</button>
-          <button class="btn btn-success" id="submitReport">🚀 Submit Report</button>
-        </div>
+      <!-- Submit Button -->
+      <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" id="previewReport">
+          <i class="fas fa-eye me-2"></i>Preview
+        </button>
+        <button type="submit" class="btn btn-primary px-4" id="submitReport">
+          <i class="fas fa-paper-plane me-2"></i>Submit Report
+        </button>
       </div>
-    </div>
-  </section>
-</div>
+    </form>
+  </div>
 
-<!-- Footer -->
+  <!-- Footer -->
   <footer class="bg-light border-top mt-5">
     <div class="container py-3">
       <div class="row">
-        <div class="col-md-6 mb-3 mb-md-0">
-          <h6 class="fw-bold mb-3">Legal</h6>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
-            <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
+        <div class="col-md-6">
+          <h5>CivicVerse</h5>
+          <p class="text-muted small">Empowering citizens to build better communities through technology.</p>
+        </div>
+        <div class="col-md-3">
+          <h6>Quick Links</h6>
+          <ul class="list-unstyled small">
+            <li><a href="/about.html" class="text-muted">About Us</a></li>
+            <li><a href="/contact.html" class="text-muted">Contact</a></li>
+            <li><a href="/faq.html" class="text-muted">FAQs</a></li>
           </ul>
         </div>
-        <div class="col-md-6 mb-3 mb-md-0">
-          <h6 class="fw-bold mb-3">Quick Links</h6>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
-            <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
-            <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
+        <div class="col-md-3">
+          <h6>Legal</h6>
+          <ul class="list-unstyled small">
+            <li><a href="/privacy.html" class="text-muted">Privacy Policy</a></li>
+            <li><a href="/terms.html" class="text-muted">Terms of Service</a></li>
           </ul>
         </div>
       </div>
-      <div class="text-center text-muted small mt-2">Last Updated On: 25 June 2025 | v-2.1.6</div>
+      <hr>
+      <div class="text-center text-muted small">
+        &copy; 2025 CivicVerse. All rights reserved.
+      </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/js/report.js"></script>
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Custom JS -->
+  <script src="/js/report.js"></script>
 </body>
 </html>
