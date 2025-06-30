@@ -204,20 +204,40 @@
       <section class="mb-5" id="imageSection">
         <h2 class="h5 mb-1">Image Upload & AI Analysis</h2>
         <p class="text-muted">🤖 AI will analyze your image automatically</p>
+        <!-- IMAGE INPUT BUTTONS -->
         <div class="d-flex gap-2 mb-3">
-          <button type="button" class="btn btn-primary" id="cameraUpload"><i class="fas fa-camera me-2"></i>Camera</button>
-          <button type="button" class="btn btn-outline-primary" id="galleryUpload"><i class="fas fa-images me-2"></i>Gallery</button>
-          <input type="file" id="hiddenFileInput" accept="image/*" class="d-none">
+          <!-- Native label + input approach ensures file picker always opens -->
+          <label class="btn btn-primary m-0">
+            <i class="fas fa-camera me-2"></i>Camera
+            <input type="file" id="cameraInput"
+       accept="image/*" capture="environment"
+       style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
+          </label>
+          <label class="btn btn-outline-primary m-0">
+            <i class="fas fa-images me-2"></i>Gallery
+            <input type="file" id="galleryInput" accept="image/*" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
+          </label>
         </div>
-        <div id="imagePreview" class="mb-3"></div>
-        
-        <!-- AI Analysis Results -->
-        <div id="aiResults" class="ai-result d-none">
-          <h5 class="h6 mb-3">🤖 AI Analysis Results</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <p class="mb-1"><strong>Issue Type:</strong> <span id="aiIssueType">-</span></p>
-              <p class="mb-1"><strong>Category:</strong> <span id="aiCategory">-</span></p>
+
+        <!-- IMAGE PREVIEW -->
+        <div id="previewWrapper" class="d-none mb-3">
+          <img id="previewImage" class="img-fluid rounded" style="max-height:200px;" alt="Preview">
+          <button type="button" class="btn btn-sm btn-danger mt-2" id="removeImage">
+            <i class="fas fa-trash me-1"></i> Remove Image
+          </button>
+        </div>
+
+        <!-- AI ANALYSIS CARD -->
+        <div id="aiCard" class="card d-none">
+          <div class="card-body">
+            <h5 class="h6 mb-3">🤖 AI Analysis Results</h5>
+            <p class="mb-1"><strong>Issue Type:</strong> <span id="aiIssueType">-</span></p>
+            <p class="mb-1"><strong>Category:</strong> <span id="aiCategory">-</span></p>
+            <p class="mb-1"><strong>GPS Location:</strong> <span id="aiGps">-</span></p>
+            <p class="mb-1"><strong>Priority:</strong> <span id="aiPriority">-</span></p>
+            <div class="mt-3">
+              <label for="aiDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="aiDescription" rows="3"></textarea>
             </div>
             <div class="col-md-6">
               <p class="mb-1"><strong>GPS Location:</strong> <span id="aiGps">-</span></p>

@@ -10,15 +10,24 @@ router.post('/', async (req, res) => {
   try {
     const { title, description, location, category, images, userEmail } = req.body;
     
+    // Compute coordinates robustly
+    const coords = Array.isArray(location?.coordinates) && location.coordinates.length === 2
+      ? location.coordinates
+      : (location?.lat !== undefined && location?.lng !== undefined)
+        ? [location.lng, location.lat]
+        : [0, 0];
+
+    const locObj = {
+      type: 'Point',
+      coordinates: coords,
+      address: location?.address || 'Unknown address'
+    };
+
     const newReport = new Report({
       user: req.user?.id || 'anonymous',
       title,
       description,
-      location: {
-        type: 'Point',
-        coordinates: [location.lng, location.lat],
-        address: location.address
-      },
+      location: locObj,
       category,
       images,
       status: 'pending',

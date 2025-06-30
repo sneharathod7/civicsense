@@ -64,8 +64,9 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// Increase body size limit to accept base64-encoded images (up to 10 MB)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
@@ -107,10 +108,7 @@ app.use('/api/reports', reportsRoutes);
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-// If no API routes are hit, send the React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/citizen-dashboard.html'));
-});
+
 
 // File logging setup
 const LOG_FILE = path.join(__dirname, 'server.log');

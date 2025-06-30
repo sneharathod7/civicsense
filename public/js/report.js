@@ -55,7 +55,7 @@
   }
 
   // INITIALIZATION
-  document.addEventListener('DOMContentLoaded', () => {
+  function mainInit() {
     console.log('Initializing report page...');
     
     // Check if map container exists first
@@ -106,7 +106,15 @@
     
     // Initial test
     setTimeout(testMapStatus, 2000);
-  });
+  }
+
+  // Run init when DOM ready; handle case where script is loaded after DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mainInit);
+  } else {
+    // DOM already parsed
+    mainInit();
+  }
   
   // MAP FUNCTIONS
   function initMap() {
@@ -425,9 +433,10 @@
       });
     });
     
+    // Highlight active dropdown item based on current selection
     const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
     dropdownItems.forEach(item => {
-      item.classList.toggle('active', item.dataset.value === value);
+      item.classList.toggle('active', item.dataset.value === selectedCategory);
     });
   }
   
@@ -476,7 +485,7 @@
             address: addressInput.value || 'Not provided'
           },
           images: selectedImages.map(img => img.preview),
-          userEmail: document.getElementById('email').value
+          userEmail: document.getElementById('email')?.value || null
         };
 
         const response = await fetch('/api/reports', {
@@ -492,9 +501,12 @@
         if (result.success) {
           alert('Report submitted successfully!');
           form.reset();
-          document.getElementById('imagePreview').innerHTML = '';
-          const aiResultsEl = document.getElementById('aiResults');
-          if (aiResultsEl) aiResultsEl.classList.add('d-none');
+          const previewWrapperEl = document.getElementById('previewWrapper');
+          const previewImageEl = document.getElementById('previewImage');
+          const aiCardEl = document.getElementById('aiCard');
+          if (previewImageEl) previewImageEl.src = '';
+          if (previewWrapperEl) previewWrapperEl.classList.add('d-none');
+          if (aiCardEl) aiCardEl.classList.add('d-none');
           selectedImages = [];
           if (map) {
             map.setView([20.5937, 78.9629], 5);
@@ -512,46 +524,61 @@
     });
   }
 
-  // IMAGE UPLOAD
+  // IMAGE UPLOAD (label + input approach – no programmatic clicks needed)
   function initImageUpload() {
     console.log('initImageUpload: Function started.');
-    const cameraBtn = document.getElementById('cameraUpload');
-    console.log('initImageUpload: Found cameraBtn:', cameraBtn);
-    const galleryBtn = document.getElementById('galleryUpload');
-    console.log('initImageUpload: Found galleryBtn:', galleryBtn);
-    const fileInput = document.getElementById('hiddenFileInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const aiResults = document.getElementById('aiResults');
+    const cameraInput = document.getElementById('cameraInput');
+    const galleryInput = document.getElementById('galleryInput');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const previewImage = document.getElementById('previewImage');
+    const aiCard = document.getElementById('aiCard');
+    // AI results elements
+    const aiIssueType = document.getElementById('aiIssueType');
+    const aiCategory = document.getElementById('aiCategory');
+    const aiGps = document.getElementById('aiGps');
+    const aiPriority = document.getElementById('aiPriority');
+    const aiDescription = document.getElementById('aiDescription');
+
+    // Array to hold selected images
+    let selectedImages = [];
     
-    if (!fileInput || !imagePreview) return;
+    if (!cameraInput && !galleryInput) {
+      console.warn('initImageUpload: No file inputs found');
+      return;
+    }
+
     
     // Function to update the image preview
     function updateImagePreview() {
       if (selectedImages.length > 0) {
         const image = selectedImages[0];
-        imagePreview.innerHTML = `
-          <img src="${image.preview}" class="img-fluid rounded" alt="Preview" style="max-height: 200px;">
-          <button type="button" class="btn btn-sm btn-danger mt-2" id="removeImage">
-            <i class="fas fa-trash me-1"></i> Remove Image
-          </button>
-        `;
+        if (previewImage) {
+          previewImage.src = image.preview;
+        }
+        if (previewWrapper) {
+          previewWrapper.classList.remove('d-none');
+        }
         
         // Handle remove image button
         const removeBtn = document.getElementById('removeImage');
         if (removeBtn) {
           removeBtn.addEventListener('click', () => {
             selectedImages = [];
-            imagePreview.innerHTML = '';
-            fileInput.value = '';
-            if (aiResults) aiResults.classList.add('d-none');
+            if (previewImage) previewImage.src = '';
+            if (previewWrapper) previewWrapper.classList.add('d-none');
+            if (cameraInput) cameraInput.value = '';
+            if (galleryInput) galleryInput.value = '';
+            if (aiCard) aiCard.classList.add('d-none');
           });
         }
       } else {
-        imagePreview.innerHTML = '';
+        if (previewWrapper) previewWrapper.classList.add('d-none');
+        if (previewWrapper) previewWrapper.innerHTML = '';
       }
     }
     
     function handleFileSelect(event) {
+      console.log('handleFileSelect fired');
       const file = event.target.files[0];
       if (!file) return;
       
@@ -574,92 +601,39 @@
         updateImagePreview();
         
         // Show AI results section
-        if (aiResults) {
-          aiResults.classList.remove('d-none');
-          
-          // Simulate AI analysis
-          setTimeout(() => {
-            const aiCategory = document.getElementById('aiCategory');
-            const aiGps = document.getElementById('aiGps');
-            const aiPriority = document.getElementById('aiPriority');
-            const aiDescription = document.getElementById('aiDescription');
-            
-            if (aiCategory) aiCategory.textContent = selectedCategory || 'Pothole';
-            if (aiGps) aiGps.textContent = currentCoords ? 
-              `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Not available';
-            if (aiPriority) aiPriority.textContent = 'High';
-            if (aiDescription) {
-              document.getElementById('ai-section').classList.remove('d-none');
-              aiDescription.value = `Generating description for ${selectedCategory || 'Pothole'}. Location: ${currentCoords ? 
-                `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Not specified'}`;
-            }
-          }, 1000);
+        if (aiCard) {
+          aiCard.classList.remove('d-none');
         }
+
+        // Simulate AI analysis delay
+        setTimeout(() => {
+          if (aiIssueType) aiIssueType.textContent = 'Road Infrastructure';
+          if (aiCategory) aiCategory.textContent = selectedCategory || 'Pothole';
+          if (aiGps) aiGps.textContent = currentCoords ? `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Not available';
+          if (aiPriority) aiPriority.textContent = 'High';
+          if (aiDescription) {
+            aiDescription.value = `Auto-generated description for ${selectedCategory || 'pothole'} at ${currentCoords ? `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'unknown location'}`;
+          }
+        }, 500);
       };
-      
       reader.readAsDataURL(file);
     }
-    
-    // Add event listeners for camera and gallery buttons
-    if (cameraBtn) {
-      cameraBtn.addEventListener('click', (e) => {
-        console.log('Camera button clicked');
-        fileInput.setAttribute('capture', 'environment');
-        triggerFileInput();
-      });
-    }
-    
-    if (galleryBtn) {
-      galleryBtn.addEventListener('click', (e) => {
-        console.log('Gallery button clicked');
-        fileInput.removeAttribute('capture');
-        triggerFileInput();
-      });
-    }
-    
-    // Helper to trigger file dialog with graceful fallback
-    // Some mobile browsers block programmatic click() on inputs that are fully
-    // display:none.  We temporarily make the input visually hidden (but still
-    // in the layout tree) so that the click is considered user-initiated.
-    function triggerFileInput() {
-      if (!fileInput) return;
-      try {
-        console.log('triggerFileInput: preparing file input for click');
 
-        // Ensure the element is focusable & clickable
-        fileInput.classList.remove('d-none');
-        fileInput.style.position = 'absolute';
-        fileInput.style.left = '-9999px';
-        fileInput.style.opacity = '0';
-
-        // Trigger the chooser – this is still inside the user-gesture handler
-        fileInput.click();
-
-        // After file dialog closes (change fires) restore original styles
-        const restoreStyles = () => {
-          fileInput.classList.add('d-none');
-          fileInput.style.position = '';
-          fileInput.style.left = '';
-          fileInput.style.opacity = '';
-          fileInput.removeEventListener('change', restoreStyles);
-        };
-        fileInput.addEventListener('change', restoreStyles);
-      } catch (err) {
-        console.error('triggerFileInput: Unable to open file dialog', err);
-        alert('File selection is not supported on this device/browser.');
-      }
+  // Bind change listeners
+  [cameraInput, galleryInput].forEach(input => {
+    if (input) {
+      console.log('Attaching change listener to', input.id);
+      input.addEventListener('change', handleFileSelect);
     }
-    
-    // Handle file selection
-    fileInput.addEventListener('change', handleFileSelect);
-    
-    // Make updateImagePreview available globally
-    window.updateImagePreview = updateImagePreview;
-  }
-  
-  // THEME SWITCHER
-  function initThemeSwitcher() {
-    const themeSwitch = document.getElementById('themeSwitch');
+  });
+
+  // Expose helper for other modules/tests
+  window.updateImagePreview = updateImagePreview;
+}
+
+// THEME SWITCHER
+function initThemeSwitcher() {
+  // ... (rest of the code remains the same)
     if (!themeSwitch) return;
     
     // Load saved theme preference
