@@ -485,13 +485,18 @@
             address: addressInput.value || 'Not provided'
           },
           images: selectedImages.map(img => img.preview),
-          userEmail: document.getElementById('email')?.value || null
+          userEmail: JSON.parse(localStorage.getItem('user')).email,
+          userMobile: JSON.parse(localStorage.getItem('user')).mobile || ''
         };
+
+        // Get JWT token from localStorage
+        const token = localStorage.getItem('token');
 
         const response = await fetch('/api/reports', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
           },
           body: JSON.stringify(data),
         });

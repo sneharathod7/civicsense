@@ -288,6 +288,9 @@ function createReportCard(report) {
   const categoryIcon = getCategoryIcon(report.category);
   const daysAgo = Math.floor((new Date() - new Date(report.dateUpdated)) / (1000 * 60 * 60 * 24));
   
+  // Add phone number to the card
+  const phoneSection = `<div class="mb-1"><strong>Phone:</strong> ${report.userMobile || '-'}</div>`;
+  
   return `
     <div class="card mb-3 report-card">
       <div class="card-body">
