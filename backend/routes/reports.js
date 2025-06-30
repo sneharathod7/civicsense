@@ -2,12 +2,17 @@ const express = require('express');
 const router = express.Router();
 const Report = require('../models/Report');
 const { sendReportNotification } = require('../services/emailService');
+const { protect } = require('../middleware/auth');
 
 // @route   POST api/reports
 // @desc    Create a new report
-// @access  Public (temporarily disabled auth for testing)
-router.post('/', async (req, res) => {
+// @access  Private (requires authentication)
+router.post('/', protect, async (req, res) => {
   try {
+    console.log('Received POST /api/reports', req.body);
+    console.log('req.user:', req.user);
+    console.log('Authorization header:', req.headers.authorization);
+
     const { title, description, location, category, images, userEmail } = req.body;
     
     // Compute coordinates robustly
@@ -23,18 +28,26 @@ router.post('/', async (req, res) => {
       address: location?.address || 'Unknown address'
     };
 
-    const newReport = new Report({
-      user: req.user?.id || 'anonymous',
+    // Prepare report data
+    const reportData = {
       title,
       description,
       location: locObj,
       category,
       images,
       status: 'pending',
-      userEmail: userEmail || 'no-email@example.com'
-    });
+      userEmail: req.user?.email || userEmail || 'no-email@example.com',
+      userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile'
+    };
+    if (req.user?.id) {
+      reportData.user = req.user.id; // Only set if authenticated
+    }
 
+    const newReport = new Report(reportData);
+
+    console.log('Saving new report...');
     const report = await newReport.save();
+    console.log('Report saved:', report);
     
     // Send email notification
     try {
@@ -46,7 +59,8 @@ router.post('/', async (req, res) => {
       if (userEmail) {
         await sendReportNotification({
           ...report.toObject(),
-          title: `[Confirmation] ${report.title}`
+          title: `[Confirmation] ${report.title}`,
+          userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile'
         }, userEmail);
       }
     } catch (emailError) {
@@ -60,8 +74,8 @@ router.post('/', async (req, res) => {
       message: 'Report submitted successfully!'
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Full error:', err);
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
 });
 

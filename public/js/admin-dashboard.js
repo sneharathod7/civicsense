@@ -44,6 +44,7 @@ function populateAdminTable(complaints) {
         </select>
       </td>
       <td>${new Date(cmp.createdAt).toLocaleString()}</td>
+      <td>${cmp.userMobile || '-'}</td>
       <td><button class="btn btn-sm btn-primary update-btn" data-id="${cmp.id}">Update</button></td>
     `;
     tbody.appendChild(tr);
