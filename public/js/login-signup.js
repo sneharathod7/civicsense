@@ -119,7 +119,7 @@ loginForm.addEventListener('submit', async function(e) {
         return;
     }
     try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('/api/v1/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ emailOrMobile, password, role })
@@ -135,11 +135,13 @@ loginForm.addEventListener('submit', async function(e) {
             return;
         }
         // Save in localStorage for later use
-        localStorage.setItem('userId', data.userId);
+        localStorage.removeItem('userId');
+            const uid = data.user?._id || data.user?.id || data.userId;
+            if (uid) localStorage.setItem('userId', uid);
         localStorage.setItem('role', data.role);
         showLoginMsg('Login successful! Redirecting...', true);
         setTimeout(() => {
-            window.location.href = role === 'Admin' ? '/admin-dashboard' : '/citizen-dashboard';
+            window.location.href = role === 'Admin' ? '/admin-dashboard' : '/dashboard';
         }, 1200);
     } catch (err) {
         showLoginMsg('Server error. Try again.', false);
@@ -173,7 +175,7 @@ signupForm.addEventListener('submit', async function(e) {
         return;
     }
     try {
-        const res = await fetch('/api/auth/signup', {
+        const res = await fetch('/api/v1/auth/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ firstName, lastName, email, mobile, address, password, role })
@@ -201,7 +203,7 @@ verifyOtpBtn.addEventListener('click', async function() {
         return;
     }
     try {
-        const res = await fetch('/api/auth/verify-otp', {
+        const res = await fetch('/api/v1/auth/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, otp })
@@ -213,7 +215,7 @@ verifyOtpBtn.addEventListener('click', async function() {
         }
         showOtpMsg('OTP verified! Redirecting...', true);
         setTimeout(() => {
-            window.location.href = role === 'Admin' ? '/admin-dashboard' : '/citizen-dashboard';
+            window.location.href = role === 'Admin' ? '/admin-dashboard' : '/dashboard';
         }, 1200);
     } catch (err) {
         showOtpMsg('Server error. Try again.', false);
@@ -232,7 +234,7 @@ resendOtpBtn.addEventListener('click', async function() {
         return;
     }
     try {
-        const res = await fetch('/api/auth/resend-otp', {
+        const res = await fetch('/api/v1/auth/resend-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })

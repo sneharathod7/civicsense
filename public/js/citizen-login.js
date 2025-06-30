@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailOrMobile, password, role: 'Citizen' })
@@ -29,13 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
         showMsg(data.message || 'Login failed.', false);
         return;
       }
-      localStorage.setItem('userId', data.userId);
+      // Clean old value
+      localStorage.removeItem('userId');
+      const uid = data.user?._id || data.user?.id || data.userId;
+      if (uid) localStorage.setItem('userId', uid);
       localStorage.setItem('role', 'Citizen');
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user', JSON.stringify({ name: data.name || data.firstName || '', email: data.email || '' }));
+      const fname = data.user?.firstName || data.user?.name || data.firstName || '';
+      localStorage.setItem('firstName', fname);
+      localStorage.setItem('user', JSON.stringify({ name: fname, email: data.user?.email || data.email || '' }));
       showMsg('Login successful! Redirecting...', true);
       setTimeout(() => {
-        window.location.href = '/citizen-dashboard';
+        window.location.href = '/dashboard';
       }, 1200);
     } catch (err) {
       showMsg('Server error. Try again.', false);

@@ -1,92 +1,114 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
-const User = require('./User');
+const mongoose = require('mongoose');
 
-const CitizenProfile = sequelize.define('CitizenProfile', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+const citizenProfileSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
     unique: true
   },
   firstName: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: [true, 'First name is required'],
+    trim: true
   },
   lastName: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: [true, 'Last name is required'],
+    trim: true
   },
   dateOfBirth: {
-    type: DataTypes.DATEONLY,
-    allowNull: true
+    type: Date,
+    default: null
   },
   gender: {
-    type: DataTypes.ENUM('Male', 'Female', 'Other', 'Prefer not to say'),
-    allowNull: true
+    type: String,
+    enum: ['Male', 'Female', 'Other', 'Prefer not to say'],
+    default: null
   },
   phoneNumber: {
-    type: DataTypes.STRING(20),
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   whatsappNumber: {
-    type: DataTypes.STRING(20),
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   state: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   district: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   city: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   religion: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   category: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: String,
+    trim: true,
+    default: null
   },
   profileImage: {
-    type: DataTypes.STRING,
-    allowNull: true
+    type: String,
+    default: null
   },
   isEmailVerified: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
+    type: Boolean,
+    default: false
   },
   isPhoneVerified: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
+    type: Boolean,
+    default: false
   },
   points: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
+    type: Number,
+    default: 0,
+    min: 0
   },
   rank: {
-    type: DataTypes.STRING,
-    defaultValue: 'Citizen'
+    type: String,
+    default: 'Citizen',
+    enum: ['Citizen', 'Active Citizen', 'Super Citizen', 'Community Leader']
   },
-  specializationAreas: {
-    type: DataTypes.JSON,
-    defaultValue: {}
-  }
+  specializationAreas: [{
+    type: String,
+    trim: true
+  }]
 }, {
-  tableName: 'citizen_profiles',
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-User.hasOne(CitizenProfile, { foreignKey: 'userId', onDelete: 'CASCADE' });
-CitizenProfile.belongsTo(User, { foreignKey: 'userId' });
+// Indexes are defined in the schema
+
+// Virtual for full name
+citizenProfileSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`.trim();
+});
+
+// Middleware to populate user data when querying
+citizenProfileSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'user',
+    select: 'email username role'
+  });
+  next();
+});
+
+const CitizenProfile = mongoose.model('CitizenProfile', citizenProfileSchema);
 
 module.exports = CitizenProfile;

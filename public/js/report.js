@@ -1,421 +1,677 @@
 /* -------------------------------------------------
-   CivicVerse New Report Page Script (Heading 12)
-   Rewritten 2025-06-25
+   CivicSense Report Page - Main Script
+   Last Updated: 2025-06-29
+   Features:
+   - Dynamic geolocation with Leaflet map
+   - Image upload from camera/gallery
+   - Form validation and submission
+   - Responsive design
 --------------------------------------------------*/
-(function () {
-  // --- Category Selection Elements ---
-  const categoryDropdownBtn = document.getElementById('categoryDropdown');
-  const categoryMenu        = document.getElementById('categoryMenu');
-  const categoryIcons       = document.querySelectorAll('.category-icon');
-  let   selectedCategory    = null;
 
-  function setCategory(val, labelHtml) {
-    selectedCategory = val;
-    categoryDropdownBtn.innerHTML = labelHtml + ' ▼';
-    // highlight dropdown
-    [...categoryMenu.querySelectorAll('.dropdown-item')].forEach(i => i.classList.toggle('active', i.dataset.value === val));
-    // highlight icon grid
-    categoryIcons.forEach(btn => btn.classList.toggle('selected', btn.dataset.value === val));
-  }
-
-  categoryMenu.addEventListener('click', e => {
-    const item = e.target.closest('.dropdown-item');
-    if (!item) return;
-    e.preventDefault();
-    setCategory(item.dataset.value, item.innerHTML.trim());
-  });
-  categoryIcons.forEach(btn => btn.addEventListener('click', () => {
-    const emoji = btn.querySelector('span').outerHTML;
-    setCategory(btn.dataset.value, `${emoji} ${btn.textContent.trim()}`);
-  }));
-
-  // --- Map & Location ---
-  const mapEl           = document.getElementById('map');
-  const currentLocP     = document.getElementById('currentLocation');
-  const confirmLocBtn   = document.getElementById('confirmLocation');
-  const adjustLocBtn    = document.getElementById('adjustLocation');
-  let map, marker, currentCoords;
-
-  function updateLocText() {
-    if (!currentCoords) return;
-    const { lat, lng } = currentCoords;
-    currentLocP.textContent = `📍 Current: (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-    document.getElementById('aiGps').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    // Reverse-geocode to human-readable address
-    const addrInput = document.getElementById('addressBox');
-    if (addrInput) {
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
-        .then(r => r.json())
-        .then(d => { addrInput.value = d.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`; })
-        .catch(() => {});
-    }
-  }
-
-  function initMap() {
-    map = L.map(mapEl).setView([28.4595, 77.0266], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-    marker = L.marker([28.4595, 77.0266], { draggable: true }).addTo(map);
-    marker.on('dragend', () => { currentCoords = marker.getLatLng(); updateLocText(); });
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        currentCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        marker.setLatLng(currentCoords);
-        map.setView(currentCoords, 15);
-        updateLocText();
-      }, updateLocText);
-    } else updateLocText();
-  }
-
-  confirmLocBtn.addEventListener('click', () => {
-    if (!currentCoords) return alert('Location not set');
-    confirmLocBtn.textContent = 'Location Confirmed ✅';
-    confirmLocBtn.classList.replace('btn-success', 'btn-outline-success');
-  });
-  adjustLocBtn.addEventListener('click', () => {
-    alert('Tap a point on the map to choose new location');
-    map.once('click', e => { marker.setLatLng(e.latlng); currentCoords = e.latlng; updateLocText(); });
-  });
-
-  // --- Image Upload & AI analysis placeholder ---
-  const cameraBtn   = document.getElementById('cameraUpload');
-  const galleryBtn  = document.getElementById('galleryUpload');
-  const hiddenFile  = document.getElementById('hiddenFileInput');
-  const previewDiv  = document.getElementById('imagePreview');
-  const aiCard      = document.getElementById('aiResults');
-  const aiIssueSpan = document.getElementById('aiIssueType');
-  const aiCatSpan   = document.getElementById('aiCategory');
-  const aiPriority  = document.getElementById('aiPriority');
-  const aiDescTA    = document.getElementById('aiDescription');
-  document.getElementById('acceptAi').addEventListener('click', () => { aiDescTA.readOnly = true; });
-  document.getElementById('editDescription').addEventListener('click', () => { aiDescTA.readOnly = false; aiDescTA.focus(); });
-
-  function triggerPick(camera=false){
-    if(camera) hiddenFile.setAttribute('capture','environment'); else hiddenFile.removeAttribute('capture');
-    hiddenFile.click();
-  }
-  cameraBtn.addEventListener('click',()=>triggerPick(true));
-  galleryBtn.addEventListener('click',()=>triggerPick(false));
-  hiddenFile.addEventListener('change',()=>{
-    const file = hiddenFile.files[0];
-    if(!file) return;
-    previewDiv.innerHTML = `<img src="${URL.createObjectURL(file)}" class="img-fluid rounded" style="max-height:250px;">`;
-    // mock AI
-    aiIssueSpan.textContent='Pothole';
-    aiCatSpan.textContent='Roads';
-    aiPriority.textContent='Medium';
-    aiDescTA.value='AI-generated issue description.';
-    aiCard.classList.remove('d-none');
-  });
-
-  // --- Submission actions ---
-  function collectState(action){
-    return {
-      action,
-      category: selectedCategory,
-      coords: currentCoords,
-      address: document.getElementById('addressBox').value,
-      extraAddr: document.getElementById('additionalAddress').value,
-      description: aiDescTA.value,
-      notifyEmail: document.getElementById('notifyEmail').checked,
-      notifySms: document.getElementById('notifySms').checked,
-      anonymous: document.getElementById('identityToggle').checked
-    };
-  }
+(function() {
+  // UTILITIES
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => document.querySelectorAll(selector);
   
-  document.getElementById('previewReport').addEventListener('click', () => {
-    const previewData = collectState('preview');
-    console.log('Preview:', previewData);
-    // Show preview in a modal or preview panel
-    alert('Preview generated (check console)');
-  });
+  // GLOBAL STATE
+  let selectedCategory = null;
+  let currentCoords = null;
+  let map = null;
+  let marker = null;
+  let selectedImages = []; // Store uploaded images
+  
+  // DEBUG: Check if map container exists
+  function checkMapContainer() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+      console.error('Map container not found. Make sure you have an element with id="map" in your HTML');
+      return false;
+    }
+    if (mapElement.offsetWidth === 0 || mapElement.offsetHeight === 0) {
+      console.warn('Map container has zero dimensions. Check CSS or parent container visibility');
+    }
+    return true;
+  }
 
-  document.getElementById('submitReport').addEventListener('click', () => {
-    const formData = collectState('submit');
-    console.log('Submitting report:', formData);
+  // Test function to check map status
+  function testMapStatus() {
+    console.log('--- MAP STATUS ---');
+    console.log('Map element exists:', !!document.getElementById('map'));
+    console.log('Leaflet loaded:', typeof L !== 'undefined');
+    console.log('Map instance:', map ? 'Initialized' : 'Not initialized');
+    console.log('Marker instance:', marker ? 'Initialized' : 'Not initialized');
     
-    // Generate a unique report ID (in a real app, this would come from the server)
-    const reportId = 'RPT-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    if (map) {
+      console.log('Map center:', map.getCenter());
+      console.log('Map zoom:', map.getZoom());
+    }
     
-    // Format the data for URL parameters
-    const params = new URLSearchParams({
-      id: reportId,
-      category: formData.category || 'general',
-      description: encodeURIComponent(formData.description || ''),
-      address: encodeURIComponent(formData.address || ''),
-      lat: formData.coords ? formData.coords.lat.toFixed(6) : '',
-      lng: formData.coords ? formData.coords.lng.toFixed(6) : '',
-      timestamp: new Date().toISOString(),
-      status: 'submitted'
-    });
+    if (marker) {
+      console.log('Marker position:', marker.getLatLng());
+    }
     
-    // Redirect to success page with report data
-    window.location.href = `/report-success.html?${params.toString()}`;
-  });
+    console.log('Current coordinates:', currentCoords);
+    console.log('--- END MAP STATUS ---');
+  }
 
-  // init everything after DOM ready
-  document.addEventListener('DOMContentLoaded', initMap);
-})();
-
-// ---- Legacy code below retained ----
-
-// Initialize map
-let map;
-let marker;
-let currentLocation;
-
-// Initialize map when the page loads
-document.addEventListener('DOMContentLoaded', () => {
+  // INITIALIZATION
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Initializing report page...');
+    
+    // Check if map container exists first
+    if (!checkMapContainer()) {
+      alert('Map container not found. The page may not load correctly.');
+    }
+    
+    // Initialize map first as it's most critical
+    console.log('Initializing map...');
     initMap();
-    setupFormHandlers();
-    setupPhotoHandlers();
-});
-
-// Initialize the map
-function initMap() {
-    // Create map centered at a default location
-    map = L.map('map').setView([0, 0], 2);
     
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Try to get user's location
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                const { latitude, longitude } = position.coords;
-                currentLocation = { latitude, longitude };
-                
-                // Update map view
-                map.setView([latitude, longitude], 15);
-                
-                // Add marker
-                marker = L.marker([latitude, longitude]).addTo(map);
-                
-                // Update form fields
-                document.getElementById('latitude').value = latitude;
-                document.getElementById('longitude').value = longitude;
-                
-                // Get address from coordinates
-                getAddressFromCoordinates(latitude, longitude);
-            },
-            error => {
-                console.error('Error getting location:', error);
-                alert('Unable to get your location. Please enable location services.');
-            }
-        );
-    }
-
-    // Handle map clicks
-    map.on('click', e => {
-        const { lat, lng } = e.latlng;
-        
-        // Update marker position
-        if (marker) {
-            marker.setLatLng([lat, lng]);
-        } else {
-            marker = L.marker([lat, lng]).addTo(map);
-        }
-        
-        // Update form fields
-        document.getElementById('latitude').value = lat;
-        document.getElementById('longitude').value = lng;
-        
-        // Get address from coordinates
-        getAddressFromCoordinates(lat, lng);
-    });
-}
-
-// Get address from coordinates using Nominatim
-async function getAddressFromCoordinates(lat, lng) {
-    try {
-        const response = await fetch(`/api/reverse-geocode?lat=${lat}&lon=${lng}`);
-        const data = await response.json();
-        document.getElementById('address').value = data.display_name;
-    } catch (error) {
-        console.error('Error getting address:', error);
-    }
-}
-
-// Setup form handlers
-function setupFormHandlers() {
-    const form = document.getElementById('reportForm');
-    const issueTypeSelect = document.getElementById('issueType');
+    // Then initialize other components
+    console.log('Initializing category selection...');
+    initCategorySelection();
+    console.log('Initializing image upload...');
+    initImageUpload();
+    console.log('Initializing form submission...');
+    initFormSubmission();
+    console.log('Initializing theme switcher...');
+    initThemeSwitcher();
     
-    // Handle form submission
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Show loading state
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalText = submitButton.innerHTML;
-        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
-        submitButton.disabled = true;
-        
-        try {
-            // Create FormData object
-            const formData = new FormData(form);
-            // Attach userId so backend can link complaint to user
-            const storedUserId = localStorage.getItem('userId');
-            if (storedUserId) {
-                formData.append('userId', storedUserId);
-            }
-            // Log FormData content
-            for (let pair of formData.entries()) {
-                console.log('FormData:', pair[0], pair[1]);
-            }
-            // Send to server
-            const response = await fetch('/api/complaints', {
-                method: 'POST',
-                body: formData
-            });
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Failed to submit report. Response:', errorText);
-                throw new Error('Failed to submit report');
-            }
-            const data = await response.json();
-            console.log('Submission success:', data);
-            // Show success message
-            alert('Report submitted successfully! Your ticket ID is: ' + data.data.ticketId);
-            // Reset form
-            form.reset();
-            document.getElementById('photoPreview').innerHTML = '';
-            document.getElementById('department').value = '';
-        } catch (error) {
-            console.error('Error submitting report:', error);
-            alert('Failed to submit report. Please try again.');
-        } finally {
-            // Reset button state
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-        }
-    });
+    console.log('Report page initialized');
     
-    // Handle issue type change
-    issueTypeSelect.addEventListener('change', () => {
-        predictDepartment();
-    });
-}
-
-// Setup photo handlers
-function setupPhotoHandlers() {
-    const photoInput = document.getElementById('photo');
-    const captureButton = document.getElementById('capturePhoto');
-    const photoPreview = document.getElementById('photoPreview');
-    
-    // Handle file input change
-    photoInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            displayPhotoPreview(file);
-            predictDepartment();
-        }
-    });
-    
-    // Handle photo capture
-    captureButton.addEventListener('click', () => {
-        // Check if browser supports getUserMedia
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // Create video element
-            const video = document.createElement('video');
-            video.style.display = 'none';
-            document.body.appendChild(video);
-            
-            // Get camera stream
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                    video.play();
-                    
-                    // Create canvas for capturing
-                    const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    
-                    // Draw video frame to canvas
-                    const context = canvas.getContext('2d');
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
-                    // Convert to blob
-                    canvas.toBlob(blob => {
-                        // Create file from blob
-                        const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
-                        
-                        // Update file input
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        photoInput.files = dataTransfer.files;
-                        
-                        // Display preview
-                        displayPhotoPreview(file);
-                        
-                        // Predict department
-                        predictDepartment();
-                        
-                        // Stop camera stream
-                        stream.getTracks().forEach(track => track.stop());
-                        video.remove();
-                    }, 'image/jpeg');
-                })
-                .catch(error => {
-                    console.error('Error accessing camera:', error);
-                    alert('Unable to access camera. Please upload a photo instead.');
-                });
-        } else {
-            alert('Your browser does not support camera access. Please upload a photo instead.');
-        }
-    });
-}
-
-// Display photo preview
-function displayPhotoPreview(file) {
-    const reader = new FileReader();
-    const photoPreview = document.getElementById('photoPreview');
-    
-    reader.onload = (e) => {
-        photoPreview.innerHTML = `
-            <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px;">
-        `;
+    // Add manual location button for testing
+    const locationButton = document.createElement('button');
+    locationButton.textContent = 'Test Location (0,0)';
+    locationButton.style.position = 'fixed';
+    locationButton.style.bottom = '10px';
+    locationButton.style.right = '10px';
+    locationButton.style.zIndex = '1000';
+    locationButton.onclick = () => {
+      console.log('Test location button clicked');
+      currentCoords = { lat: 0, lng: 0 };
+      updateMarkerPosition(0, 0);
+      updateLocationText();
     };
+    document.body.appendChild(locationButton);
     
-    reader.readAsDataURL(file);
-}
-
-// Predict department using ML model
-async function predictDepartment() {
-    const issueType = document.getElementById('issueType').value;
-    const photoInput = document.getElementById('photo');
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
+    // Add test button
+    const testButton = document.createElement('button');
+    testButton.textContent = 'Test Map Status';
+    testButton.style.position = 'fixed';
+    testButton.style.bottom = '50px';
+    testButton.style.right = '10px';
+    testButton.style.zIndex = '1000';
+    testButton.onclick = testMapStatus;
+    document.body.appendChild(testButton);
     
-    if (!issueType || !photoInput.files[0] || !latitude || !longitude) {
-        return;
-    }
+    // Initial test
+    setTimeout(testMapStatus, 2000);
+  });
+  
+  // MAP FUNCTIONS
+  function initMap() {
+    console.log('Initializing map...');
+    // Default to center of India if geolocation fails
+    const defaultLocation = { lat: 20.5937, lng: 78.9629 };
     
     try {
-        const formData = new FormData();
-        formData.append('photo', photoInput.files[0]);
-        formData.append('issue_type', issueType);
-        formData.append('latitude', latitude);
-        formData.append('longitude', longitude);
+      // Initialize map
+      const mapElement = document.getElementById('map');
+      if (!mapElement) {
+        console.error('Map container not found');
+        return;
+      }
+      
+      // Check if Leaflet is loaded
+      if (typeof L === 'undefined') {
+        console.error('Leaflet is not loaded');
+        return;
+      }
+      
+      // Initialize map with options
+      map = L.map('map', {
+        center: [defaultLocation.lat, defaultLocation.lng],
+        zoom: 15,
+        zoomControl: true
+      });
+      
+      console.log('Map initialized, adding tiles...');
+      
+      // Add OpenStreetMap tiles with error handling
+      try {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          crossOrigin: true
+        }).addTo(map);
+        console.log('Tiles added successfully');
+      } catch (tileError) {
+        console.error('Error adding tiles:', tileError);
+      }
+      
+      // Initialize marker
+      try {
+        console.log('Creating marker at:', defaultLocation);
+        marker = L.marker(
+          [defaultLocation.lat, defaultLocation.lng], 
+          { draggable: true }
+        ).addTo(map);
         
-        const response = await fetch('/api/predict-department', {
-            method: 'POST',
-            body: formData
+        console.log('Marker created, binding events...');
+        
+        // Update coordinates when marker is dragged
+        marker.on('dragend', function() {
+          const pos = this.getLatLng();
+          console.log('Marker dragged to:', pos);
+          currentCoords = { lat: pos.lat, lng: pos.lng };
+          updateLocationText();
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to predict department');
+        // Set initial coordinates
+        currentCoords = { ...defaultLocation };
+        updateLocationText();
+        
+        console.log('Marker initialized successfully');
+      } catch (markerError) {
+        console.error('Failed to initialize marker:', markerError);
+        // Try to recover by creating a simple marker
+        try {
+          marker = L.marker([defaultLocation.lat, defaultLocation.lng]).addTo(map);
+          console.log('Simple marker created as fallback');
+        } catch (e) {
+          console.error('Could not create fallback marker:', e);
+        }
+      }
+      
+      // Handle map click
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        currentCoords = { lat, lng };
+        updateMarkerPosition(lat, lng);
+        updateLocationText();
+      });
+      
+      // Try to get user's location
+      getUserLocation();
+      
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      alert('Error initializing map. Please refresh the page.');
+    }
+  }
+  
+  function getUserLocation() {
+    const statusElement = $('#locationStatus');
+    const locationButton = $('#getLocationBtn');
+    
+    // Helper function to update status
+    const updateStatus = (message, type = 'info') => {
+      if (!statusElement) return;
+      statusElement.textContent = message;
+      statusElement.className = `text-${type}`;
+      statusElement.style.display = 'block';
+      
+      // Show/hide retry button
+      if (locationButton) {
+        locationButton.style.display = type === 'error' ? 'inline-block' : 'none';
+      }
+    };
+
+    // Check if geolocation is supported
+    if (!navigator.geolocation) {
+      updateStatus('Geolocation is not supported by your browser', 'danger');
+      return;
+    }
+    
+    // Show loading state
+    updateStatus('Getting your location...', 'info');
+    
+    // Set timeout for geolocation request
+    const geoTimeout = setTimeout(() => {
+      updateStatus('Taking longer than expected to get your location...', 'warning');
+    }, 5000);
+
+    // Get current position
+    navigator.geolocation.getCurrentPosition(
+      // Success callback
+      (position) => {
+        clearTimeout(geoTimeout);
+        const { latitude, longitude, accuracy } = position.coords;
+        currentCoords = { lat: latitude, lng: longitude };
+        
+        // Update map and UI
+        updateMarkerPosition(latitude, longitude);
+        updateLocationText();
+        
+        // Update status with accuracy info
+        updateStatus(
+          `Location found! (Accuracy: ${Math.round(accuracy)} meters) Drag the marker to adjust.`,
+          'success'
+        );
+      },
+      // Error callback
+      (error) => {
+        clearTimeout(geoTimeout);
+        console.error('Geolocation error:', error);
+        
+        let message = 'Could not get your location. ';
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Location access was denied. Please enable it in your browser settings and try again.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Location information is unavailable. Please check your connection and try again.';
+            break;
+          case error.TIMEOUT:
+            message = 'The request to get location timed out. Please try again.';
+            break;
+          default:
+            message = 'An unknown error occurred while getting your location.';
         }
         
-        const data = await response.json();
-        document.getElementById('department').value = data.department;
-        
-    } catch (error) {
-        console.error('Error predicting department:', error);
+        updateStatus(message, 'danger');
+      },
+      // Options
+      {
+        enableHighAccuracy: true,  // Try to use GPS if available
+        timeout: 15000,           // 15 seconds timeout
+        maximumAge: 0             // Don't use a cached position
+      }
+    );
+    
+    // Handle retry button click
+    if (locationButton) {
+      locationButton.onclick = (e) => {
+        e.preventDefault();
+        getUserLocation();
+      };
     }
-} 
+  }
+  
+  function updateMarkerPosition(lat, lng) {
+    console.log('Updating marker position to:', lat, lng);
+    if (!marker) {
+      console.error('Marker is not initialized');
+      return;
+    }
+    if (!map) {
+      console.error('Map is not initialized');
+      return;
+    }
+    try {
+      marker.setLatLng([lat, lng]);
+      map.setView([lat, lng], 17);
+      console.log('Marker and map position updated successfully');
+    } catch (error) {
+      console.error('Error updating marker position:', error);
+    }
+  }
+  
+  async function updateLocationText() {
+    if (!currentCoords) return;
+    
+    const { lat, lng } = currentCoords;
+    const coordText = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+    
+    // Update coordinates display
+    const coordElement = $('#currentLocation');
+    if (coordElement) {
+      coordElement.textContent = `📍 ${coordText}`;
+    }
+    
+    const addressElement = $('#addressBox');
+    if (!addressElement) return;
+    
+    // Show loading state
+    addressElement.placeholder = 'Getting address...';
+    
+    try {
+      // Simple reverse geocoding using OpenStreetMap's Nominatim
+      // Note: This is a simplified version that might have rate limits
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'CivicSense/1.0 (your-email@example.com)'
+          },
+          mode: 'cors' // Explicitly enable CORS
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.display_name) {
+        addressElement.value = data.display_name;
+      } else {
+        addressElement.value = 'Address not found';
+      }
+    } catch (error) {
+      console.error('Error getting address:', error);
+      // Fall back to coordinates if address lookup fails
+      addressElement.value = coordText;
+      addressElement.placeholder = 'Could not get address. Using coordinates instead.';
+      
+      // In development, you can uncomment this to see the actual error
+      // addressElement.placeholder = `Error: ${error.message}`;
+    }
+  }
+  
+  // CATEGORY SELECTION
+  function initCategorySelection() {
+    const dropdownBtn = $('#categoryDropdown');
+    const dropdownMenu = $('#categoryMenu');
+    const iconButtons = $$('.category-icon');
+    
+    if (!dropdownMenu || !iconButtons.length) return;
+    
+    function setCategory(value, label) {
+      selectedCategory = value;
+      
+      // Update the hidden input field
+      const categoryInput = document.getElementById('selectedCategory');
+      if (categoryInput) {
+        categoryInput.value = value;
+      }
+      
+      // Update UI
+      iconButtons.forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.value === value);
+      });
+      
+      const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
+      dropdownItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.value === value);
+      });
+      
+      if (dropdownBtn) {
+        // Try to get the icon from the clicked button or find it in the DOM
+        const iconElement = $(`[data-value="${value}"] i`);
+        let iconHtml = '';
+        
+        if (iconElement) {
+          // Clone the icon if found
+          const icon = iconElement.cloneNode(true);
+          iconHtml = icon.outerHTML + ' ';
+        } else {
+          // Fallback to a default icon
+          iconHtml = '<i class="fas fa-map-marker-alt"></i> ';
+        }
+        
+        // Update dropdown button content
+        dropdownBtn.innerHTML = `${iconHtml}${label} ▼`;
+      }
+    }
+    
+    // Handle dropdown selection
+    dropdownMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('.dropdown-item');
+      if (!item) return;
+      
+      e.preventDefault();
+      setCategory(item.dataset.value, item.textContent.trim());
+    });
+    
+    // Handle icon selection
+    iconButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const value = btn.dataset.value;
+        const label = btn.textContent.trim();
+        setCategory(value, label);
+      });
+    });
+    
+    const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
+    dropdownItems.forEach(item => {
+      item.classList.toggle('active', item.dataset.value === value);
+    });
+  }
+  
+  // FORM SUBMISSION
+  function initFormSubmission() {
+    const form = document.getElementById('reportForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Validate required fields
+      const categoryInput = document.getElementById('selectedCategory');
+      const descriptionInput = document.getElementById('aiDescription');
+      const addressInput = document.getElementById('addressBox');
+      
+      if (!categoryInput?.value) {
+        alert('Please select a category');
+        return;
+      }
+      
+      if (!addressInput?.value?.trim()) {
+        alert('Please select a location on the map');
+        addressInput.focus();
+        return;
+      }
+      
+      if (!descriptionInput?.value?.trim()) {
+        alert('Please provide a description');
+        descriptionInput.focus();
+        return;
+      }
+      
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
+
+      try {
+        const data = {
+          title: 'Civic Issue Report',
+          description: descriptionInput.value,
+          category: categoryInput.value,
+          location: {
+            type: 'Point',
+            coordinates: currentCoords ? [currentCoords.lng, currentCoords.lat] : [0, 0],
+            address: addressInput.value || 'Not provided'
+          },
+          images: selectedImages.map(img => img.preview),
+          userEmail: document.getElementById('email').value
+        };
+
+        const response = await fetch('/api/reports', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Report submitted successfully!');
+          form.reset();
+          document.getElementById('imagePreview').innerHTML = '';
+          const aiResultsEl = document.getElementById('aiResults');
+          if (aiResultsEl) aiResultsEl.classList.add('d-none');
+          selectedImages = [];
+          if (map) {
+            map.setView([20.5937, 78.9629], 5);
+          }
+        } else {
+          alert(`Submission failed: ${result.message || 'Unknown error'}`);
+        }
+      } catch (err) {
+        console.error('Error submitting report:', err);
+        alert('A client-side error occurred. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Report';
+      }
+    });
+  }
+
+  // IMAGE UPLOAD
+  function initImageUpload() {
+    console.log('initImageUpload: Function started.');
+    const cameraBtn = document.getElementById('cameraUpload');
+    console.log('initImageUpload: Found cameraBtn:', cameraBtn);
+    const galleryBtn = document.getElementById('galleryUpload');
+    console.log('initImageUpload: Found galleryBtn:', galleryBtn);
+    const fileInput = document.getElementById('hiddenFileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const aiResults = document.getElementById('aiResults');
+    
+    if (!fileInput || !imagePreview) return;
+    
+    // Function to update the image preview
+    function updateImagePreview() {
+      if (selectedImages.length > 0) {
+        const image = selectedImages[0];
+        imagePreview.innerHTML = `
+          <img src="${image.preview}" class="img-fluid rounded" alt="Preview" style="max-height: 200px;">
+          <button type="button" class="btn btn-sm btn-danger mt-2" id="removeImage">
+            <i class="fas fa-trash me-1"></i> Remove Image
+          </button>
+        `;
+        
+        // Handle remove image button
+        const removeBtn = document.getElementById('removeImage');
+        if (removeBtn) {
+          removeBtn.addEventListener('click', () => {
+            selectedImages = [];
+            imagePreview.innerHTML = '';
+            fileInput.value = '';
+            if (aiResults) aiResults.classList.add('d-none');
+          });
+        }
+      } else {
+        imagePreview.innerHTML = '';
+      }
+    }
+    
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPEG, PNG, etc.)');
+        return;
+      }
+      
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        // Add to selected images
+        selectedImages = [{
+          file: file,
+          preview: e.target.result
+        }];
+        
+        // Update preview
+        updateImagePreview();
+        
+        // Show AI results section
+        if (aiResults) {
+          aiResults.classList.remove('d-none');
+          
+          // Simulate AI analysis
+          setTimeout(() => {
+            const aiCategory = document.getElementById('aiCategory');
+            const aiGps = document.getElementById('aiGps');
+            const aiPriority = document.getElementById('aiPriority');
+            const aiDescription = document.getElementById('aiDescription');
+            
+            if (aiCategory) aiCategory.textContent = selectedCategory || 'Pothole';
+            if (aiGps) aiGps.textContent = currentCoords ? 
+              `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Not available';
+            if (aiPriority) aiPriority.textContent = 'High';
+            if (aiDescription) {
+              document.getElementById('ai-section').classList.remove('d-none');
+              aiDescription.value = `Generating description for ${selectedCategory || 'Pothole'}. Location: ${currentCoords ? 
+                `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Not specified'}`;
+            }
+          }, 1000);
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    }
+    
+    // Add event listeners for camera and gallery buttons
+    if (cameraBtn) {
+      cameraBtn.addEventListener('click', (e) => {
+        console.log('Camera button clicked');
+        fileInput.setAttribute('capture', 'environment');
+        triggerFileInput();
+      });
+    }
+    
+    if (galleryBtn) {
+      galleryBtn.addEventListener('click', (e) => {
+        console.log('Gallery button clicked');
+        fileInput.removeAttribute('capture');
+        triggerFileInput();
+      });
+    }
+    
+    // Helper to trigger file dialog with graceful fallback
+    // Some mobile browsers block programmatic click() on inputs that are fully
+    // display:none.  We temporarily make the input visually hidden (but still
+    // in the layout tree) so that the click is considered user-initiated.
+    function triggerFileInput() {
+      if (!fileInput) return;
+      try {
+        console.log('triggerFileInput: preparing file input for click');
+
+        // Ensure the element is focusable & clickable
+        fileInput.classList.remove('d-none');
+        fileInput.style.position = 'absolute';
+        fileInput.style.left = '-9999px';
+        fileInput.style.opacity = '0';
+
+        // Trigger the chooser – this is still inside the user-gesture handler
+        fileInput.click();
+
+        // After file dialog closes (change fires) restore original styles
+        const restoreStyles = () => {
+          fileInput.classList.add('d-none');
+          fileInput.style.position = '';
+          fileInput.style.left = '';
+          fileInput.style.opacity = '';
+          fileInput.removeEventListener('change', restoreStyles);
+        };
+        fileInput.addEventListener('change', restoreStyles);
+      } catch (err) {
+        console.error('triggerFileInput: Unable to open file dialog', err);
+        alert('File selection is not supported on this device/browser.');
+      }
+    }
+    
+    // Handle file selection
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    // Make updateImagePreview available globally
+    window.updateImagePreview = updateImagePreview;
+  }
+  
+  // THEME SWITCHER
+  function initThemeSwitcher() {
+    const themeSwitch = document.getElementById('themeSwitch');
+    if (!themeSwitch) return;
+    
+    // Load saved theme preference
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-bs-theme', savedTheme);
+    themeSwitch.checked = savedTheme === 'dark';
+    
+    // Handle theme switch
+    themeSwitch.addEventListener('change', (e) => {
+      const theme = e.target.checked ? 'dark' : 'light';
+      document.body.setAttribute('data-bs-theme', theme);
+      localStorage.setItem('theme', theme);
+    });
+  }
+})();

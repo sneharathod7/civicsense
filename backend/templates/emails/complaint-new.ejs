@@ -1,0 +1,26 @@
+<% include('layout', { subject }) %>
+
+<h2>New Complaint Reported</h2>
+<p>Hello Admin,</p>
+<p>A new complaint has been submitted to the system with the following details:</p>
+
+<div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4CAF50; margin: 15px 0;">
+  <h3 style="margin-top: 0; color: #333;"><%= data.complaint.issueType %></h3>
+  <p><strong>Ticket ID:</strong> <%= data.complaint.ticketId %></p>
+  <p><strong>Status:</strong> <span style="text-transform: capitalize;"><%= data.complaint.status %></span></p>
+  <p><strong>Location:</strong> <%= data.complaint.address %></p>
+  <p><strong>Description:</strong></p>
+  <p><%= data.complaint.description %></p>
+  
+  <% if (data.complaint.images && data.complaint.images.length > 0) { %>
+    <p><strong>Attached Images:</strong> <%= data.complaint.images.length %></p>
+  <% } %>
+  
+  <p><strong>Reported On:</strong> <%= new Date(data.complaint.createdAt).toLocaleString() %></p>
+</div>
+
+<p>Please log in to the admin dashboard to review and take appropriate action on this complaint.</p>
+
+<a href="<%= appUrl %>/admin/complaints/<%= data.complaint._id %>" class="button" style="color: white;">View Complaint</a>
+
+<p>Best regards,<br><%= appName %> Team</p>
