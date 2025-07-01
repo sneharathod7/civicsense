@@ -41,14 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
         states.sort((a, b) => a.name.localeCompare(b.name));
         states.forEach(st => {
           const opt = document.createElement('option');
-          opt.value = st.iso2;
+          opt.value = st.name;  // Store state name instead of ISO code
+          opt.dataset.iso2 = st.iso2;  // Keep ISO code in dataset for API calls
           opt.textContent = st.name;
           stateSelect.appendChild(opt);
         });
 
         stateSelect.addEventListener('change', () => {
           citySelect.innerHTML = '<option selected disabled>Select City</option>';
-          const stateCode = stateSelect.value;
+          const selectedOption = stateSelect.options[stateSelect.selectedIndex];
+          const stateCode = selectedOption.dataset.iso2;
           if (!stateCode) return;
           fetch(`https://api.countrystatecity.in/v1/countries/IN/states/${stateCode}/cities`, {
             headers: { 'X-CSCAPI-KEY': CSC_API_KEY }
@@ -59,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
               cities.sort((a, b) => a.name.localeCompare(b.name));
               cities.forEach(c => {
                 const opt = document.createElement('option');
+                opt.value = c.name;  // Store city name
                 opt.textContent = c.name;
                 citySelect.appendChild(opt);
               });

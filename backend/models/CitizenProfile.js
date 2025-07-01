@@ -36,20 +36,26 @@ const citizenProfileSchema = new mongoose.Schema({
     trim: true,
     default: null
   },
-  state: {
+  address: {
     type: String,
     trim: true,
     default: null
   },
-  district: {
+  state: {
     type: String,
     trim: true,
-    default: null
+    required: [true, 'State is required']
   },
   city: {
     type: String,
     trim: true,
-    default: null
+    required: [true, 'City is required']
+  },
+  pinCode: {
+    type: String,
+    trim: true,
+    required: [true, 'PIN code is required'],
+    match: [/^\d{6}$/, 'Please enter a valid 6-digit PIN code']
   },
   religion: {
     type: String,

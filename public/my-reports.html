@@ -197,27 +197,53 @@
             </label>
           </div>
           <div class="dropdown">
-            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" 
-                    type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-link p-0 text-dark dropdown-toggle d-flex align-items-center gap-2" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false">
               <div class="avatar-circle">
-                <img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar">
+                <img id="userAvatar" src="/images/default-avatar.png" alt="User Avatar">
               </div>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
               <li class="px-3 py-2 border-bottom">
-                <div class="fw-semibold" id="ddUserName">Username</div>
-                <small class="text-muted" id="ddUserEmail">user@email.com</small>
+                <div class="fw-semibold" id="ddUserName">Loading...</div>
+                <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
               </li>
-              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
-              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
-              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
-              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
-              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
-              <li><hr class="dropdown-divider m-1"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/profile.html">
+                  <i class="fas fa-user"></i> Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/my-reports.html">
+                  <i class="fas fa-list"></i> My Reports
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/achievements.html">
+                  <i class="fas fa-trophy"></i> Achievements
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/rewards.html">
+                  <i class="fas fa-gift"></i> Rewards
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/settings.html">
+                  <i class="fas fa-cog"></i> Settings
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
               <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
-              <li><hr class="dropdown-divider m-1"></li>
-              <li><a class="dropdown-item text-danger logout-link" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="logoutBtn">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+              </li>
             </ul>
           </div>
         </div>

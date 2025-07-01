@@ -9,7 +9,10 @@ const {
   deleteUser,
   getMe,
   updateDetails,
-  updatePassword
+  updatePassword,
+  updateEmail,
+  updatePhone,
+  uploadPhoto
 } = require('../controllers/userController');
 
 // Public routes (no authentication required)
@@ -22,6 +25,9 @@ router.use(protect);
 router.get('/me', getMe);
 router.put('/updatedetails', updateDetails);
 router.put('/updatepassword', updatePassword);
+router.put('/updateemail', updateEmail);
+router.put('/updatephone', updatePhone);
+router.put('/photo', uploadPhoto);
 
 // Admin-only routes
 router.use(authorize('admin'));

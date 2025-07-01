@@ -190,33 +190,59 @@
             </span>
           </button>
           <div class="form-check form-switch my-0">
-            <input class="form-check-input" type="checkbox" id="themeSwitch" aria-label="Toggle dark mode">
+            <input class="form-check-input" type="checkbox" id="themeSwitch">
             <label class="form-check-label" for="themeSwitch">
               <i class="fas fa-moon"></i>
             </label>
           </div>
           <div class="dropdown">
-            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" 
-                    type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-link p-0 text-dark dropdown-toggle d-flex align-items-center gap-2" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false">
               <div class="avatar-circle">
-                <img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar">
+                <img id="userAvatar" src="/images/default-avatar.png" alt="User Avatar">
               </div>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown" style="min-width: 240px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
               <li class="px-3 py-2 border-bottom">
-                <div class="fw-semibold" id="ddUserName">Username</div>
-                <small class="text-muted" id="ddUserEmail">user@email.com</small>
+                <div class="fw-semibold" id="ddUserName">Loading...</div>
+                <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
               </li>
-              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
-              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
-              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
-              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
-              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
-              <li><hr class="dropdown-divider m-1"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/profile.html">
+                  <i class="fas fa-user"></i> Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/my-reports.html">
+                  <i class="fas fa-list"></i> My Reports
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/achievements.html">
+                  <i class="fas fa-trophy"></i> Achievements
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/rewards.html">
+                  <i class="fas fa-gift"></i> Rewards
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="/settings.html">
+                  <i class="fas fa-cog"></i> Settings
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
               <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
-              <li><hr class="dropdown-divider m-1"></li>
-              <li><a class="dropdown-item text-danger logout-link" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="logoutBtn">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -402,71 +428,53 @@
     </div>
   </footer>
 
-  <!-- JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Auth Script -->
   <script src="/js/auth.js"></script>
+  <!-- Dashboard Script -->
   <script src="/js/citizen-dashboard.js"></script>
   <script>
-    // Theme Toggle
     document.addEventListener('DOMContentLoaded', function() {
+      // Theme Toggle
       const themeSwitch = document.getElementById('themeSwitch');
       const currentTheme = localStorage.getItem('theme') || 'light';
       
       // Apply saved theme
-      // Initialize dropdown explicitly (Safari fix)
-      const ddToggler = document.getElementById('userDropdown');
-      if (ddToggler) {
-        new bootstrap.Dropdown(ddToggler);
-      }
-
-      // nav highlight
-      if (currentPage === 'citizen-dashboard.html') {
-        document.documentElement.setAttribute('data-bs-theme', 'dark');
-        if (themeSwitch) themeSwitch.checked = true;
+      document.documentElement.setAttribute('data-bs-theme', currentTheme);
+      if (themeSwitch) {
+        themeSwitch.checked = currentTheme === 'dark';
+        updateThemeIcon(themeSwitch.checked);
       }
 
       // Toggle theme and icon
       if (themeSwitch) {
         themeSwitch.addEventListener('change', function() {
-          if (this.checked) {
-            // dark mode on
-            document.documentElement.setAttribute('data-bs-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            document.querySelector('#themeSwitch + label i').classList.remove('fa-moon');
-            document.querySelector('#themeSwitch + label i').classList.add('fa-sun');
-          } else {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
-            localStorage.setItem('theme', 'light');
-            document.querySelector('#themeSwitch + label i').classList.remove('fa-sun');
-            document.querySelector('#themeSwitch + label i').classList.add('fa-moon');
-          }
+          document.documentElement.setAttribute('data-bs-theme', this.checked ? 'dark' : 'light');
+          localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+          updateThemeIcon(this.checked);
         });
+      }
+
+      function updateThemeIcon(isDark) {
+        const icon = document.querySelector('#themeSwitch + label i');
+        if (isDark) {
+          icon.classList.remove('fa-moon');
+          icon.classList.add('fa-sun');
+        } else {
+          icon.classList.remove('fa-sun');
+          icon.classList.add('fa-moon');
+        }
       }
 
       // Set active nav link
       const currentPage = window.location.pathname.split('/').pop() || 'citizen-dashboard.html';
       document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
+        if (link.getAttribute('href') === `/${currentPage}`) {
           link.classList.add('active');
-        } else {
-          link.classList.remove('active');
         }
       });
-
-      // Logout functionality
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          // Add your logout logic here
-          window.location.href = '/landing.html';
-        });
-      }
     });
   </script>
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Dashboard Script -->
-  <script src="/js/citizen-dashboard.js"></script>
 </body>
 </html>
