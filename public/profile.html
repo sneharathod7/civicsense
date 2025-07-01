@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Profile - CivicSense+</title>
+  <title>User Profile - CivicSense+</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/profile.css" />
@@ -112,10 +112,11 @@
         <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
           <div class="profile-avatar-container me-md-4 mb-3 mb-md-0">
             <img src="/img/avatar-placeholder.png" alt="Profile Photo" class="profile-avatar rounded-circle" id="profileAvatar">
-            <div class="avatar-upload-btn" id="avatarUploadBtn">
+            <label for="avatarInput" class="avatar-upload-btn" id="avatarUploadBtn">
               <i class="fas fa-camera"></i>
-              <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-            </div>
+              <span class="ms-2">Change Photo</span>
+            </label>
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
           </div>
           <div class="flex-grow-1">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start mb-2">
@@ -154,6 +155,7 @@
             <h5 class="mb-0"><i class="fas fa-address-card me-2"></i>Contact Information</h5>
           </div>
           <div class="card-body">
+            <!-- Email -->
             <div class="mb-3">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <div>
@@ -167,9 +169,10 @@
                   Change
                 </button>
               </div>
-              <div class="ms-4 ps-3 text-muted" id="userEmail">john.doe@example.com</div>
+              <div class="ms-4 ps-3 text-muted" id="userEmail"></div>
             </div>
 
+            <!-- Phone -->
             <div class="mb-3">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <div>
@@ -183,53 +186,71 @@
                   Change
                 </button>
               </div>
-              <div class="ms-4 ps-3 text-muted" id="userPhone">+91 98765 43210</div>
+              <div class="ms-4 ps-3 text-muted" id="userPhone"></div>
             </div>
 
+            <!-- Address -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                  <span>Address</span>
+                </div>
+              </div>
+              <div class="ms-4 ps-3">
+                <input type="text" class="form-control" id="address" disabled>
+              </div>
+            </div>
 
-          </div>
-        </div>
+            <!-- City -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-city me-2 text-primary"></i>
+                  <span>City</span>
+                </div>
+              </div>
+              <div class="ms-4 ps-3">
+                <input type="text" class="form-control" id="city" disabled>
+              </div>
+            </div>
 
-        <!-- Personal Information -->
-        <div class="card mb-4 shadow-sm">
-          <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small mb-1">First Name</label>
-                <input type="text" class="form-control" id="firstName" value="John" disabled>
+            <!-- State -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-map me-2 text-primary"></i>
+                  <span>State</span>
+                </div>
               </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small mb-1">Last Name</label>
-                <input type="text" class="form-control" id="lastName" value="Doe" disabled>
+              <div class="ms-4 ps-3">
+                <input type="text" class="form-control" id="state" disabled>
               </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small mb-1">Date of Birth</label>
-                <input type="date" class="form-control" id="dateOfBirth" value="1985-06-15" disabled>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small mb-1">Gender</label>
-                <select class="form-select" id="gender" disabled>
-                  <option value="male" selected>Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
-                </select>
-              </div>
-              <div class="col-12 mb-3">
-                <label class="form-label text-muted small mb-1">Address</label>
-                <input type="text" class="form-control" id="address" value="123 Main Street, Connaught Place" disabled>
-              </div>
-              <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small mb-1">City</label>
-                <input type="text" class="form-control" id="city" value="New Delhi" disabled>
-              </div>
+            </div>
 
-              <div class="col-md-4 mb-0">
-                <label class="form-label text-muted small mb-1">State</label>
-                <input type="text" class="form-control" id="state" value="Delhi" disabled>
+            <!-- PIN Code -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-map-pin me-2 text-primary"></i>
+                  <span>PIN Code</span>
+                </div>
+              </div>
+              <div class="ms-4 ps-3">
+                <input type="text" class="form-control" id="pinCode" disabled pattern="[0-9]{6}" maxlength="6">
+              </div>
+            </div>
+
+            <!-- Password Change Button -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <i class="fas fa-lock me-2 text-primary"></i>
+                  <span>Password</span>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                  Change Password
+                </button>
               </div>
             </div>
           </div>
@@ -239,7 +260,7 @@
       <!-- Right Column -->
       <div class="col-lg-4">
         <!-- Civic Stats -->
-        <div class="card mb-4 shadow-sm">
+        <div class="card mb-2 shadow-sm">
           <div class="card-header bg-light">
             <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Civic Stats</h5>
           </div>
@@ -368,32 +389,18 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="changeEmailModalLabel">Change Email Address</h5>
+          <h5 class="modal-title" id="changeEmailModalLabel">Change Email</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="changeEmailForm">
-            <div class="mb-3">
-              <label for="currentEmail" class="form-label">Current Email</label>
-              <input type="email" class="form-control" id="currentEmail" value="john.doe@example.com" disabled>
-            </div>
-            <div class="mb-3">
-              <label for="newEmail" class="form-label">New Email Address</label>
-              <input type="email" class="form-control" id="newEmail" required>
-            </div>
-            <div class="mb-3">
-              <label for="confirmEmail" class="form-label">Confirm New Email</label>
-              <input type="email" class="form-control" id="confirmEmail" required>
-            </div>
-            <div class="mb-3">
-              <label for="currentPasswordEmail" class="form-label">Current Password</label>
-              <input type="password" class="form-control" id="currentPasswordEmail" required>
-            </div>
-          </form>
+          <div class="mb-3">
+            <label for="newEmail" class="form-label">New Email Address</label>
+            <input type="email" class="form-control" id="newEmail" required>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" form="changeEmailForm" class="btn btn-primary">Update Email</button>
+          <button type="button" class="btn btn-primary" id="changeEmailBtn">Update Email</button>
         </div>
       </div>
     </div>
@@ -408,28 +415,14 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="changePhoneForm">
-            <div class="mb-3">
-              <label for="currentPhone" class="form-label">Current Phone</label>
-              <input type="tel" class="form-control" id="currentPhone" value="+91 98765 43210" disabled>
-            </div>
-            <div class="mb-3">
-              <label for="newPhone" class="form-label">New Phone Number</label>
-              <input type="tel" class="form-control" id="newPhone" required>
-            </div>
-            <div class="mb-3">
-              <label for="verificationCode" class="form-label">Verification Code</label>
-              <div class="input-group">
-                <input type="text" class="form-control" id="verificationCode" placeholder="Enter code" required>
-                <button class="btn btn-outline-secondary" type="button" id="sendVerificationCode">Send Code</button>
-              </div>
-              <small class="text-muted">We'll send a verification code to your new number</small>
-            </div>
-          </form>
+          <div class="mb-3">
+            <label for="newPhone" class="form-label">New Phone Number</label>
+            <input type="tel" class="form-control" id="newPhone" required>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" form="changePhoneForm" class="btn btn-primary">Update Phone</button>
+          <button type="button" class="btn btn-primary" id="changePhoneBtn">Update Phone</button>
         </div>
       </div>
     </div>
@@ -444,25 +437,22 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="changePasswordForm">
-            <div class="mb-3">
-              <label for="currentPassword" class="form-label">Current Password</label>
-              <input type="password" class="form-control" id="currentPassword" required>
-            </div>
-            <div class="mb-3">
-              <label for="newPassword" class="form-label">New Password</label>
-              <input type="password" class="form-control" id="newPassword" required>
-              <div class="form-text">Must be at least 8 characters long and contain a number</div>
-            </div>
-            <div class="mb-3">
-              <label for="confirmPassword" class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control" id="confirmPassword" required>
-            </div>
-          </form>
+          <div class="mb-3">
+            <label for="currentPassword" class="form-label">Current Password</label>
+            <input type="password" class="form-control" id="currentPassword" required>
+          </div>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="newPassword" required minlength="6">
+          </div>
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" form="changePasswordForm" class="btn btn-primary">Update Password</button>
+          <button type="button" class="btn btn-primary" id="changePasswordBtn">Update Password</button>
         </div>
       </div>
     </div>

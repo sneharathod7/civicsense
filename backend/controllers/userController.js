@@ -2,9 +2,12 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
+const CitizenProfile = require('../models/CitizenProfile');
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Get all users
 // @route   GET /api/v1/users
@@ -84,7 +87,7 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
     );
     
     if (fs.existsSync(filePath)) {
-      await fs.unlink(filePath);
+      await fs.promises.unlink(filePath);
     }
   }
 
@@ -100,14 +103,31 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/users/me
 // @access  Private
 exports.getMe = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate({
-    path: 'profile',
-    select: 'firstName lastName mobile address'
-  });
+  const user = await User.findById(req.user.id)
+    .populate({
+      path: 'profile',
+      select: 'dateOfBirth gender state district city profileImage points rank'
+    });
+
+  if (!user) {
+    return next(new ErrorResponse('User not found', 404));
+  }
+
+  // Combine user and profile data
+  const userData = {
+    ...user.toObject(),
+    dateOfBirth: user.profile?.dateOfBirth,
+    gender: user.profile?.gender,
+    state: user.profile?.state,
+    city: user.profile?.city,
+    points: user.profile?.points,
+    rank: user.profile?.rank,
+    photo: user.profile?.profileImage
+  };
 
   res.status(200).json({
     success: true,
-    data: user
+    data: userData
   });
 });
 
@@ -115,17 +135,120 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/users/updatedetails
 // @access  Private
 exports.updateDetails = asyncHandler(async (req, res, next) => {
-  const fieldsToUpdate = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    mobile: req.body.mobile
-  };
+  const { address, city, state, pinCode } = req.body;
 
-  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
-    new: true,
-    runValidators: true
+  // Validate PIN code if provided
+  if (pinCode && !/^\d{6}$/.test(pinCode)) {
+    return next(new ErrorResponse('Please enter a valid 6-digit PIN code', 400));
+  }
+
+  // Update user
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { address, city, state, pinCode },
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+
+  // Update citizen profile if exists
+  if (user.profile) {
+    await CitizenProfile.findByIdAndUpdate(
+      user.profile,
+      { address, city, state, pinCode },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    data: user
   });
+});
+
+// @desc    Update user email
+// @route   PUT /api/v1/users/updateemail
+// @access  Private
+exports.updateEmail = asyncHandler(async (req, res, next) => {
+  // Check if email exists
+  const emailExists = await User.findOne({ email: req.body.email });
+  if (emailExists) {
+    return next(new ErrorResponse('Email already exists', 400));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      email: req.body.email,
+      verified: process.env.NODE_ENV === 'development', // Auto-verify in development
+      ...(process.env.NODE_ENV !== 'development' && {
+        emailVerificationToken: crypto.randomBytes(20).toString('hex'),
+        emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+      })
+    },
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+
+  // Send verification email in production
+  if (process.env.NODE_ENV !== 'development') {
+    const verificationUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/verifyemail/${user.emailVerificationToken}`;
+    const message = `Please click on the link to verify your email: \n\n ${verificationUrl}`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Email Verification',
+        message
+      });
+
+      res.status(200).json({
+        success: true,
+        data: user,
+        message: 'Verification email sent'
+      });
+    } catch (err) {
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpire = undefined;
+      await user.save();
+
+      return next(new ErrorResponse('Email could not be sent', 500));
+    }
+  } else {
+    // In development, just return success
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  }
+});
+
+// @desc    Update user phone
+// @route   PUT /api/v1/users/updatephone
+// @access  Private
+exports.updatePhone = asyncHandler(async (req, res, next) => {
+  // Check if phone exists
+  const phoneExists = await User.findOne({ mobile: req.body.mobile });
+  if (phoneExists) {
+    return next(new ErrorResponse('Phone number already exists', 400));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      mobile: req.body.mobile
+    },
+    {
+      new: true,
+      runValidators: true
+    }
+  );
 
   res.status(200).json({
     success: true,
@@ -137,81 +260,110 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/users/updatepassword
 // @access  Private
 exports.updatePassword = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select('+password');
-
-  // Check current password
-  if (!(await user.matchPassword(req.body.currentPassword))) {
-    return next(new ErrorResponse('Password is incorrect', 401));
-  }
-
-  user.password = req.body.newPassword;
-  await user.save();
-
-  // Send token response
-  sendTokenResponse(user, 200, res);
-});
-
-// @desc    Upload photo for user
-// @route   PUT /api/v1/users/photo
-// @access  Private
-exports.uploadUserPhoto = asyncHandler(async (req, res, next) => {
-  if (!req.files) {
-    return next(new ErrorResponse(`Please upload a file`, 400));
-  }
-
-  const file = req.files.file;
-
-  // Make sure the image is a photo
-  if (!file.mimetype.startsWith('image')) {
-    return next(new ErrorResponse(`Please upload an image file`, 400));
-  }
-
-  // Check filesize
-  const maxSize = process.env.MAX_FILE_UPLOAD || 1000000;
-  if (file.size > maxSize) {
-    return next(
-      new ErrorResponse(
-        `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
-        400
-      )
-    );
-  }
-
-  // Create custom filename
-  const ext = path.parse(file.name).ext;
-  file.name = `photo_${req.user.id}${ext}`;
-
-  // Create uploads directory if it doesn't exist
-  const uploadPath = path.join(__dirname, '../public/uploads/users');
-  
   try {
-    await fs.access(uploadPath);
-  } catch (error) {
-    await fs.mkdir(uploadPath, { recursive: true });
-  }
+    const { currentPassword, newPassword } = req.body;
 
-  // Move file to uploads directory
-  file.mv(`${uploadPath}/${file.name}`, async (err) => {
-    if (err) {
-      console.error(err);
-      return next(new ErrorResponse(`Problem with file upload`, 500));
+    // Get user with password
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
     }
 
-    // Update user with new photo
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { photo: file.name },
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    // Check current password
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Wrong password'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    // Generate new token
+    const token = user.getSignedJwtToken();
 
     res.status(200).json({
       success: true,
-      data: file.name
+      token,
+      message: 'Password updated successfully'
     });
-  });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @desc    Upload user photo
+// @route   PUT /api/v1/users/photo
+// @access  Private
+exports.uploadPhoto = asyncHandler(async (req, res, next) => {
+  if (!req.files || !req.files.photo) {
+    return next(new ErrorResponse('Please upload a file', 400));
+  }
+
+  const file = req.files.photo;
+
+  // Validate file type
+  if (!file.mimetype.startsWith('image')) {
+    return next(new ErrorResponse('Please upload an image file', 400));
+  }
+
+  // Check file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    return next(new ErrorResponse('Image must be less than 2MB', 400));
+  }
+
+  // Create custom filename with original extension
+  const ext = path.extname(file.name);
+  const fileName = `user-${req.user.id}-${Date.now()}${ext}`;
+
+  // Create uploads directory if it doesn't exist
+  const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  // Move file to upload directory
+  const filePath = path.join(uploadsDir, fileName);
+  
+  try {
+    await file.mv(filePath);
+
+    // Delete old photo if exists
+    if (req.user.photo) {
+      const oldPhotoPath = path.join(uploadsDir, req.user.photo);
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.unlinkSync(oldPhotoPath);
+      }
+    }
+
+    // Update user and citizen profile
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { photo: fileName },
+      { new: true }
+    );
+
+    if (user.profile) {
+      await CitizenProfile.findByIdAndUpdate(
+        user.profile,
+        { profileImage: fileName }
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { photo: fileName }
+    });
+  } catch (err) {
+    console.error('File upload error:', err);
+    return next(new ErrorResponse('Error uploading file', 500));
+  }
 });
 
 // @desc    Resize user photo
@@ -251,6 +403,80 @@ exports.resizeUserPhoto = asyncHandler(async (req, res, next) => {
     next();
   });
 });
+
+// @desc    Update user profile
+// @route   PUT /api/v1/users/updateprofile
+// @access  Private
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { email, mobile, address, city, state, pinCode, currentPassword } = req.body;
+    const userId = req.user.id;
+
+    // Get user with password
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // If email or mobile is being updated, verify current password
+    if (email !== user.email || mobile !== user.mobile) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide current password to update email or mobile number'
+        });
+      }
+
+      // Check if password matches
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: 'Wrong password'
+        });
+      }
+    }
+
+    // Update user fields
+    const updateFields = {};
+    if (email) updateFields.email = email;
+    if (mobile) updateFields.mobile = mobile;
+    if (address) updateFields.address = address;
+    if (city) updateFields.city = city;
+    if (state) updateFields.state = state;
+    if (pinCode) updateFields.pinCode = pinCode;
+    updateFields.updatedAt = Date.now();
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateFields,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: updatedUser,
+      message: 'Profile updated successfully'
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `This ${field} is already registered`
+      });
+    }
+    next(error);
+  }
+};
 
 // Helper function to get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {

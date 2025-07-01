@@ -153,24 +153,116 @@ let itemsPerPage = 10;
 let filteredReports = [];
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', () => {
-  loadReports();
+document.addEventListener('DOMContentLoaded', async () => {
+  // Check authentication
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/citizen-login.html';
+    return;
+  }
+
+  // Initialize user data and avatar
+  await initializeUserData();
+  
+  // Setup event listeners
   setupEventListeners();
-  updateStatsCards();
-  updatePerformanceMetrics();
-  renderReports();
-  updatePagination();
+  
+  // Load reports
+  await loadReports();
 });
 
-// Load reports (in a real app, this would be an API call)
-function loadReports() {
-  // For now, just use the sample data
-  filteredReports = [...sampleReports];
-  totalItems.textContent = filteredReports.length;
+async function initializeUserData() {
+  try {
+    const response = await fetch('/api/v1/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+
+    const { data } = await response.json();
+    
+    // Update user info in header
+    document.getElementById('ddUserName').textContent = `${data.firstName} ${data.lastName}`;
+    document.getElementById('ddUserEmail').textContent = data.email;
+
+    // Update avatar
+    updateAvatarDisplay(data.photo, data.firstName, data.lastName);
+
+    // Store user data in localStorage
+    localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('userId', data._id);
+
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    showMessage('Failed to load user data', true);
+  }
 }
 
-// Set up event listeners
+function updateAvatarDisplay(photoUrl, firstName, lastName) {
+  const userAvatar = document.getElementById('userAvatar');
+  
+  if (photoUrl) {
+    // If there's a photo URL, use it
+    userAvatar.src = `/uploads/${photoUrl}`;
+  } else if (firstName && lastName) {
+    // If no photo but we have a name, use initials
+    const initialsUrl = generateInitialsAvatar(firstName, lastName);
+    userAvatar.src = initialsUrl;
+  }
+}
+
+function generateInitialsAvatar(firstName, lastName) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  canvas.width = 200;
+  canvas.height = 200;
+
+  // Draw background
+  context.fillStyle = '#0d6efd';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw text
+  context.font = 'bold 80px Arial';
+  context.fillStyle = 'white';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+  context.fillText(initials, canvas.width/2, canvas.height/2);
+
+  return canvas.toDataURL('image/png');
+}
+
 function setupEventListeners() {
+  // Logout handler
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = '/citizen-login.html';
+    });
+  }
+
+  // Theme switch handler
+  const themeSwitch = document.getElementById('themeSwitch');
+  if (themeSwitch) {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', currentTheme);
+    themeSwitch.checked = currentTheme === 'dark';
+    updateThemeIcon(themeSwitch.checked);
+
+    themeSwitch.addEventListener('change', () => {
+      const isDark = themeSwitch.checked;
+      document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateThemeIcon(isDark);
+    });
+  }
+
   // Search input
   searchInput.addEventListener('input', () => {
     currentPage = 1;
@@ -201,6 +293,42 @@ function setupEventListeners() {
     updatePagination();
     renderReports();
   });
+}
+
+function updateThemeIcon(isDark) {
+  const icon = document.querySelector('#themeSwitch + label i');
+  if (isDark) {
+    icon.classList.remove('fa-moon');
+    icon.classList.add('fa-sun');
+  } else {
+    icon.classList.remove('fa-sun');
+    icon.classList.add('fa-moon');
+  }
+}
+
+function showMessage(message, isError = false) {
+  // You can implement this based on your UI needs
+  console.log(isError ? 'Error: ' : 'Message: ', message);
+}
+
+async function loadReports() {
+  try {
+    const response = await fetch('/api/v1/reports/my-reports', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch reports');
+    }
+
+    const data = await response.json();
+    displayReports(data.data);
+  } catch (error) {
+    console.error('Error loading reports:', error);
+    showMessage('Failed to load reports', true);
+  }
 }
 
 // Filter reports based on search and filters

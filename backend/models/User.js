@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -31,6 +32,26 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Address is required'],
     trim: true
+  },
+  city: {
+    type: String,
+    required: [true, 'City is required'],
+    trim: true
+  },
+  state: {
+    type: String,
+    required: [true, 'State is required'],
+    trim: true
+  },
+  pinCode: {
+    type: String,
+    required: [true, 'PIN code is required'],
+    trim: true,
+    match: [/^\d{6}$/, 'Please enter a valid 6-digit PIN code']
+  },
+  photo: {
+    type: String,
+    default: null
   },
   password: {
     type: String,
@@ -111,6 +132,13 @@ userSchema.methods.getEmailVerificationToken = function() {
   this.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
 
   return verificationToken;
+};
+
+// Sign JWT and return
+userSchema.methods.getSignedJwtToken = function() {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '30d'
+  });
 };
 
 // Hash password before saving

@@ -1251,3 +1251,33 @@ Error: listen EADDRINUSE: address already in use :::5000
 [2025-06-30T16:09:15.217Z] Server started on port 5000
 [2025-06-30T16:11:36.637Z] Server started on port 5000
 [2025-06-30T16:14:22.846Z] Server started on port 5000
+[2025-06-30T18:07:41.806Z] Server started on port 5000
+[2025-06-30T18:27:48.743Z] Server started on port 5000
+[2025-07-01T03:18:55.702Z] Server started on port 5000
+[2025-07-01T03:35:07.806Z] Server started on port 5000
+[2025-07-01T03:44:14.362Z] Server started on port 5000
+[2025-07-01T03:44:27.742Z] Server started on port 5000
+[2025-07-01T03:44:42.926Z] Server started on port 5000
+[2025-07-01T04:00:52.328Z] Server started on port 5000
+[2025-07-01T05:08:58.362Z] Server started on port 5000
+[2025-07-01T05:16:41.169Z] Server started on port 5000
+[2025-07-01T05:24:44.971Z] Server started on port 5000
+[2025-07-01T05:26:11.053Z] Server started on port 5000
+[2025-07-01T05:26:11.061Z] Uncaught Exception: listen EADDRINUSE: address already in use :::5000
+Error: listen EADDRINUSE: address already in use :::5000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (D:\civicsense\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (D:\civicsense\backend\server.js:316:20)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-07-01T05:32:50.255Z] Server started on port 5000
+[2025-07-01T05:37:44.985Z] Server started on port 5000
+[2025-07-01T06:33:04.569Z] Server started on port 5000
+[2025-07-01T06:55:48.296Z] Server started on port 5000
+[2025-07-01T06:59:56.232Z] Server started on port 5000
+[2025-07-01T07:25:00.040Z] Server started on port 5000

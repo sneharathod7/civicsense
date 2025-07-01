@@ -1,25 +1,104 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // Debug: Show user info from localStorage
-  console.log('User in localStorage:', localStorage.getItem('user'));
-
-  const userId = localStorage.getItem('userId');
-  if (!userId) {
-    // Not logged in – redirect to login
+  // Check authentication
+  const token = localStorage.getItem('token');
+  if (!token) {
     window.location.href = '/citizen-login.html';
     return;
   }
 
-  const firstName = localStorage.getItem('firstName') || 'Citizen';
-  document.getElementById('greeting').innerText = `🎉 Welcome back, ${firstName}! 👋`;
+  // Initialize user data and avatar
+  await initializeUserData();
+  
+  // Fetch and display complaints
+  await fetchComplaints();
 
-  // Fetch complaints for this user
+  // Setup event listeners
+  setupEventListeners();
+});
+
+async function initializeUserData() {
   try {
-    const res = await fetch(`/api/reports?userId=${userId}`);
+    const response = await fetch('/api/v1/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+
+    const { data } = await response.json();
+    
+    // Update user info in header
+    document.getElementById('ddUserName').textContent = `${data.firstName} ${data.lastName}`;
+    document.getElementById('ddUserEmail').textContent = data.email;
+    
+    // Update greeting
+    document.getElementById('greeting').innerText = `🎉 Welcome back, ${data.firstName}! 👋`;
+
+    // Update avatar
+    updateAvatarDisplay(data.photo, data.firstName, data.lastName);
+
+    // Store user data in localStorage
+    localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('userId', data._id);
+
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    showMessage('Failed to load user data', true);
+  }
+}
+
+function updateAvatarDisplay(photoUrl, firstName, lastName) {
+  const userAvatar = document.getElementById('userAvatar');
+  
+  if (photoUrl) {
+    // If there's a photo URL, use it
+    userAvatar.src = `/uploads/${photoUrl}`;
+  } else if (firstName && lastName) {
+    // If no photo but we have a name, use initials
+    const initialsUrl = generateInitialsAvatar(firstName, lastName);
+    userAvatar.src = initialsUrl;
+  }
+}
+
+function generateInitialsAvatar(firstName, lastName) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  canvas.width = 200;
+  canvas.height = 200;
+
+  // Draw background
+  context.fillStyle = '#0d6efd';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw text
+  context.font = 'bold 80px Arial';
+  context.fillStyle = 'white';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+  context.fillText(initials, canvas.width/2, canvas.height/2);
+
+  return canvas.toDataURL('image/png');
+}
+
+async function fetchComplaints() {
+  try {
+    const userId = localStorage.getItem('userId');
+    const res = await fetch(`/api/reports?userId=${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    
     const data = await res.json();
     if (!data.success) {
-      alert('Failed to load complaints.');
+      showMessage('Failed to load complaints.', true);
       return;
     }
+    
     const complaints = data.data;
     populateStats(complaints);
     populateRecent(complaints);
@@ -32,12 +111,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('impactSummary').innerText =
       `📊 Your impact: ${resolved} issues resolved, helping ${resolved * 10}+ citizens`;
   } catch (err) {
-    console.error(err);
-    alert('Server error fetching complaints.');
+    console.error('Error fetching complaints:', err);
+    showMessage('Server error fetching complaints.', true);
+  }
+}
+
+function setupEventListeners() {
+  // Logout handler
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = '/citizen-login.html';
+    });
   }
 
+  // Theme switch handler
+  const themeSwitch = document.getElementById('themeSwitch');
+  if (themeSwitch) {
+    themeSwitch.addEventListener('change', () => {
+      document.documentElement.setAttribute('data-bs-theme', 
+        themeSwitch.checked ? 'dark' : 'light'
+      );
+    });
+  }
+}
 
-});
+function showMessage(message, isError = false) {
+  // You can implement this based on your UI needs
+  console.log(isError ? 'Error: ' : 'Message: ', message);
+}
 
 function populateStats(complaints) {
   const total = complaints.length;

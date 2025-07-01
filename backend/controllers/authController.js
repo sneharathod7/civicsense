@@ -24,7 +24,7 @@ const generateToken = (id) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, mobile, address, password, role = 'Citizen' } = req.body;
+    const { firstName, lastName, email, mobile, address, city, state, pinCode, password, role = 'Citizen' } = req.body;
 
     // Basic validation
     if (!email || !password) {
@@ -58,6 +58,9 @@ exports.register = async (req, res, next) => {
       email: email.toLowerCase(),
       mobile,
       address,
+      city,
+      state,
+      pinCode,
       password,
       role
     });
@@ -72,7 +75,10 @@ exports.register = async (req, res, next) => {
         firstName,
         lastName,
         mobile,
-        address
+        address,
+        city,
+        state,
+        pinCode
       });
 
       // Update user with profile reference
@@ -103,7 +109,7 @@ exports.register = async (req, res, next) => {
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
-    const { email, emailOrMobile, mobile, password } = req.body;
+    const { email, emailOrMobile, mobile, password, role } = req.body;
 
     // Determine identifier (email or mobile)
     let identifier = email || emailOrMobile || mobile;
@@ -123,6 +129,11 @@ exports.login = async (req, res, next) => {
       query.email = identifier.toLowerCase();
     } else {
       query.mobile = identifier;
+    }
+
+    // Add role to query if provided
+    if (role) {
+      query.role = role;
     }
 
     // Check for user
@@ -160,7 +171,7 @@ exports.login = async (req, res, next) => {
     res.status(200).json({
       success: true,
       token,
-      user, // keep for frontend convenience
+      user,
       data: user
     });
   } catch (err) {
