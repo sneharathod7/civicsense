@@ -8,6 +8,7 @@ const logger = require('../utils/logger');
 const CitizenProfile = require('../models/CitizenProfile');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const Achievement = require('../models/Achievement');
 
 // @desc    Get all users
 // @route   GET /api/v1/users
@@ -404,79 +405,66 @@ exports.resizeUserPhoto = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Update user profile
-// @route   PUT /api/v1/users/updateprofile
-// @access  Private
-exports.updateProfile = async (req, res, next) => {
-  try {
-    const { email, mobile, address, city, state, pinCode, currentPassword } = req.body;
-    const userId = req.user.id;
-
-    // Get user with password
-    const user = await User.findById(userId).select('+password');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // If email or mobile is being updated, verify current password
-    if (email !== user.email || mobile !== user.mobile) {
-      if (!currentPassword) {
-        return res.status(400).json({
-          success: false,
-          message: 'Please provide current password to update email or mobile number'
-        });
+// Helper function to update achievement points
+async function updateAchievementPoints(userId, points, reason) {
+  let achievement = await Achievement.findOne({ user: userId });
+  
+  if (!achievement) {
+    achievement = await Achievement.create({
+      user: userId,
+      points: 0,
+      stats: {
+        totalReports: 0,
+        resolvedReports: 0,
+        upvotesReceived: 0,
+        commentsPosted: 0
       }
-
-      // Check if password matches
-      const isMatch = await user.matchPassword(currentPassword);
-      if (!isMatch) {
-        return res.status(401).json({
-          success: false,
-          message: 'Wrong password'
-        });
-      }
-    }
-
-    // Update user fields
-    const updateFields = {};
-    if (email) updateFields.email = email;
-    if (mobile) updateFields.mobile = mobile;
-    if (address) updateFields.address = address;
-    if (city) updateFields.city = city;
-    if (state) updateFields.state = state;
-    if (pinCode) updateFields.pinCode = pinCode;
-    updateFields.updatedAt = Date.now();
-
-    // Update user
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      updateFields,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
-
-    res.status(200).json({
-      success: true,
-      data: updatedUser,
-      message: 'Profile updated successfully'
     });
-  } catch (error) {
-    if (error.code === 11000) {
-      // Duplicate key error
-      const field = Object.keys(error.keyPattern)[0];
-      return res.status(400).json({
-        success: false,
-        message: `This ${field} is already registered`
-      });
-    }
-    next(error);
   }
-};
+
+  achievement.points += points;
+  achievement.pointsHistory.push({
+    points,
+    reason,
+    type: 'earned',
+    timestamp: Date.now()
+  });
+
+  await achievement.save();
+  return achievement;
+}
+
+// @desc    Update user profile
+// @route   PUT /api/v1/users/profile
+// @access  Private
+exports.updateProfile = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    mobile: req.body.mobile
+  };
+
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  // Check if this is the first time the profile is being completed
+  if (user && !user.profileCompleted) {
+    // Award points for completing profile
+    await updateAchievementPoints(user.id, 20, 'Profile completed');
+    
+    // Mark profile as completed
+    user.profileCompleted = true;
+    await user.save();
+  }
+
+  res.status(200).json({
+    success: true,
+    data: user
+  });
+});
 
 // Helper function to get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {

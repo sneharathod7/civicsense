@@ -1,0 +1,266 @@
+/* Stats Cards */
+.stats-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.icon-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Badges Container */
+.badges-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 10px;
+}
+
+.badge-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 220px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.badge-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.badge-item.earned {
+    border-left: 4px solid #28a745;
+}
+
+.badge-icon {
+    width: 60px;
+    height: 60px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    color: #6c757d;
+    font-size: 24px;
+}
+
+.badge-item.earned .badge-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.badge-info h5 {
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.badge-info p {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.badge-info small {
+    color: #adb5bd;
+    font-size: 0.8rem;
+    display: block;
+}
+
+/* Roadmap */
+.roadmap-container {
+    padding: 10px;
+}
+
+.roadmap-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+}
+
+.roadmap-item:hover {
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.roadmap-item.earned {
+    background-color: rgba(40, 167, 69, 0.05);
+    border-left: 4px solid #28a745;
+}
+
+.roadmap-item .badge-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    margin-right: 15px;
+    margin-bottom: 0;
+}
+
+.roadmap-item .badge-info {
+    flex: 1;
+}
+
+.roadmap-item .progress {
+    height: 25px;
+    border-radius: 12px;
+    background-color: #e9ecef;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.roadmap-item .progress-bar {
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.5s ease-in-out;
+}
+
+.roadmap-item .badge-percentage {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.roadmap-item.earned .badge-percentage {
+    color: #28a745;
+}
+
+/* Points History Table */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.text-success {
+    color: #28a745 !important;
+    font-weight: bold;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+    font-weight: bold;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Card styling */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card-header {
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+}
+
+.card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .badges-container {
+        justify-content: center;
+    }
+    
+    .badge-item {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .roadmap-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .roadmap-item .badge-icon {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .roadmap-item .badge-percentage {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+        text-align: right;
+        width: 100%;
+    }
+} 

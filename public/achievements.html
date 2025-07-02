@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievements - CivicVerse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/achievements.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --transition: all 0.3s ease;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Header styles */
+        .sticky-top {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            transition: var(--transition);
+        }
+        
+        /* Navigation links */
+        .nav-link {
+            color: #495057;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 1rem;
+            background-color: var(--primary-color);
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: calc(100% - 2rem);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="sticky-top bg-white shadow-sm">
+        <div class="container-fluid">
+            <div class="row align-items-center py-2">
+                <!-- Left Section (25%) -->
+                <div class="col-lg-3 d-flex align-items-center">
+                    <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-landmark fs-3 text-primary me-2"></i>
+                            <div>
+                                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
+                                <div class="small text-muted">Smart Governance</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Center Navigation (50%) -->
+                <div class="col-lg-6">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
+                            <a href="/report.html" class="nav-link">New Report</a>
+                            <a href="/my-reports.html" class="nav-link">My Reports</a>
+                            <a href="/achievements.html" class="nav-link active">Achievements</a>
+                            <a href="/rewards.html" class="nav-link">Rewards</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Section (25%) -->
+                <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
+                    <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
+                        <i class="fas fa-bell fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                        </span>
+                    </button>
+                    <div class="form-check form-switch my-0">
+                        <input class="form-check-input" type="checkbox" id="themeSwitch">
+                        <label class="form-check-label" for="themeSwitch">
+                            <i class="fas fa-moon"></i>
+                        </label>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-link p-0 text-dark dropdown-toggle d-flex align-items-center gap-2" 
+                                type="button" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                            <div class="avatar-circle" id="userAvatar">
+                                <!-- Avatar will be set by auth.js -->
+                            </div>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li class="px-3 py-2 border-bottom">
+                                <div class="fw-semibold" id="ddUserName">Loading...</div>
+                                <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="/profile.html">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="/my-reports.html">
+                                    <i class="fas fa-list"></i> My Reports
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="/achievements.html">
+                                    <i class="fas fa-trophy"></i> Achievements
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="/rewards.html">
+                                    <i class="fas fa-gift"></i> Rewards
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="/settings.html">
+                                    <i class="fas fa-cog"></i> Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
+                            <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Page Title -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold">Your Achievements</h1>
+                <p class="lead text-muted">Track your progress and earn rewards for your civic contributions.</p>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="row mb-5 g-4">
+            <div class="col-md-3">
+                <div class="card stats-card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="icon-circle bg-primary-subtle mb-3 mx-auto">
+                            <i class="fas fa-file-alt fa-2x text-primary"></i>
+                        </div>
+                        <h3 id="totalReports" class="display-5 fw-bold">0</h3>
+                        <p class="text-muted mb-0">Total Reports</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="icon-circle bg-success-subtle mb-3 mx-auto">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <h3 id="resolvedReports" class="display-5 fw-bold">0</h3>
+                        <p class="text-muted mb-0">Reports Resolved</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="icon-circle bg-warning-subtle mb-3 mx-auto">
+                            <i class="fas fa-star fa-2x text-warning"></i>
+                        </div>
+                        <h3 id="totalPoints" class="display-5 fw-bold">0</h3>
+                        <p class="text-muted mb-0">Points Earned</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="icon-circle bg-info-subtle mb-3 mx-auto">
+                            <i class="fas fa-medal fa-2x text-info"></i>
+                        </div>
+                        <h3 id="totalBadges" class="display-5 fw-bold">0</h3>
+                        <p class="text-muted mb-0">Badges Earned</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Badges & Achievements</h5>
+                        <div class="badge bg-light text-primary" id="badgeProgress"></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="badges-container" id="badgesContainer">
+                            <!-- Badges will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badge Roadmap -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Achievement Roadmap</h5>
+                        <div class="badge bg-light text-info" id="nextMilestone"></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="roadmap-container" id="roadmapContainer">
+                            <!-- Roadmap will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Points History -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Points History</h5>
+                        <a href="/rewards.html" class="btn btn-light btn-sm">
+                            <i class="fas fa-gift"></i> Redeem Rewards
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Points</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pointsHistoryTable">
+                                    <!-- Points history will be dynamically added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light border-top mt-5">
+        <div class="container py-3">
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-3">Legal</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
+                        <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
+                        <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
+                        <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center text-muted small mt-2">
+                Last Updated On: 24 June 2025 | v-2.1.5
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/achievements.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme Toggle
+            const themeSwitch = document.getElementById('themeSwitch');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            // Apply saved theme
+            document.documentElement.setAttribute('data-bs-theme', currentTheme);
+            if (themeSwitch) {
+                themeSwitch.checked = currentTheme === 'dark';
+                updateThemeIcon(themeSwitch.checked);
+            }
+
+            // Toggle theme and icon
+            if (themeSwitch) {
+                themeSwitch.addEventListener('change', function() {
+                    document.documentElement.setAttribute('data-bs-theme', this.checked ? 'dark' : 'light');
+                    localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+                    updateThemeIcon(this.checked);
+                });
+            }
+
+            function updateThemeIcon(isDark) {
+                const icon = document.querySelector('#themeSwitch + label i');
+                if (isDark) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

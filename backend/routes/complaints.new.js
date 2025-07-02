@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const Complaint = require('../models/mongodb/Complaint');
+const Complaint = require('../models/Complaint');
 const { protect } = require('../middleware/auth');
 
 // Configure multer for file uploads

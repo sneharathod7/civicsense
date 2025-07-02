@@ -92,6 +92,10 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  profileCompleted: {
+    type: Boolean,
+    default: false
   }
 });
 
