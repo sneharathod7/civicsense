@@ -1,16 +1,60 @@
 const path = require('path');
 const fs = require('fs');
-const Complaint = require('../models/mongodb/Complaint');
+const Complaint = require('../models/Complaint');
 const User = require('../models/User');
+const Achievement = require('../models/Achievement');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const { predictDepartment } = require('../utils/mlClassifier');
 const { sendEmail } = require('../utils/emailSender');
 
+// Helper function to update achievement points
+async function updateAchievementPoints(userId, points, reason) {
+  let achievement = await Achievement.findOne({ user: userId });
+  
+  if (!achievement) {
+    achievement = await Achievement.create({
+      user: userId,
+      points: 0,
+      stats: {
+        totalReports: 0,
+        resolvedReports: 0,
+        upvotesReceived: 0,
+        commentsPosted: 0
+      }
+    });
+  }
+
+  achievement.points += points;
+  achievement.pointsHistory.push({
+    points,
+    reason,
+    type: 'earned',
+    timestamp: Date.now()
+  });
+
+  await achievement.save();
+  return achievement;
+}
+
 // @desc    Get all complaints
 // @route   GET /api/v1/complaints
 // @access  Public
 exports.getComplaints = asyncHandler(async (req, res, next) => {
+  // Debug: Log the current user ID
+  console.log('Current user ID:', req.user ? req.user.id : 'No user');
+
+  // Debug: Log all complaints for the current user
+  const userComplaints = await Complaint.find({ user: req.user.id });
+  console.log('Found complaints for user:', {
+    count: userComplaints.length,
+    complaints: userComplaints.map(c => ({
+      id: c._id,
+      status: c.status,
+      createdAt: c.createdAt
+    }))
+  });
+
   res.status(200).json({
     success: true,
     data: res.advancedResults.data
@@ -110,6 +154,9 @@ exports.createComplaint = asyncHandler(async (req, res, next) => {
         status: 'pending'
       });
 
+      // Award points for creating a new report
+      await updateAchievementPoints(req.user.id, 10, 'New report submitted');
+
       res.status(201).json({
         success: true,
         data: complaint
@@ -140,10 +187,18 @@ exports.updateComplaint = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Check if the complaint is being marked as resolved
+  const isBeingResolved = req.body.status === 'resolved' && complaint.status !== 'resolved';
+
   complaint = await Complaint.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
   });
+
+  // Award points if the complaint is being resolved
+  if (isBeingResolved) {
+    await updateAchievementPoints(complaint.user.toString(), 50, 'Report resolved');
+  }
 
   res.status(200).json({ success: true, data: complaint });
 });

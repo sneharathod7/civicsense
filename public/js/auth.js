@@ -1,5 +1,15 @@
 // auth.js - Simple frontend auth state management for static HTML
 
+// Get auth token from localStorage
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+// Check if user is authenticated
+function isAuthenticated() {
+    return localStorage.getItem('isLoggedIn') === 'true' && getToken();
+}
+
 // Call this on page load to update navbar links based on login state
 function updateNavbar() {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -15,6 +25,8 @@ function updateNavbar() {
 // Call this on logout
 function logout() {
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/landing.html';
 }
 
@@ -30,9 +42,8 @@ function attachLogoutHandler() {
 
 // Protect a page or action: if not logged in, redirect to login with redirect param
 function requireLogin(redirectTo) {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-        window.location.href = `/login-signup.html?redirect=${encodeURIComponent(redirectTo)}`;
+    if (!isAuthenticated()) {
+        window.location.href = `/citizen-login.html?redirect=${encodeURIComponent(redirectTo)}`;
         return false;
     }
     return true;
@@ -47,21 +58,35 @@ function setUserAvatar() {
 
     avatars.forEach(avatar => {
         avatar.innerHTML = '';
-        if (user.profileImage) {
+        // Check for profileImage or photo property
+        if (user.profileImage || user.photo) {
             const img = document.createElement('img');
-            img.src = user.profileImage;
-            img.alt = 'Profile';
-            img.className = 'avatar-img';
-            avatar.appendChild(img);
-        } else {
-            let initial = '?';
-            if (user.name && user.name.trim()) {
-                initial = user.name.trim()[0].toUpperCase();
-            } else if (user.email && user.email.trim()) {
-                initial = user.email.trim()[0].toUpperCase();
+            // Use profileImage if available, otherwise use photo
+            const imagePath = user.profileImage || (user.photo ? `/uploads/${user.photo}` : null);
+            if (imagePath) {
+                img.src = imagePath;
+                img.alt = 'Profile';
+                img.className = 'avatar-img';
+                avatar.appendChild(img);
+                return;
             }
-            avatar.textContent = initial;
         }
+        
+        // If we get here, no valid image was found, use initials
+        let initial = '?';
+        // Try to get initials from firstName and lastName first
+        if (user.firstName && user.lastName) {
+            initial = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+        } 
+        // Fallback to name if available
+        else if (user.name && user.name.trim()) {
+            initial = user.name.trim()[0].toUpperCase();
+        } 
+        // Last resort, use email
+        else if (user.email && user.email.trim()) {
+            initial = user.email.trim()[0].toUpperCase();
+        }
+        avatar.textContent = initial;
     });
 }
 
@@ -77,3 +102,5 @@ window.requireLogin = requireLogin;
 window.logout = logout;
 window.updateNavbar = updateNavbar;
 window.setUserAvatar = setUserAvatar;
+window.getToken = getToken;
+window.isAuthenticated = isAuthenticated;

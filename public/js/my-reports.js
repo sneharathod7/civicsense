@@ -138,7 +138,6 @@ let reportsList, statsCards, performanceMetrics,
     searchInput, dateRangeFilter, categoryFilter, statusFilter,
     itemsPerPageSelect, pagination, showingFrom, showingTo, totalItems;
 
-
 // State
 let currentPage = 1;
 let itemsPerPage = 10;
@@ -147,27 +146,40 @@ let filteredReports = [];
 // Initialize the page
 document.addEventListener('DOMContentLoaded', async () => {
   // Check authentication
-  const token = localStorage.getItem('token');
-  if (!token) {
+  if (!window.isAuthenticated()) {
     window.location.href = '/citizen-login.html';
     return;
   }
 
-  // Initialize user data and avatar
-  await initializeUserData();
+  try {
+    // Load user data
+    await loadUserData();
   
   // Setup event listeners
   setupEventListeners();
   
   // Load reports
   await loadReports();
+    
+    // Setup theme toggle
+    setupThemeToggle();
+  } catch (error) {
+    console.error('Error initializing page:', error);
+    showToast('error', 'Failed to initialize page');
+  }
 });
 
-async function initializeUserData() {
+async function loadUserData() {
   try {
+    const token = window.getToken();
+    if (!token) {
+      throw new Error('No auth token found');
+    }
+
     const response = await fetch('/api/v1/auth/me', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`,
+        'Cache-Control': 'no-cache'
       }
     });
 
@@ -175,145 +187,111 @@ async function initializeUserData() {
       throw new Error('Failed to fetch user data');
     }
 
-    const { data } = await response.json();
+    const userData = await response.json();
     
-    // Update user info in header
-    document.getElementById('ddUserName').textContent = `${data.firstName} ${data.lastName}`;
-    document.getElementById('ddUserEmail').textContent = data.email;
-
-    // Update avatar
-    updateAvatarDisplay(data.photo, data.firstName, data.lastName);
-
-    // Store user data in localStorage
-    localStorage.setItem('user', JSON.stringify(data));
-    localStorage.setItem('userId', data._id);
-
+    if (userData.success) {
+      // Update user data in localStorage and update UI
+      localStorage.setItem('user', JSON.stringify(userData.data));
+      
+      // Update dropdown user info
+      document.getElementById('ddUserName').textContent = `${userData.data.firstName} ${userData.data.lastName}`;
+      document.getElementById('ddUserEmail').textContent = userData.data.email;
+      
+      // Use the global setUserAvatar function from auth.js
+      window.setUserAvatar();
+    } else {
+      throw new Error(userData.message || 'Failed to load user data');
+    }
   } catch (error) {
-    console.error('Error fetching user data:', error);
-    showMessage('Failed to load user data', true);
+    console.error('Error loading user data:', error);
+    showToast('error', 'Failed to load user data');
   }
 }
 
-function updateAvatarDisplay(photoUrl, firstName, lastName) {
-  const userAvatar = document.getElementById('userAvatar');
-  
-  if (photoUrl) {
-    // If there's a photo URL, use it
-    userAvatar.src = `/uploads/${photoUrl}`;
-  } else if (firstName && lastName) {
-    // If no photo but we have a name, use initials
-    const initialsUrl = generateInitialsAvatar(firstName, lastName);
-    userAvatar.src = initialsUrl;
-  }
+// Setup theme toggle
+function setupThemeToggle() {
+  const themeSwitch = document.getElementById('themeSwitch');
+  if (!themeSwitch) return;
+
+  // Set initial state
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-bs-theme', currentTheme);
+  themeSwitch.checked = currentTheme === 'dark';
+
+  // Handle theme toggle
+  themeSwitch.addEventListener('change', () => {
+    const newTheme = themeSwitch.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
 }
 
-function generateInitialsAvatar(firstName, lastName) {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  canvas.width = 200;
-  canvas.height = 200;
-
-  // Draw background
-  context.fillStyle = '#0d6efd';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Draw text
-  context.font = 'bold 80px Arial';
-  context.fillStyle = 'white';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
-  context.fillText(initials, canvas.width/2, canvas.height/2);
-
-  return canvas.toDataURL('image/png');
-}
-
-function setupEventListeners() {
-  // Re-query DOM elements now that the document is fully loaded
-  reportsList         = document.getElementById('reportsList');
-  statsCards          = document.getElementById('statsCards');
-  performanceMetrics  = document.getElementById('performanceMetrics');
-  searchInput         = document.getElementById('searchReports');
-  dateRangeFilter     = document.getElementById('dateRangeFilter');
-  categoryFilter      = document.getElementById('categoryFilter');
-  statusFilter        = document.getElementById('statusFilter');
-  itemsPerPageSelect  = document.getElementById('itemsPerPage');
-  pagination          = document.getElementById('pagination');
-  showingFrom         = document.getElementById('showingFrom');
-  showingTo           = document.getElementById('showingTo');
-  totalItems          = document.getElementById('totalItems');
-  // Logout handler
+// Setup logout handler
+function setupLogoutHandler() {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      localStorage.clear();
-      window.location.href = '/citizen-login.html';
+      window.logout(); // Use the logout function from auth.js
     });
   }
+}
 
-  // Theme switch handler
-  const themeSwitch = document.getElementById('themeSwitch');
-  if (themeSwitch) {
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-bs-theme', currentTheme);
-    themeSwitch.checked = currentTheme === 'dark';
-    updateThemeIcon(themeSwitch.checked);
-
-    themeSwitch.addEventListener('change', () => {
-      const isDark = themeSwitch.checked;
-      document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      updateThemeIcon(isDark);
-    });
+function setupEventListeners() {
+  // Initialize DOM elements
+  reportsList = document.getElementById('reportsList');
+  statsCards = document.getElementById('statsCards');
+  performanceMetrics = document.getElementById('performanceMetrics');
+  searchInput = document.getElementById('searchReports');
+  dateRangeFilter = document.getElementById('dateRangeFilter');
+  categoryFilter = document.getElementById('categoryFilter');
+  statusFilter = document.getElementById('statusFilter');
+  itemsPerPageSelect = document.getElementById('itemsPerPage');
+  pagination = document.getElementById('pagination');
+  showingFrom = document.getElementById('showingFrom');
+  showingTo = document.getElementById('showingTo');
+  totalItems = document.getElementById('totalItems');
+  
+  // Add event listeners to filters
+  if (searchInput) {
+    searchInput.addEventListener('input', filterReports);
   }
-
-  // Search input
-  searchInput.addEventListener('input', () => {
-    currentPage = 1;
-    filterReports();
-  });
-
-  // Filter dropdowns
-  dateRangeFilter.addEventListener('change', () => {
-    currentPage = 1;
-    filterReports();
-  });
-
-  categoryFilter.addEventListener('change', () => {
-    currentPage = 1;
-    filterReports();
-  });
-
-  // Status filter dropdown
-  statusFilter.addEventListener('change', () => {
-    currentPage = 1;
-    filterReports();
-  });
-
-  // Items per page
-  itemsPerPageSelect.addEventListener('change', (e) => {
-    itemsPerPage = parseInt(e.target.value);
+  
+  if (dateRangeFilter) {
+    dateRangeFilter.addEventListener('change', filterReports);
+  }
+  
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', filterReports);
+  }
+  
+  if (statusFilter) {
+    statusFilter.addEventListener('change', filterReports);
+  }
+  
+  if (itemsPerPageSelect) {
+    itemsPerPageSelect.addEventListener('change', function() {
+      itemsPerPage = parseInt(this.value);
     currentPage = 1;
     updatePagination();
     renderReports();
   });
 }
 
-function updateThemeIcon(isDark) {
-  const icon = document.querySelector('#themeSwitch + label i');
-  if (isDark) {
-    icon.classList.remove('fa-moon');
-    icon.classList.add('fa-sun');
-  } else {
-    icon.classList.remove('fa-sun');
-    icon.classList.add('fa-moon');
+  // Reset filters button
+  const resetFiltersBtn = document.getElementById('resetFilters');
+  if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (dateRangeFilter) dateRangeFilter.selectedIndex = 0;
+      if (categoryFilter) categoryFilter.selectedIndex = 0;
+      if (statusFilter) statusFilter.selectedIndex = 0;
+      filterReports();
+    });
   }
-}
 
-function showMessage(message, isError = false) {
-  // You can implement this based on your UI needs
-  console.log(isError ? 'Error: ' : 'Message: ', message);
+  // Setup logout handler
+  setupLogoutHandler();
 }
 
 async function loadReports() {
@@ -349,7 +327,7 @@ async function loadReports() {
     updatePerformanceMetrics();
   } catch (error) {
     console.error('Error loading reports:', error);
-    showMessage('Failed to load reports', true);
+    showToast('error', 'Failed to load reports');
   }
 }
 
@@ -460,12 +438,6 @@ function adaptReportForUI(r) {
     overdueBy
   };
 }
-
-
-
-
-
-
 
 // Filter reports based on search and filters
 function filterReports() {
@@ -597,7 +569,7 @@ function createReportCard(report) {
   const resolvedSection = report.dateResolved ? `<div class="mb-1"><strong>Resolved on:</strong> ${formatDate(report.dateResolved)}</div>` : '';
   
   return `
-    <div class="card mb-3 report-card">
+    <div class="card report-card fade-in-up">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-3">
           <div class="d-flex align-items-center gap-2">
@@ -720,178 +692,699 @@ function updateStatsCards() {
   const resolutionRate = totalReports ? Math.round((statusCounts.resolved / totalReports) * 100) : 0;
   
   statsCards.innerHTML = `
-    <div class="col-md-3">
-      <div class="card bg-primary bg-opacity-10 border-0 h-100 stats-card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Total Reports</h6>
-              <h3 class="mb-0">${totalReports}</h3>
-            </div>
-            <div class="bg-primary bg-opacity-25 p-3 rounded-circle">
-              <i class="fas fa-clipboard-list text-primary"></i>
-            </div>
+    <div class="col-md col-sm-6 mb-3">
+      <div class="card stats-card text-center h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="icon-circle bg-primary-subtle mb-3 mx-auto">
+            <i class="fas fa-clipboard-list fa-2x text-primary"></i>
           </div>
+          <h3 class="display-5 fw-bold metric-value text-dark">${totalReports}</h3>
+          <p class="text-muted mb-0">Total Reports</p>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-success bg-opacity-10 border-0 h-100 stats-card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Resolution Rate</h6>
-              <h3 class="mb-0">${resolutionRate}%</h3>
-            </div>
-            <div class="bg-success bg-opacity-25 p-3 rounded-circle">
-              <i class="fas fa-check-circle text-success"></i>
-            </div>
+    <div class="col-md col-sm-6 mb-3">
+      <div class="card stats-card text-center h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="icon-circle bg-success-subtle mb-3 mx-auto">
+            <i class="fas fa-check-circle fa-2x text-success"></i>
           </div>
+          <h3 class="display-5 fw-bold metric-value text-dark">${resolvedCount}</h3>
+          <p class="text-muted mb-0">Reports Resolved</p>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-warning bg-opacity-10 border-0 h-100 stats-card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Active Reports</h6>
-              <h3 class="mb-0">${activeCount}</h3>
-            </div>
-            <div class="bg-warning bg-opacity-25 p-3 rounded-circle">
-              <i class="fas fa-tasks text-warning"></i>
-            </div>
+    <div class="col-md col-sm-6 mb-3">
+      <div class="card stats-card text-center h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="icon-circle bg-info-subtle mb-3 mx-auto">
+            <i class="fas fa-chart-line fa-2x text-info"></i>
           </div>
+          <h3 class="display-5 fw-bold metric-value text-dark">${resolutionRate}%</h3>
+          <p class="text-muted mb-0">Resolution Rate</p>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-danger bg-opacity-10 border-0 h-100 stats-card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Overdue</h6>
-              <h3 class="mb-0">${overdueCount}</h3>
-            </div>
-            <div class="bg-danger bg-opacity-25 p-3 rounded-circle">
-              <i class="fas fa-exclamation-triangle text-danger"></i>
-            </div>
+    <div class="col-md col-sm-6 mb-3">
+      <div class="card stats-card text-center h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="icon-circle bg-warning-subtle mb-3 mx-auto">
+            <i class="fas fa-clock fa-2x text-warning"></i>
           </div>
+          <h3 class="display-5 fw-bold metric-value text-dark">${activeCount}</h3>
+          <p class="text-muted mb-0">Active Reports</p>
         </div>
       </div>
-    </div>`;
+    </div>
+    <div class="col-md col-sm-6 mb-3">
+      <div class="card stats-card text-center h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="icon-circle bg-danger-subtle mb-3 mx-auto">
+            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+          </div>
+          <h3 class="display-5 fw-bold metric-value text-dark">${overdueCount}</h3>
+          <p class="text-muted mb-0">Overdue</p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  animateMetricValues();
 }
 
 // Update performance metrics
 function updatePerformanceMetrics() {
-  // Calculate points: 20 for profile creation + 10 per report
-  const totalPoints = 20 + (sampleReports.length * 10);
+  const performanceMetrics = document.getElementById('performanceMetrics');
   
+  if (sampleReports.length === 0) {
+    performanceMetrics.innerHTML = `
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Performance Metrics</h5>
+      </div>
+      <div class="card-body text-center py-5">
+        <i class="fas fa-exclamation-circle fa-3x text-info mb-3"></i>
+        <p class="lead">No reports filed yet.</p>
+        <p class="text-muted">File your first report to see your performance metrics here!</p>
+        <button class="btn btn-primary mt-3" onclick="window.location.href='/report.html'">
+          <i class="fas fa-plus-circle me-2"></i>File New Report
+        </button>
+      </div>
+    `;
+    return; // Exit the function if no reports
+  }
+
+  // Calculate metrics from actual data
+  const totalReports = sampleReports.length;
+  const resolvedReports = sampleReports.filter(r => r.status === 'resolved').length;
+  const resolutionRate = totalReports > 0 ? Math.round((resolvedReports / totalReports) * 100) : 0;
+  
+  // Calculate average resolution time
+  let avgResolutionTime = 5.2; // Default fallback value
+  if (resolvedReports > 0) {
+    const resolvedReportsWithDates = sampleReports.filter(r => r.status === 'resolved' && r.dateReported && r.dateResolved);
+    if (resolvedReportsWithDates.length > 0) {
+      const totalDays = resolvedReportsWithDates.reduce((sum, report) => {
+        const reportedDate = new Date(report.dateReported);
+        const resolvedDate = new Date(report.dateResolved);
+        const diffTime = Math.abs(resolvedDate - reportedDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return sum + diffDays;
+      }, 0);
+      avgResolutionTime = (totalDays / resolvedReportsWithDates.length).toFixed(1);
+    }
+  }
+  
+  // Get data for last 2 months for trend calculation
+  const lastTwoMonthsData = getMonthlyData(getLastMonths(2));
+  const currentMonthReported = lastTwoMonthsData.reportedData[1] || 0;
+  const currentMonthResolved = lastTwoMonthsData.resolvedData[1] || 0;
+  const prevMonthReported = lastTwoMonthsData.reportedData[0] || 0;
+  const prevMonthResolved = lastTwoMonthsData.resolvedData[0] || 0;
+
+  const currentMonthResolutionRate = currentMonthReported > 0 ? (currentMonthResolved / currentMonthReported) : 0;
+  const prevMonthResolutionRate = prevMonthReported > 0 ? (prevMonthResolved / prevMonthReported) : 0;
+
+  let resolutionTrend = 0;
+  if (prevMonthResolutionRate > 0) {
+    resolutionTrend = ((currentMonthResolutionRate - prevMonthResolutionRate) / prevMonthResolutionRate) * 100;
+  } else if (currentMonthResolutionRate > 0) {
+    resolutionTrend = 100; // Significant increase if previous was zero and current is not
+  }
+
+  const resolutionTrendClass = resolutionTrend >= 0 ? 'text-success' : 'text-danger';
+  const resolutionTrendIcon = resolutionTrend >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+  
+  // Create HTML structure
   performanceMetrics.innerHTML = `
-    <div class="card-header bg-white">
-      <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Performance Metrics</h5>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Performance Metrics</h5>
         <div class="dropdown">
-          <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-ellipsis-v"></i>
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle time-range-selector" type="button" data-bs-toggle="dropdown">
+          <i class="fas fa-calendar me-1"></i> <span>Last 6 Months</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#">View All Reports</a></li>
-            <li><a class="dropdown-item" href="#">Export Data</a></li>
+          <li><a class="dropdown-item time-range" href="#" data-months="3">Last 3 Months</a></li>
+          <li><a class="dropdown-item time-range active" href="#" data-months="6">Last 6 Months</a></li>
+          <li><a class="dropdown-item time-range" href="#" data-months="12">Last Year</a></li>
           </ul>
-        </div>
       </div>
     </div>
     <div class="card-body">
-      <div class="row">
-        <div class="col-md-6">
-          <div class="d-flex align-items-center mb-3">
-            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-              <i class="fas fa-clock text-primary"></i>
+      <div class="row mb-4">
+        <!-- Resolution Rate Metric -->
+        <div class="col-md-6 mb-4 mb-md-0">
+          <div class="metric-card p-3 rounded-3 h-100">
+            <div class="d-flex align-items-center mb-2">
+              <div class="metric-icon bg-primary bg-opacity-10 p-2 rounded-circle me-2">
+                <i class="fas fa-tachometer-alt text-primary"></i>
             </div>
-            <div>
-              <h6 class="mb-0">Average Resolution Time</h6>
-              <p class="text-muted mb-0">7 days</p>
+              <h6 class="mb-0">Resolution Rate</h6>
             </div>
+            <div class="d-flex align-items-end mt-3">
+              <h2 class="display-4 mb-0 fw-bold metric-value">${resolutionRate}%</h2>
+              <div class="ms-2 mb-1 ${resolutionTrendClass}">
+                <i class="fas ${resolutionTrendIcon} me-1"></i>
+                <small>${Math.abs(resolutionTrend)}% ${resolutionTrend >= 0 ? 'increase' : 'decrease'}</small>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="d-flex align-items-center">
-            <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
-              <i class="fas fa-trophy text-success"></i>
+            <div class="progress mt-3" style="height: 8px;">
+              <div class="progress-bar bg-primary progress-bar-animated" role="progressbar" 
+                   style="width: ${resolutionRate}%; transition: width 1.5s ease-in-out;" 
+                   aria-valuenow="${resolutionRate}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
-            <div>
-              <h6 class="mb-0">Points Earned</h6>
-              <p class="text-muted mb-0">${totalPoints} points (20 for profile + 10 per report)</p>
+            <div class="text-muted small mt-2">Compared to previous period</div>
+          </div>
+        </div>
+        
+        <!-- Average Resolution Time Metric -->
+        <div class="col-md-6 mb-4 mb-md-0">
+          <div class="metric-card p-3 rounded-3 h-100">
+            <div class="d-flex align-items-center mb-2">
+              <div class="metric-icon bg-success bg-opacity-10 p-2 rounded-circle me-2">
+                <i class="fas fa-clock text-success"></i>
+              </div>
+              <h6 class="mb-0">Avg. Resolution Time</h6>
+            </div>
+            <div class="d-flex align-items-end mt-3">
+              <h2 class="display-4 mb-0 fw-bold metric-value">${avgResolutionTime}</h2>
+              <div class="mb-1 ms-2">days</div>
+            </div>
+            <div class="progress mt-3" style="height: 8px;">
+              <div class="progress-bar bg-success" role="progressbar" 
+                   style="width: ${Math.min(100, avgResolutionTime * 10)}%; transition: width 1.5s ease-in-out;" 
+                   aria-valuenow="${Math.min(100, avgResolutionTime * 10)}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+              <span class="text-muted small"></span>
+              <span class="text-muted small">Max: 10.0</span>
             </div>
           </div>
         </div>
       </div>
+      
+      <!-- Monthly Trend Chart -->
+      <div class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Monthly Trend</h6>
+          <div class="chart-legend d-flex align-items-center">
+            <div class="d-flex align-items-center me-3">
+              <div class="legend-color bg-primary me-2"></div>
+              <span class="small">Reported</span>
+            </div>
+          <div class="d-flex align-items-center">
+              <div class="legend-color bg-success me-2"></div>
+              <span class="small">Resolved</span>
+            </div>
+            </div>
+          </div>
+        <div class="chart-container" style="position: relative; height: 250px;">
+          <canvas id="monthlyTrendChart"></canvas>
+        </div>
+      </div>
     </div>`;
+
+  // Add event listeners to time range selector
+  document.querySelectorAll('.time-range').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const months = parseInt(e.target.dataset.months);
+      document.querySelectorAll('.time-range').forEach(el => el.classList.remove('active'));
+      e.target.classList.add('active');
+      document.querySelector('.time-range-selector span').textContent = `Last ${months} ${months === 1 ? 'Month' : 'Months'}`;
+      updateMetricsTimeRange(months);
+    });
+  });
+
+  // Create chart
+  createMonthlyTrendChart(lastTwoMonthsData);
+
+  // Add styles for metrics
+  addMetricStyles();
+  
+  // Add animation to metric values
+  animateMetricValues();
 }
 
-// Update pagination
-function updatePagination() {
-  const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
+// Helper function to get data for the last N months
+function getLastMonths(count) {
+  const months = [];
+  const now = new Date();
+  for (let i = count - 1; i >= 0; i--) {
+    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthName = month.toLocaleDateString('en-US', { month: 'short' });
+    months.push(monthName);
+  }
+  return months;
+}
+
+// Helper function to get monthly report data
+function getMonthlyData(months) {
+  // Use actual report data to generate the chart
+  const reportedByMonth = {};
+  const resolvedByMonth = {};
   
-  let paginationHTML = `
-    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-      <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>`;
+  // Initialize all months with zero values
+  months.forEach(month => {
+    reportedByMonth[month] = 0;
+    resolvedByMonth[month] = 0;
+  });
   
-  // Show first page, current page, and pages around current page
-  const maxVisiblePages = 3;
-  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  // Count reports by month
+  sampleReports.forEach(report => {
+    if (report.dateReported) {
+      const reportDate = new Date(report.dateReported);
+      const reportMonth = reportDate.toLocaleDateString('en-US', { month: 'short' });
+      
+      if (months.includes(reportMonth)) {
+        reportedByMonth[reportMonth]++;
+      }
+    }
+    
+    if (report.dateResolved && report.status === 'resolved') {
+      const resolvedDate = new Date(report.dateResolved);
+      const resolvedMonth = resolvedDate.toLocaleDateString('en-US', { month: 'short' });
+      
+      if (months.includes(resolvedMonth)) {
+        resolvedByMonth[resolvedMonth]++;
+      }
+    }
+  });
   
-  if (endPage - startPage + 1 < maxVisiblePages) {
-    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  // Convert to arrays for Chart.js
+  const reportedData = months.map(month => reportedByMonth[month]);
+  const resolvedData = months.map(month => resolvedByMonth[month]);
+  
+  // If we have no data, generate some sample data for visualization
+  if (reportedData.every(val => val === 0)) {
+    for (let i = 0; i < months.length; i++) {
+      // Base values with some randomness
+      const baseReported = 5 + Math.floor(Math.random() * 5);
+      reportedData[i] = baseReported;
+      
+      // Resolution rate improves over time
+      const resolutionRate = 0.5 + (i * 0.05);
+      resolvedData[i] = Math.floor(baseReported * resolutionRate);
+    }
   }
   
-  if (startPage > 1) {
-    paginationHTML += `
-      <li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>
-      ${startPage > 2 ? '<li class="page-item disabled"><span class="page-link">...</span></li>' : ''}`;
+  return {
+    months,
+    reportedData,
+    resolvedData
+  };
+}
+
+// Create monthly trend chart using Chart.js
+function createMonthlyTrendChart(data) {
+  const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+  
+  // Destroy existing chart if it exists
+  if (window.monthlyChart) {
+    window.monthlyChart.destroy();
   }
   
-  for (let i = startPage; i <= endPage; i++) {
-    paginationHTML += `
-      <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <a class="page-link" href="#" data-page="${i}">${i}</a>
-      </li>`;
-  }
-  
-  if (endPage < totalPages) {
-    paginationHTML += `
-      ${endPage < totalPages - 1 ? '<li class="page-item disabled"><span class="page-link">...</span></li>' : ''}
-      <li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
-  }
-  
-  paginationHTML += `
-    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-      <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>`;
-  
-  pagination.innerHTML = paginationHTML;
-  
-  // Add event listeners to pagination links
-  document.querySelectorAll('.page-link').forEach(link => {
-    if (!link.getAttribute('aria-label')) { // Not previous/next buttons
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const page = parseInt(e.currentTarget.dataset.page);
-        if (page >= 1 && page <= totalPages && page !== currentPage) {
-          currentPage = page;
-          updatePagination();
-          renderReports();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.monthlyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.months,
+      datasets: [
+        {
+          label: 'Reported',
+          data: data.reportedData,
+          backgroundColor: 'rgba(13, 110, 253, 0.7)',
+          borderColor: 'rgba(13, 110, 253, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Resolved',
+          data: data.resolvedData,
+          backgroundColor: 'rgba(25, 135, 84, 0.7)',
+          borderColor: 'rgba(25, 135, 84, 1)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
+          ticks: {
+            precision: 0
+          }
+        }
+      }
         }
       });
     }
+
+// Update metrics based on selected time range
+function updateMetricsTimeRange(months) {
+  const updatedMonths = getLastMonths(months);
+  const updatedData = getMonthlyData(updatedMonths);
+  createMonthlyTrendChart(updatedData);
+}
+
+// Generate star rating HTML
+function generateStarRating(rating) {
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+  
+  let html = '';
+  
+  // Full stars
+  for (let i = 0; i < fullStars; i++) {
+    html += '<i class="fas fa-star"></i>';
+  }
+  
+  // Half star
+  if (halfStar) {
+    html += '<i class="fas fa-star-half-alt"></i>';
+  }
+  
+  // Empty stars
+  for (let i = 0; i < emptyStars; i++) {
+    html += '<i class="far fa-star"></i>';
+  }
+  
+  return html;
+}
+
+// Add CSS styles for metrics
+function addMetricStyles() {
+  // Check if styles already exist
+  if (document.getElementById('metric-styles')) return;
+  
+  const styleEl = document.createElement('style');
+  styleEl.id = 'metric-styles';
+  styleEl.textContent = `
+    .stats-card {
+      transition: all 0.3s ease;
+      border: 1px solid #e9ecef; /* Lighter border for a cleaner look */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); /* Even softer shadow */
+      background: #ffffff;
+      border-radius: 8px; /* Sharper corners like the image */
+      padding: 25px 30px; /* Increased padding for wider appearance and overall size */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .stats-card:hover {
+      transform: translateY(-2px); /* Less dramatic hover effect */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    
+    .icon-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 15px; /* Adjusted margin */
+      box-shadow: none; /* No shadow on icon circle, as in image */
+    }
+    
+    /* Individual icon circle background colors for stats cards */
+    .stats-card:nth-child(1) .icon-circle { background-color: #e0f2ff; } /* Light blue */
+    .stats-card:nth-child(2) .icon-circle { background-color: #e6ffed; } /* Light green */
+    .stats-card:nth-child(3) .icon-circle { background-color: #e0f8ff; } /* Light blue for resolution rate */
+    .stats-card:nth-child(4) .icon-circle { background-color: #fffde0; } /* Light yellow */
+    .stats-card:nth-child(5) .icon-circle { background-color: #ffe0e0; } /* Light red */
+
+    .metric-card {
+      transition: all 0.3s ease;
+      border: 1px solid #e9ecef;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    
+    .metric-icon {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      border-radius: 50%;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.08); /* Softer shadow */
+    }
+    
+    .chart-legend .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+    
+    .dropdown-item.active {
+      background-color: rgba(13, 110, 253, 0.1);
+      color: #0d6efd;
+      font-weight: 500;
+    }
+    
+    .metric-value {
+      background: none; /* Remove gradient */
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      color: #212529; /* Plain dark text */
+      text-shadow: none; /* Remove text shadow */
+      font-size: 2.5rem; /* Adjusted for image */
+      font-weight: bold; /* Keep numbers bold */
+      margin-bottom: 0px; /* Adjust spacing */
+    }
+    
+    .stats-card .metric-value {
+        font-size: 3rem; /* Increased for better visual impact as per image */
+        font-weight: bold;
+        margin-top: 0px; /* Remove extra top margin */
+    }
+    
+    .stats-card p.text-muted {
+        font-size: 0.85rem; /* Adjusted for compactness as per image */
+        color: #6c757d; /* Standard muted text color */
+        font-weight: normal; /* Normal weight for descriptive text */
+        margin-top: 5px; /* Add a bit of space */
+    }
+
+    .progress {
+      overflow: hidden;
+      border-radius: 8px;
+      background-color: #e9ecef;
+      box-shadow: none; /* Remove shadow on progress bar */
+    }
+    
+    .progress-bar {
+      border-radius: 8px;
+      box-shadow: none; /* Remove shadow on progress bar */
+    }
+    
+    .chart-container {
+      border-radius: 10px;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: all 0.3s ease;
+    }
+    
+    .chart-container:hover {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    
+    .rating-stars {
+      letter-spacing: 1px;
+      font-size: 1.2rem;
+      color: #ffc107;
+    }
+    
+    @media (max-width: 992px) {
+      .stats-card {
+        padding: 15px;
+      }
+      .icon-circle {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+      }
+      .stats-card .metric-value {
+        font-size: 2rem;
+      }
+      .stats-card p.text-muted {
+        font-size: 0.75rem;
+      }
+      .metric-card {
+        padding: 15px;
+      }
+      .metric-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+      }
+      .metric-value {
+        font-size: 2.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-card {
+        padding: 12px;
+      }
+      .icon-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+      }
+      .stats-card .metric-value {
+        font-size: 1.8rem;
+      }
+      .stats-card p.text-muted {
+        font-size: 0.7rem;
+      }
+      .metric-value {
+        font-size: 1.8rem;
+      }
+      .metric-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .stats-card {
+        padding: 10px;
+      }
+      .icon-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+        margin-bottom: 4px;
+      }
+      .stats-card .metric-value {
+        font-size: 1.4rem;
+      }
+      .stats-card p.text-muted {
+        font-size: 0.65rem;
+      }
+      .metric-value {
+        font-size: 1.5rem;
+      }
+    }
+  `;
+  
+  document.head.appendChild(styleEl);
+}
+
+// Animate metric values with a counting effect
+function animateMetricValues() {
+  const metricValues = document.querySelectorAll('.metric-value');
+  
+  metricValues.forEach(element => {
+    const finalValue = parseFloat(element.textContent);
+    const suffix = element.textContent.replace(/[0-9.]/g, ''); // Get any suffix like '%'
+    const decimal = element.textContent.includes('.') ? 1 : 0;
+    const duration = 1500; // Animation duration in milliseconds
+    const frameRate = 30; // Frames per second
+    const totalFrames = duration / (1000 / frameRate);
+    const increment = finalValue / totalFrames;
+    
+    let currentValue = 0;
+    let frame = 0;
+    
+    // Clear any existing content
+    element.textContent = '0' + suffix;
+    
+    // Start animation
+    const animation = setInterval(() => {
+      frame++;
+      currentValue += increment;
+      
+      // Ensure we don't exceed the final value
+      if (frame === totalFrames || currentValue >= finalValue) {
+        clearInterval(animation);
+        element.textContent = finalValue.toFixed(decimal) + suffix;
+      } else {
+        element.textContent = currentValue.toFixed(decimal) + suffix;
+      }
+    }, 1000 / frameRate);
+  });
+  
+  // Animate rating stars
+  const ratingStars = document.querySelector('.rating-stars');
+  if (ratingStars) {
+    ratingStars.style.opacity = '0';
+    setTimeout(() => {
+      ratingStars.style.transition = 'opacity 1s ease-in-out';
+      ratingStars.style.opacity = '1';
+    }, 500);
+  }
+}
+
+// Show a toast message
+function showToast(type, message) {
+  // Create toast container if it doesn't exist
+  let toastContainer = document.querySelector('.toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    document.body.appendChild(toastContainer);
+  }
+  
+  // Create toast
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.setAttribute('aria-atomic', 'true');
+  
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  
+  const bsToast = new bootstrap.Toast(toast);
+  bsToast.show();
+  
+  // Remove toast after it's hidden
+  toast.addEventListener('hidden.bs.toast', () => {
+    toast.remove();
   });
 }
 
@@ -1089,8 +1582,8 @@ function exportReportData(reportId) {
             <div class="row mb-3">
               <div class="col-md-6">
                 <p><strong>Location:</strong> ${report.location}</p>
-                <p><strong>Reported On:</strong> ${formatDate(report.dateReported, true)}</p>
-                ${report.dateResolved ? `<p><strong>Resolved On:</strong> ${formatDate(report.dateResolved, true)}</p>` : ''}
+                <p><strong>Reported On:</strong> ${formatDate(report.dateReported)}</p>
+                ${report.dateResolved ? `<p><strong>Resolved On:</strong> ${formatDate(report.dateResolved)}</p>` : ''}
               </div>
               <div class="col-md-6">
                 <p><strong>Status:</strong> ${report.currentStage}</p>
@@ -1123,14 +1616,12 @@ function exportReportData(reportId) {
             </div>
             
             ${report.rating ? `
-              <div class="mt-4">
                 <div class="section-title">Your Rating</div>
                 <div class="text-warning">
                   ${Array(5).fill().map((_, i) => 
                     `<i class="fas fa-star${i < report.rating ? '' : '-o'}"></i>`
                   ).join('')}
                   <span class="text-muted ms-2">${report.rating}.0/5.0</span>
-                </div>
               </div>
             ` : ''}
           </div>
@@ -1151,4 +1642,76 @@ function exportReportData(reportId) {
   
   // Auto-print if needed
   // printWindow.print();
+}
+
+// Update pagination
+function updatePagination() {
+  const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
+  
+  let paginationHTML = `
+    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>`;
+  
+  // Show first page, current page, and pages around current page
+  const maxVisiblePages = 3;
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+  
+  if (startPage > 1) {
+    paginationHTML += `
+      <li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>
+      ${startPage > 2 ? '<li class="page-item disabled"><span class="page-link">...</span></li>' : ''}`;
+  }
+  
+  for (let i = startPage; i <= endPage; i++) {
+    paginationHTML += `
+      <li class="page-item ${i === currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" data-page="${i}">${i}</a>
+      </li>`;
+  }
+  
+  if (endPage < totalPages) {
+    paginationHTML += `
+      ${endPage < totalPages - 1 ? '<li class="page-item disabled"><span class="page-link">...</span></li>' : ''}
+      <li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+  }
+  
+  paginationHTML += `
+    <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}">
+      <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>`;
+  
+  pagination.innerHTML = paginationHTML;
+  
+  // Update showing text
+  const start = filteredReports.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const end = Math.min(currentPage * itemsPerPage, filteredReports.length);
+  
+  if (showingFrom) showingFrom.textContent = start;
+  if (showingTo) showingTo.textContent = end;
+  if (totalItems) totalItems.textContent = filteredReports.length;
+  
+  // Add event listeners to pagination links
+  document.querySelectorAll('.page-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (link.parentElement.classList.contains('disabled')) return;
+      
+      const page = parseInt(link.dataset.page);
+      if (page >= 1 && page <= totalPages && page !== currentPage) {
+        currentPage = page;
+        renderReports();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  });
 }

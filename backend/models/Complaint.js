@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const complaintSchema = new mongoose.Schema({
+  ticketId: {
+    type: String,
+    unique: true,
+    trim: true
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -9,6 +14,7 @@ const complaintSchema = new mongoose.Schema({
   issueType: {
     type: String,
     required: [true, 'Issue type is required'],
+    enum: ['pothole', 'garbage', 'street_light', 'water_leak', 'other'],
     trim: true
   },
   description: {
@@ -45,34 +51,50 @@ const complaintSchema = new mongoose.Schema({
     type: String, // Array of image URLs
     trim: true
   }],
-  ticketId: {
-    type: String,
-    unique: true,
-    trim: true
-  },
   upvotes: {
     type: Number,
     default: 0
   },
+  upvotedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  comments: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    text: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   expectedResolutionDate: {
     type: Date
   },
   resolutionNotes: {
     type: String,
     trim: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Create a 2dsphere index for geospatial queries
 complaintSchema.index({ 'location.coordinates': '2dsphere' });
+
+// Virtual for getting the number of comments
+complaintSchema.virtual('commentCount').get(function() {
+  return this.comments ? this.comments.length : 0;
+});
 
 // Generate ticket ID before saving
 complaintSchema.pre('save', function(next) {
@@ -82,11 +104,7 @@ complaintSchema.pre('save', function(next) {
   next();
 });
 
-// Update the updatedAt field before saving
-complaintSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// Check if model exists before compiling it
+const Complaint = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);
 
-const Complaint = mongoose.model('Complaint', complaintSchema);
 module.exports = Complaint;

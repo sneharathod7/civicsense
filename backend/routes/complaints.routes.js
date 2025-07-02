@@ -16,7 +16,7 @@ const {
 // Import middleware
 const { protect, authorize } = require('../middleware/auth');
 const advancedResults = require('../middleware/advancedResults');
-const Complaint = require('../models/mongodb/Complaint');
+const Complaint = require('../models/Complaint');
 
 // Include other resource routers
 const commentRouter = require('./comments');

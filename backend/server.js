@@ -38,14 +38,17 @@ app.use(helmet({
 // Add CORS headers
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   next();
 });
 
-// Enable CORS
+// Enable CORS with proper options
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Trust proxy for cookies to work in production
@@ -90,10 +93,6 @@ app.use(
   })
 );
 
-// Enable CORS
-app.use(cors());
-app.options('*', cors());
-
 // Compress all responses
 app.use(compression());
 
@@ -133,6 +132,7 @@ const complaintRoutes = require('./routes/complaints.new');
 const userRoutes = require('./routes/userRoutes');
 const geocode = require('./routes/geocode');
 const reports = require('./routes/reports');
+const achievements = require('./routes/achievements');
 
 // Mount routers
 app.use('/api/v1/auth', authRoutes);
@@ -140,6 +140,7 @@ app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/geocode', geocode);
 app.use('/api/reports', reports);
+app.use('/api/v1/achievements', achievements);
 
 // Proxy requests to ML API
 app.use('/api/v1/predict-department', createProxyMiddleware({
