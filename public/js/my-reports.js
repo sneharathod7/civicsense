@@ -335,10 +335,72 @@ async function loadReports() {
     }
 
     const resJson = await response.json();
+    
+    // Debug: Log the raw API response
+    console.log('=== RAW API RESPONSE ===');
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries([...response.headers.entries()]));
+    console.log('Response data:', resJson);
+    
     const apiReports = Array.isArray(resJson.data) ? resJson.data : [];
+    
+    // Debug: Log the structure of each report
+    console.log('=== REPORT DATA STRUCTURE ===');
+    apiReports.forEach((report, index) => {
+      // Log the raw report object first
+      console.log(`=== RAW REPORT ${index} ===`);
+      console.log(JSON.parse(JSON.stringify(report, (key, value) => {
+        if (key === 'images' || key === 'photos') {
+          return Array.isArray(value) 
+            ? `Array(${value.length})` 
+            : value;
+        }
+        return value;
+      })));
+      
+      // Then log the structured data
+      console.log(`Report ${index} (${report._id}):`, {
+        hasPhotos: 'photos' in report,
+        photos: report.photos,
+        hasImages: 'images' in report,
+        images: report.images,
+        // Include other relevant fields
+        status: report.status,
+        createdAt: report.createdAt,
+        updatedAt: report.updatedAt
+      });
+    });
+
+    // Debug: Log raw API response
+    console.log('=== API RESPONSE ===');
+    console.log('Raw API response:', resJson);
+    console.log('API reports count:', apiReports.length);
+    
+    // Log each report's image data before adaptation
+    apiReports.forEach((report, index) => {
+      console.log(`Report ${index} (${report._id}):`, {
+        hasPhotos: 'photos' in report,
+        photosCount: report.photos?.length || 0,
+        photos: report.photos,
+        hasImages: 'images' in report,
+        imagesCount: report.images?.length || 0,
+        images: report.images
+      });
+    });
 
     // Transform API payload into structure expected by UI helpers
     const adapted = apiReports.map(adaptReportForUI);
+    
+    // Debug: Log after adaptation
+    console.log('=== AFTER ADAPTATION ===');
+    adapted.forEach((report, index) => {
+      console.log(`Adapted report ${index} (${report.id}):`, {
+        photosCount: report.photos?.length || 0,
+        imagesCount: report.images?.length || 0,
+        photos: report.photos || [],
+        images: report.images || []
+      });
+    });
 
     // Replace existing report array contents with the fetched data
     sampleReports.splice(0, sampleReports.length, ...adapted);
@@ -435,27 +497,102 @@ function adaptReportForUI(r) {
       { 
         name: 'Verified', 
         completed: ['verified', 'assigned', 'in-progress', 'resolved'].includes(uiStatus),
-        date: updatedDateObj.toISOString() 
+        date: ['verified', 'assigned', 'in-progress', 'resolved'].includes(uiStatus) ? updatedDateObj.toISOString() : null
       },
       { 
         name: 'Assigned', 
         completed: ['assigned', 'in-progress', 'resolved'].includes(uiStatus),
-        date: updatedDateObj.toISOString() 
+        date: ['assigned', 'in-progress', 'resolved'].includes(uiStatus) ? updatedDateObj.toISOString() : null
       },
       { 
         name: 'In Progress', 
         completed: ['in-progress', 'resolved'].includes(uiStatus),
-        date: updatedDateObj.toISOString() 
+        date: ['in-progress', 'resolved'].includes(uiStatus) ? updatedDateObj.toISOString() : null
       },
       { 
         name: 'Resolved', 
         completed: uiStatus === 'resolved',
-        date: resolvedDateObj ? resolvedDateObj.toISOString() : null 
+        date: uiStatus === 'resolved' ? resolvedDateObj.toISOString() : null 
       }
     ],
     assignedTo: r.assignedTo || '',
     lastUpdate: r.lastUpdate || '',
-    photos: r.images || [],
+    photos: (() => {
+      // Handle both photos and images fields, ensure we have an array of valid URLs
+    const images = [];
+    const sources = [];
+    
+    console.log('Adapting report images:', {
+      hasPhotos: Array.isArray(r.photos),
+      photosCount: r.photos?.length || 0,
+      hasImages: Array.isArray(r.images),
+      imagesCount: r.images?.length || 0
+    });
+    
+    // Normalize photos field
+    if (Array.isArray(r.photos)) {
+      if (r.photos.length > 0) {
+        console.log('Processing photos array:', r.photos);
+        sources.push(...r.photos);
+      }
+    } else if (r.photos && typeof r.photos === 'object') {
+      console.log('Processing single photo object:', r.photos);
+      sources.push(r.photos);
+    }
+    
+    // Normalize images field (legacy support)
+    if (Array.isArray(r.images)) {
+      if (r.images.length > 0) {
+        console.log('Processing images array:', r.images);
+        sources.push(...r.images);
+      }
+    } else if (r.images && typeof r.images === 'object') {
+      console.log('Processing single image object:', r.images);
+      sources.push(r.images);
+    }
+    
+    console.log('Total image sources found:', sources.length);
+    
+    // Process all image sources
+    for (const src of sources) {
+      if (!src) {
+        console.log('Skipping empty source');
+        continue;
+      }
+      
+      console.log('Processing image source:', typeof src === 'string' ? src.substring(0, 100) : src);
+      
+      // If it's a string, use it as is
+      if (typeof src === 'string') {
+        // Ensure the URL is absolute if it's a path
+        const url = src.startsWith('http') || src.startsWith('/') || src.startsWith('data:image') 
+          ? src 
+          : `/${src.replace(/^\/+/, '')}`; // Ensure single leading slash
+        console.log('Added string URL:', url.substring(0, 100));
+        images.push(url);
+      }
+      // If it's an object with a url property
+      else if (src.url) {
+        const url = src.url.startsWith('http') || src.url.startsWith('/') || src.url.startsWith('data:image')
+          ? src.url
+          : `/${src.url.replace(/^\/+/, '')}`; // Ensure single leading slash
+        console.log('Added URL from object:', url.substring(0, 100));
+        images.push(url);
+      }
+      // If it's an object with data property (base64)
+      else if (src.data) {
+        const mimeType = src.contentType || 'image/jpeg';
+        const url = `data:${mimeType};base64,${src.data}`;
+        console.log('Added base64 image');
+        images.push(url);
+      } else {
+        console.log('Unhandled image format:', src);
+      }
+    }
+    
+    console.log('Processed images:', images);
+    return images;
+    })(),
     userMobile: r.userMobile || '',
     overdueBy
   };
@@ -897,19 +1034,50 @@ function updatePagination() {
 
 // View report details in modal
 function viewReportDetails(reportId) {
+  // Find the report in the sample data
   const report = sampleReports.find(r => r.id === reportId);
-  if (!report) return;
+  if (!report) {
+    showMessage('Report not found', true);
+    return;
+  }
+  
+  // Debug: Log the report data and image URLs
+  console.log('=== DEBUG: Report Data ===');
+  console.log('Report ID:', report.id);
+  console.log('Has photos property:', 'photos' in report);
+  console.log('Has images property:', 'images' in report);
+  
+  if (report.photos) {
+    console.log('Photos type:', typeof report.photos);
+    console.log('Photos array length:', report.photos.length);
+    console.log('Photos array content:', report.photos);
+    if (report.photos.length > 0) {
+      console.log('First photo type:', typeof report.photos[0]);
+      console.log('First photo value:', report.photos[0]);
+    }
+  }
+  
+  if (report.images) {
+    console.log('Images array length:', report.images.length);
+    console.log('Images array content:', report.images);
+  }
   
   const modal = new bootstrap.Modal(document.getElementById('reportDetailsModal'));
   const modalContent = document.getElementById('reportDetailsContent');
   
   // Create modal content based on report data
+  const isResolved = report.status === 'resolved';
+  const statusText = isResolved ? 'Resolved' : 'Pending';
+  const statusClass = isResolved ? 'bg-success' : 'bg-warning';
+  
   let content = `
     <div class="mb-4">
+      <!-- Main Header with Status -->
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>${report.title}</h4>
-        <span class="badge ${report.status === 'resolved' ? 'bg-success' : 'bg-primary'}">
-          ${report.status === 'resolved' ? 'Resolved' : 'In Progress'}
+        <span class="badge ${statusClass} px-3 py-2">
+          <i class="fas ${isResolved ? 'fa-check-circle' : 'fa-clock'} me-1"></i>
+          ${statusText}
         </span>
       </div>
       
@@ -926,22 +1094,101 @@ function viewReportDetails(reportId) {
         </div>
       </div>
       
+      <!-- Main Image placed after location -->
+      <div class="mb-4 text-center">
+        ${(() => {
+          // Debug log the images data
+          console.log('Available images data:', {
+            hasPhotos: !!report.photos,
+            photosCount: report.photos?.length || 0,
+            hasImages: !!report.images,
+            imagesCount: report.images?.length || 0,
+            firstPhoto: report.photos?.[0]?.substring(0, 100) || 'N/A',
+            firstImage: report.images?.[0]?.substring(0, 100) || 'N'
+          });
+          
+          // Try to get images from either photos or images array
+          let imgs = [];
+          
+          // Check both photos and images arrays
+          if (report.photos && report.photos.length) {
+            imgs = [...report.photos];
+          } else if (report.images && report.images.length) {
+            imgs = [...report.images];
+          }
+          
+          // If we have images, process the first one
+          if (imgs.length > 0) {
+            let imgSrc = imgs[0];
+            
+            // Handle different image source formats
+            if (typeof imgSrc === 'object' && imgSrc !== null) {
+              // If it's an object with url property
+              if (imgSrc.url) {
+                imgSrc = imgSrc.url;
+              } 
+              // If it's an object with data property (base64)
+              else if (imgSrc.data) {
+                imgSrc = `data:${imgSrc.contentType || 'image/jpeg'};base64,${imgSrc.data}`;
+              }
+            }
+            
+            // If it's a relative path, ensure it starts with a slash
+            if (typeof imgSrc === 'string' && !imgSrc.startsWith('http') && !imgSrc.startsWith('data:image') && !imgSrc.startsWith('/')) {
+              imgSrc = '/' + imgSrc;
+            }
+            
+            console.log('Attempting to load image:', imgSrc);
+            
+            return `
+              <div style="position: relative; min-height: 200px;">
+                <img 
+                  src="${imgSrc}" 
+                  class="img-fluid rounded" 
+                  style="max-height: 300px; width: 100%; object-fit: cover;" 
+                  onerror="console.error('Failed to load image:', this.src); this.onerror=null; this.parentElement.innerHTML = '
+                    <div class=\'bg-light rounded p-4\' style=\'height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;\'>
+                      <i class=\'fas fa-image fa-3x text-muted mb-2\'></i>
+                      <p class=\'text-muted mb-0\'>Image not available</p>
+                      <small class=\'text-muted\'>${imgSrc.substring(0, 30)}...</small>
+                    </div>'
+                  "
+                  onload="console.log('Successfully loaded image:', this.src)"
+                >
+              </div>`;
+          } else {
+            console.log('No images available for this report');
+            return `
+              <div class="bg-light rounded p-4" style="height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                <p class="text-muted mb-0">No image available</p>
+                ${report.photos || report.images ? 
+                  `<small class="text-muted">(Found ${(report.photos || report.images).length} images but none are valid)</small>` : 
+                  ''}
+              </div>`;
+          }
+        })()}
+      </div>
+      
       <h5>Description</h5>
       <p class="mb-4">${report.description}</p>
       
       <h5>Status Updates</h5>
       <div class="timeline">
-        ${report.stages.map(stage => `
-          <div class="timeline-item ${stage.completed ? 'completed' : ''}">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-              <h6 class="mb-1">${stage.name}</h6>
-              <p class="text-muted small mb-2">
-                ${stage.date ? formatDate(stage.date, true) : 'Pending'}
-              </p>
+        ${report.stages.map(stage => {
+          const isCompleted = stage.completed || (stage.date && new Date(stage.date) <= new Date());
+          return `
+            <div class="timeline-item ${isCompleted ? 'completed' : ''}">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <h6 class="mb-1">${stage.name}</h6>
+                <p class="text-muted small mb-2">
+                  ${isCompleted ? formatDate(stage.date || new Date(), true) : 'Pending'}
+                </p>
+              </div>
             </div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
       
       ${report.photos && report.photos.length > 0 ? `

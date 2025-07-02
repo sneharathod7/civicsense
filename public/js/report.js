@@ -108,6 +108,21 @@
     setTimeout(testMapStatus, 2000);
   }
 
+  // Helper function to convert data URL to Blob
+  function dataURLtoBlob(dataURL) {
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new Blob([u8arr], { type: mime });
+  }
+
   // Run init when DOM ready; handle case where script is loaded after DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mainInit);
@@ -475,30 +490,97 @@
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
 
       try {
-        const data = {
-          title: 'Civic Issue Report',
-          description: descriptionInput.value,
-          category: categoryInput.value,
-          location: {
-            type: 'Point',
-            coordinates: currentCoords ? [currentCoords.lng, currentCoords.lat] : [0, 0],
-            address: addressInput.value || 'Not provided'
-          },
-          images: selectedImages.map(img => img.preview),
-          userEmail: JSON.parse(localStorage.getItem('user')).email,
-          userMobile: JSON.parse(localStorage.getItem('user')).mobile || ''
-        };
+        // Prepare the form data
+        const formData = new FormData();
+        
+        // Add text fields
+        formData.append('title', `${categoryInput.value.charAt(0).toUpperCase() + categoryInput.value.slice(1)} Issue Report`);
+        formData.append('description', descriptionInput.value);
+        formData.append('category', categoryInput.value);
+        formData.append('location', JSON.stringify({
+          type: 'Point',
+          coordinates: currentCoords ? [currentCoords.lng, currentCoords.lat] : [0, 0],
+          address: addressInput.value || 'Not provided'
+        }));
+        
+        // Add user info
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        formData.append('userEmail', user.email || '');
+        formData.append('userMobile', user.mobile || '');
+        
+        // Add images if any
+        if (selectedImages.length > 0) {
+          // Try to get the original file if available, otherwise use the preview
+          const imageData = await Promise.all(selectedImages.map(async (img, index) => {
+            if (img.file) {
+              // If it's a file, read it as data URL
+              return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  resolve(e.target.result);
+                };
+                reader.readAsDataURL(img.file);
+              });
+            } else if (img.preview && img.preview.startsWith('data:image')) {
+              return img.preview;
+            }
+            return null;
+          }));
+          
+          // Filter out any null values
+          const validImages = imageData.filter(img => img !== null);
+          formData.append('images', JSON.stringify(validImages));
+          
+          // Also append files for backward compatibility
+          selectedImages.forEach((img, index) => {
+            if (img.file) {
+              formData.append('photos', img.file);
+            }
+          });
+        }
+        
+        // Debug log
+        console.log('Submitting form with data:', {
+          title: formData.get('title'),
+          category: formData.get('category'),
+          imagesCount: selectedImages.length,
+          hasFile: selectedImages.some(img => img.file)
+        });
 
         // Get JWT token from localStorage
         const token = localStorage.getItem('token');
 
+        // Don't set Content-Type header - let the browser set it with the correct boundary
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+        }
+        
+        // Log the form data being sent
+        console.log('=== FORM DATA SUBMISSION ===');
+        console.log('Has images to upload:', selectedImages.length > 0);
+        console.log('Number of images:', selectedImages.length);
+        console.log('Form data keys:', [...formData.keys()]);
+        
+        // Log each image being sent
+        selectedImages.forEach((img, index) => {
+          console.log(`Image ${index + 1}:`, {
+            hasFile: !!img.file,
+            hasPreview: !!img.preview,
+            previewType: img.preview ? img.preview.substring(0, 30) + '...' : 'none',
+            fileInfo: img.file ? {
+              name: img.file.name,
+              type: img.file.type,
+              size: img.file.size
+            } : 'No file object'
+          });
+        });
+        
         const response = await fetch('/api/reports', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
-          },
-          body: JSON.stringify(data),
+          headers: headers,
+          body: formData,
+
         });
 
         const result = await response.json();

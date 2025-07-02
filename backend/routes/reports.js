@@ -7,76 +7,180 @@ const { protect } = require('../middleware/auth');
 // @route   POST api/reports
 // @desc    Create a new report
 // @access  Private (requires authentication)
-router.post('/', protect, async (req, res) => {
-  try {
-    console.log('Received POST /api/reports', req.body);
-    console.log('req.user:', req.user);
-    console.log('Authorization header:', req.headers.authorization);
-
-    const { title, description, location, category, images, userEmail } = req.body;
-    
-    // Compute coordinates robustly
-    const coords = Array.isArray(location?.coordinates) && location.coordinates.length === 2
-      ? location.coordinates
-      : (location?.lat !== undefined && location?.lng !== undefined)
-        ? [location.lng, location.lat]
-        : [0, 0];
-
-    const locObj = {
-      type: 'Point',
-      coordinates: coords,
-      address: location?.address || 'Unknown address'
-    };
-
-    // Prepare report data
-    const reportData = {
-      title,
-      description,
-      location: locObj,
-      category,
-      images,
-      status: 'pending',
-      userEmail: req.user?.email || userEmail || 'no-email@example.com',
-      userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile'
-    };
-    if (req.user?.id) {
-      reportData.user = req.user.id; // Only set if authenticated
+// Configure multer for file uploads
+const multer = require('multer');
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
     }
-
-    const newReport = new Report(reportData);
-
-    console.log('Saving new report...');
-    const report = await newReport.save();
-    console.log('Report saved:', report);
-    
-    // Send email notification
-    try {
-      // Replace with actual admin email or get from environment variables
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@civicsense.com';
-      await sendReportNotification(report, adminEmail);
-      
-      // If user provided email, send them a confirmation
-      if (userEmail) {
-        await sendReportNotification({
-          ...report.toObject(),
-          title: `[Confirmation] ${report.title}`,
-          userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile'
-        }, userEmail);
-      }
-    } catch (emailError) {
-      console.error('Failed to send email notification:', emailError);
-      // Don't fail the request if email fails
-    }
-    
-    res.status(201).json({
-      success: true,
-      data: report,
-      message: 'Report submitted successfully!'
-    });
-  } catch (err) {
-    console.error('Full error:', err);
-    res.status(500).json({ success: false, message: 'Server Error' });
   }
+});
+
+// Handle multiple file uploads
+const uploadMiddleware = upload.array('photos');
+
+router.post('/', protect, (req, res, next) => {
+  // First handle file uploads
+  uploadMiddleware(req, res, async (err) => {
+    if (err) {
+      console.error('File upload error:', err);
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    
+    try {
+      console.log('Received POST /api/reports');
+      console.log('req.user:', req.user);
+      console.log('req.body:', req.body);
+      console.log('Uploaded files:', req.files);
+
+      // Parse the JSON data from the form
+      const { title, description, location, category, images, userEmail } = req.body;
+      let parsedLocation = {};
+      let parsedImages = [];
+      
+      // Parse location if it's a string
+      if (typeof location === 'string') {
+        try {
+          parsedLocation = JSON.parse(location);
+        } catch (e) {
+          console.error('Error parsing location:', e);
+          parsedLocation = {};
+        }
+      } else {
+        parsedLocation = location || {};
+      }
+      
+      // Parse images (may be a JSON string array of base64 strings)
+      console.log('Raw images from request:', typeof images, images);
+      if (images) {
+        try {
+          const parsed = JSON.parse(images);
+          // Convert any plain base64 strings into objects with url property
+          parsedImages = parsed.map((img) => {
+            if (typeof img === 'string') {
+              return { url: img };
+            }
+            return img;
+          });
+          console.log('Successfully parsed images:', parsedImages.length);
+        } catch (e) {
+          console.error('Error parsing images JSON:', e);
+          parsedImages = [];
+        }
+      }
+      
+      // Log uploaded files
+      console.log('Uploaded files:', req.files ? req.files.length : 0);
+      
+      // Add any uploaded files to the images array
+      if (req.files && req.files.length > 0) {
+        console.log('Processing uploaded files...');
+        const fileImages = req.files.map((file, index) => {
+          const imgData = {
+            url: `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+            filename: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size
+          };
+          console.log(`File ${index + 1}:`, {
+            name: file.originalname,
+            size: file.size,
+            type: file.mimetype,
+            urlPreview: imgData.url.substring(0, 50) + '...'
+          });
+          return imgData;
+        });
+        
+        parsedImages = [...parsedImages, ...fileImages];
+      }
+      
+      // Build a photos array containing only string URLs (for backward compatibility)
+      const photosArray = parsedImages.map(img => typeof img === 'string' ? img : img.url).filter(Boolean);
+      
+      console.log('Final images to save:', parsedImages.length);
+      if (parsedImages.length > 0) {
+        console.log('First image preview:', {
+          url: parsedImages[0].url ? parsedImages[0].url.substring(0, 50) + '...' : 'No URL',
+          type: parsedImages[0].mimetype || 'unknown'
+        });
+      }
+    
+      // Compute coordinates robustly
+      const coords = Array.isArray(parsedLocation?.coordinates) && parsedLocation.coordinates.length === 2
+        ? parsedLocation.coordinates
+        : (parsedLocation?.lat !== undefined && parsedLocation?.lng !== undefined)
+          ? [parsedLocation.lng, parsedLocation.lat]
+          : [0, 0];
+
+      const locObj = {
+        type: 'Point',
+        coordinates: coords,
+        address: parsedLocation?.address || 'Unknown address'
+      };
+
+      // Prepare report data
+      const reportData = {
+        title,
+        description,
+        location: locObj,
+        category,
+        images: parsedImages, // detailed objects
+        photos: photosArray,  // simple string URLs for legacy UI
+        status: 'pending',
+        userEmail: req.user?.email || userEmail || 'no-email@example.com',
+        userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile',
+        createdAt: new Date()
+      };
+      
+      if (req.user?.id) {
+        reportData.user = req.user.id; // Only set if authenticated
+      }
+
+      console.log('Saving new report with data:', reportData);
+      const newReport = new Report(reportData);
+      const report = await newReport.save();
+      console.log('Report saved:', report);
+      
+      // Send email notification
+      try {
+        // Replace with actual admin email or get from environment variables
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@civicsense.com';
+        await sendReportNotification(report, adminEmail);
+        
+        // If user provided email, send them a confirmation
+        if (userEmail) {
+          await sendReportNotification({
+            ...report.toObject(),
+            title: `[Confirmation] ${report.title}`,
+            userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile'
+          }, userEmail);
+        }
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+        // Don't fail the request if email fails
+      }
+      
+      return res.status(201).json({
+        success: true,
+        data: report,
+        message: 'Report submitted successfully!'
+      });
+    } catch (err) {
+      console.error('Error saving report:', err);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
+    }
+  }); // End of upload middleware
 });
 
 // @route   GET api/reports
