@@ -133,19 +133,11 @@ const sampleReports = [
   }
 ];
 
-// DOM Elements
-const reportsList = document.getElementById('reportsList');
-const statsCards = document.getElementById('statsCards');
-const performanceMetrics = document.getElementById('performanceMetrics');
-const searchInput = document.getElementById('searchReports');
-const dateRangeFilter = document.getElementById('dateRangeFilter');
-const categoryFilter = document.getElementById('categoryFilter');
-const statusFilter = document.getElementById('statusFilter');
-const itemsPerPageSelect = document.getElementById('itemsPerPage');
-const pagination = document.getElementById('pagination');
-const showingFrom = document.getElementById('showingFrom');
-const showingTo = document.getElementById('showingTo');
-const totalItems = document.getElementById('totalItems');
+// DOM Elements (will be initialized in setupEventListeners)
+let reportsList, statsCards, performanceMetrics,
+    searchInput, dateRangeFilter, categoryFilter, statusFilter,
+    itemsPerPageSelect, pagination, showingFrom, showingTo, totalItems;
+
 
 // State
 let currentPage = 1;
@@ -237,6 +229,19 @@ function generateInitialsAvatar(firstName, lastName) {
 }
 
 function setupEventListeners() {
+  // Re-query DOM elements now that the document is fully loaded
+  reportsList         = document.getElementById('reportsList');
+  statsCards          = document.getElementById('statsCards');
+  performanceMetrics  = document.getElementById('performanceMetrics');
+  searchInput         = document.getElementById('searchReports');
+  dateRangeFilter     = document.getElementById('dateRangeFilter');
+  categoryFilter      = document.getElementById('categoryFilter');
+  statusFilter        = document.getElementById('statusFilter');
+  itemsPerPageSelect  = document.getElementById('itemsPerPage');
+  pagination          = document.getElementById('pagination');
+  showingFrom         = document.getElementById('showingFrom');
+  showingTo           = document.getElementById('showingTo');
+  totalItems          = document.getElementById('totalItems');
   // Logout handler
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
@@ -313,7 +318,13 @@ function showMessage(message, isError = false) {
 
 async function loadReports() {
   try {
-    const response = await fetch('/api/v1/reports/my-reports', {
+    const userId = localStorage.getItem('userId');
+    const userEmail = localStorage.getItem('userEmail');
+
+    const params = new URLSearchParams();
+    if (userId) params.append('userId', userId);
+    if (userEmail) params.append('userEmail', userEmail);
+    const response = await fetch(`/api/reports?${params.toString()}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -323,19 +334,165 @@ async function loadReports() {
       throw new Error('Failed to fetch reports');
     }
 
-    const data = await response.json();
-    displayReports(data.data);
+    const resJson = await response.json();
+    const apiReports = Array.isArray(resJson.data) ? resJson.data : [];
+
+    // Transform API payload into structure expected by UI helpers
+    const adapted = apiReports.map(adaptReportForUI);
+
+    // Replace existing report array contents with the fetched data
+    sampleReports.splice(0, sampleReports.length, ...adapted);
+
+    // Refresh UI with new data
+    filterReports();
+    updateStatsCards();
+    updatePerformanceMetrics();
   } catch (error) {
     console.error('Error loading reports:', error);
     showMessage('Failed to load reports', true);
   }
 }
 
+/**
+ * Convert raw backend report document into the shape required by the
+ * existing UI helpers (progress bar, status badges, etc.).
+ */
+function adaptReportForUI(r) {
+  // Map backend status to UI status with more granular stages
+  const statusMap = { 
+    'pending': 'reported',
+    'active': 'in-progress', // Map 'active' to 'in-progress'
+    'verified': 'verified',
+    'assigned': 'assigned',
+    'in-progress': 'in-progress',
+    'resolved': 'resolved',
+    'rejected': 'reported' // Reset to reported if rejected
+  };
+  let uiStatus = statusMap[r.status] || 'reported';
+
+  const reportedDateObj = r.createdAt ? new Date(r.createdAt) : new Date();
+  const updatedDateObj = r.updatedAt ? new Date(r.updatedAt) : reportedDateObj;
+  const resolvedDateObj = r.resolvedAt ? new Date(r.resolvedAt) : (r.status === 'resolved' ? updatedDateObj : null);
+
+  // Mark as overdue if unresolved for more than 15 days
+  const MS_IN_DAY = 86400000;
+  const daysSinceReport = (Date.now() - reportedDateObj.getTime()) / MS_IN_DAY;
+  let overdueBy;
+  if (uiStatus !== 'resolved' && daysSinceReport > 15) {
+    uiStatus = 'overdue';
+    overdueBy = `${Math.floor(daysSinceReport - 15)} days`;
+  }
+
+  // Calculate progress percentage based on current stage
+  const progressMap = {
+    'reported': 10,
+    'verified': 30,
+    'assigned': 50,
+    'in-progress': 70,
+    'resolved': 100,
+    'overdue': 30 // Override if status is overdue
+  };
+  
+  let progress = progressMap[uiStatus] || 10;
+  
+  // For custom stages, ensure progress is within bounds
+  progress = Math.min(100, Math.max(0, progress));
+
+  return {
+    id: r._id,
+    title: r.title || 'Untitled',
+    description: r.description || '',
+    category: (() => {
+      const cat = (r.category || 'Others').toString().toLowerCase();
+      const map = {
+        'roads': 'Roads',
+        'road': 'Roads',
+        'water': 'Water',
+        'electric': 'Electricity',
+        'electricity': 'Electricity',
+        'power': 'Electricity',
+        'environment': 'Environment',
+        'sanitation': 'Sanitation',
+        'infrastructure': 'Infrastructure',
+        'others': 'Others'
+      };
+      return map[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
+    })(),
+    status: uiStatus,
+    priority: 'medium',
+    location: r.location?.address || 'Unknown location',
+    coordinates: {
+      lat: r.location?.coordinates?.[1] ?? 0,
+      lng: r.location?.coordinates?.[0] ?? 0
+    },
+    dateReported: reportedDateObj.toISOString(),
+    dateUpdated: updatedDateObj.toISOString(),
+    dateResolved: resolvedDateObj ? resolvedDateObj.toISOString() : null,
+    progress,
+    currentStage: uiStatus === 'resolved' ? 'Resolved' : (uiStatus === 'in-progress' ? 'In Progress' : (uiStatus === 'overdue' ? 'Overdue' : 'Reported')),
+    stages: [
+      { name: 'Reported', completed: true, date: reportedDateObj.toISOString() },
+      { 
+        name: 'Verified', 
+        completed: ['verified', 'assigned', 'in-progress', 'resolved'].includes(uiStatus),
+        date: updatedDateObj.toISOString() 
+      },
+      { 
+        name: 'Assigned', 
+        completed: ['assigned', 'in-progress', 'resolved'].includes(uiStatus),
+        date: updatedDateObj.toISOString() 
+      },
+      { 
+        name: 'In Progress', 
+        completed: ['in-progress', 'resolved'].includes(uiStatus),
+        date: updatedDateObj.toISOString() 
+      },
+      { 
+        name: 'Resolved', 
+        completed: uiStatus === 'resolved',
+        date: resolvedDateObj ? resolvedDateObj.toISOString() : null 
+      }
+    ],
+    assignedTo: r.assignedTo || '',
+    lastUpdate: r.lastUpdate || '',
+    photos: r.images || [],
+    userMobile: r.userMobile || '',
+    overdueBy
+  };
+}
+
+
+
+
+
+
+
 // Filter reports based on search and filters
 function filterReports() {
   const searchTerm = searchInput.value.toLowerCase();
   const category = categoryFilter.value;
   const selectedStatus = statusFilter.value; // Get the selected status from dropdown
+  const dateRange = dateRangeFilter.value;
+  // Pre-compute earliest date based on range for efficiency
+  let earliestDate = null;
+  const now = new Date();
+  switch (dateRange) {
+    case 'Last 7 days':
+      earliestDate = new Date(now.getTime() - 7 * 86400000);
+      break;
+    case 'Last 30 days':
+      earliestDate = new Date(now.getTime() - 30 * 86400000);
+      break;
+    case 'Last 90 days':
+      earliestDate = new Date(now.getTime() - 90 * 86400000);
+      break;
+    case 'This year':
+      earliestDate = new Date(now.getFullYear(), 0, 1);
+      break;
+    default:
+      // 'All time' => no restriction
+      earliestDate = null;
+  }
   
   filteredReports = sampleReports.filter(report => {
     // Search term filter
@@ -345,13 +502,32 @@ function filterReports() {
       report.id.toLowerCase().includes(searchTerm);
     
     // Category filter
-    const matchesCategory = category === 'All Categories' || report.category === category;
+    const normalizedCategoryFilter = category.toLowerCase();
+    const matchesCategory = normalizedCategoryFilter === 'all categories'
+      || report.category.toLowerCase() === normalizedCategoryFilter
+      || report.category.toLowerCase().includes(normalizedCategoryFilter);
     
-    // Status filter - now using dropdown value directly
-    const matchesStatus = selectedStatus === 'all' || report.status === selectedStatus;
+    // Status filter - use the same mapping as in adaptReportForUI for consistency
+    const statusMap = {
+      'pending': 'reported',
+      'active': 'in-progress',
+      'verified': 'verified',
+      'assigned': 'assigned',
+      'in-progress': 'in-progress',
+      'resolved': 'resolved',
+      'overdue': 'overdue'
+    };
     
-    // Date range filter (simplified for this example)
-    const matchesDateRange = true; // In a real app, implement date filtering
+    // Get the UI status using the same mapping as in adaptReportForUI
+    const uiStatus = statusMap[report.status] || 'reported';
+    
+    // For 'active' filter, include any non-resolved report
+    // For other filters, do exact match against the UI status
+    const matchesStatus = selectedStatus === 'all' || 
+                         (selectedStatus === 'active' ? uiStatus !== 'resolved' : uiStatus === selectedStatus);
+    
+    // Date range filter
+    const matchesDateRange = earliestDate ? (new Date(report.dateReported) >= earliestDate && new Date(report.dateReported) <= now) : true;
     
     return matchesSearch && matchesCategory && matchesStatus && matchesDateRange;
   });
@@ -418,6 +594,7 @@ function createReportCard(report) {
   
   // Add phone number to the card
   const phoneSection = `<div class="mb-1"><strong>Phone:</strong> ${report.userMobile || '-'}</div>`;
+  const resolvedSection = report.dateResolved ? `<div class="mb-1"><strong>Resolved on:</strong> ${formatDate(report.dateResolved)}</div>` : '';
   
   return `
     <div class="card mb-3 report-card">
@@ -444,6 +621,7 @@ function createReportCard(report) {
         
         <h5 class="card-title">${report.title}</h5>
         <p class="card-text text-muted">"${report.description}"</p>
+        ${resolvedSection}
         
         <!-- Progress Tracker -->
         <div class="mb-3">
@@ -496,16 +674,50 @@ function createReportCard(report) {
           </div>
         </div>
       </div>
-    </div>`;
+</div>`;
 }
 
 // Update stats cards
 function updateStatsCards() {
-  const totalReports = sampleReports.length;
-  const resolvedCount = sampleReports.filter(r => r.status === 'resolved').length;
-  const activeCount = sampleReports.filter(r => r.status === 'active' || r.status === 'in-progress').length;
-  const overdueCount = sampleReports.filter(r => r.status === 'overdue').length;
-  const resolutionRate = Math.round((resolvedCount / totalReports) * 100) || 0;
+  const MS_IN_DAY = 86400000;
+  const now = Date.now();
+  
+  // Process each report to determine if it's overdue
+  const reportsWithOverdue = sampleReports.map(report => {
+    if (report.status === 'resolved') return { ...report, isOverdue: false };
+    
+    const reportedDate = new Date(report.dateReported || report.createdAt || now).getTime();
+    const daysSinceReport = (now - reportedDate) / MS_IN_DAY;
+    const isOverdue = daysSinceReport > 15;
+    
+    return {
+      ...report,
+      isOverdue,
+      // Update status to overdue if needed
+      status: isOverdue ? 'overdue' : report.status
+    };
+  });
+  
+  const totalReports = reportsWithOverdue.length;
+  const resolvedCount = reportsWithOverdue.filter(r => r.status === 'resolved').length;
+  const overdueCount = reportsWithOverdue.filter(r => r.isOverdue).length;
+  const activeCount = totalReports - resolvedCount - overdueCount;
+  
+  const inProgressCount = reportsWithOverdue.filter(r => 
+    (r.status === 'in-progress' || r.status === 'active' || r.status === 'assigned' || r.status === 'verified') && 
+    !r.isOverdue
+  ).length;
+  
+  // For backward compatibility
+  const statusCounts = {
+    pending: reportsWithOverdue.filter(r => (r.status === 'pending' || r.status === 'reported') && !r.isOverdue).length,
+    inProgress: inProgressCount,
+    resolved: resolvedCount,
+    overdue: overdueCount
+  };
+  
+  const statusArray = [statusCounts.pending, inProgressCount, resolvedCount];
+  const resolutionRate = totalReports ? Math.round((statusCounts.resolved / totalReports) * 100) : 0;
   
   statsCards.innerHTML = `
     <div class="col-md-3">
@@ -572,6 +784,9 @@ function updateStatsCards() {
 
 // Update performance metrics
 function updatePerformanceMetrics() {
+  // Calculate points: 20 for profile creation + 10 per report
+  const totalPoints = 20 + (sampleReports.length * 10);
+  
   performanceMetrics.innerHTML = `
     <div class="card-header bg-white">
       <div class="d-flex justify-content-between align-items-center">
@@ -589,43 +804,25 @@ function updatePerformanceMetrics() {
     </div>
     <div class="card-body">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="d-flex align-items-center mb-3">
             <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
               <i class="fas fa-clock text-primary"></i>
             </div>
             <div>
               <h6 class="mb-0">Average Resolution Time</h6>
-              <p class="text-muted mb-0">3.5 days</p>
+              <p class="text-muted mb-0">7 days</p>
             </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="d-flex align-items-center mb-3">
-            <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
-              <i class="fas fa-star text-warning"></i>
-            </div>
-            <div>
-              <h6 class="mb-0">Average Rating</h6>
-              <div class="text-warning">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-                <span class="text-muted ms-1">(4.2/5)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="d-flex align-items-center">
             <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
               <i class="fas fa-trophy text-success"></i>
             </div>
             <div>
               <h6 class="mb-0">Points Earned</h6>
-              <p class="text-muted mb-0">1,250 points</p>
+              <p class="text-muted mb-0">${totalPoints} points (20 for profile + 10 per report)</p>
             </div>
           </div>
         </div>

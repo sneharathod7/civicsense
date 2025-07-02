@@ -85,8 +85,13 @@ router.post('/', protect, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const query = {};
-    if (req.query.userId) {
-      query.user = req.query.userId;
+    const { userId, userEmail } = req.query;
+    if (userId && userEmail) {
+      query.$or = [{ user: userId }, { userEmail }];
+    } else if (userId) {
+      query.user = userId;
+    } else if (userEmail) {
+      query.userEmail = userEmail;
     }
     const reports = await Report.find(query).sort({ date: -1 });
     res.json({ success: true, data: reports });

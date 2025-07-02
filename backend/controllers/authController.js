@@ -111,9 +111,17 @@ exports.login = async (req, res, next) => {
   try {
     const { email, emailOrMobile, mobile, password, role } = req.body;
 
-    // Determine identifier (email or mobile)
-    let identifier = email || emailOrMobile || mobile;
-    if (typeof identifier === 'string') identifier = identifier.trim();
+    // Determine identifier (email or mobile) and ensure it is a string to avoid runtime errors
+    let identifierRaw = email ?? emailOrMobile ?? mobile;
+    if (!identifierRaw) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email/mobile and password'
+      });
+    }
+
+    // Convert to string (covers cases where mobile was sent as a number)
+    let identifier = identifierRaw.toString().trim();
 
     // Validate identifier & password
     if (!identifier || !password) {
@@ -160,7 +168,8 @@ exports.login = async (req, res, next) => {
 
     // Update last login
     user.lastLogin = Date.now();
-    await user.save();
+    // Save without triggering full validation (older accounts may miss newly required fields)
+    await user.save({ validateBeforeSave: false });
 
     // Create token
     const token = generateToken(user._id);
