@@ -697,23 +697,23 @@ function updateStatsCards() {
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="icon-circle bg-primary-subtle mb-3 mx-auto">
             <i class="fas fa-clipboard-list fa-2x text-primary"></i>
-          </div>
+            </div>
           <h3 class="display-5 fw-bold metric-value text-dark">${totalReports}</h3>
           <p class="text-muted mb-0">Total Reports</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
     <div class="col-md col-sm-6 mb-3">
       <div class="card stats-card text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="icon-circle bg-success-subtle mb-3 mx-auto">
             <i class="fas fa-check-circle fa-2x text-success"></i>
-          </div>
+      </div>
           <h3 class="display-5 fw-bold metric-value text-dark">${resolvedCount}</h3>
           <p class="text-muted mb-0">Reports Resolved</p>
-        </div>
-      </div>
     </div>
+            </div>
+            </div>
     <div class="col-md col-sm-6 mb-3">
       <div class="card stats-card text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
@@ -730,23 +730,23 @@ function updateStatsCards() {
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="icon-circle bg-warning-subtle mb-3 mx-auto">
             <i class="fas fa-clock fa-2x text-warning"></i>
-          </div>
+            </div>
           <h3 class="display-5 fw-bold metric-value text-dark">${activeCount}</h3>
           <p class="text-muted mb-0">Active Reports</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
     <div class="col-md col-sm-6 mb-3">
       <div class="card stats-card text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="icon-circle bg-danger-subtle mb-3 mx-auto">
             <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
-          </div>
+      </div>
           <h3 class="display-5 fw-bold metric-value text-dark">${overdueCount}</h3>
           <p class="text-muted mb-0">Overdue</p>
-        </div>
-      </div>
     </div>
+            </div>
+            </div>
   `;
   
   animateMetricValues();
@@ -757,8 +757,8 @@ function updatePerformanceMetrics() {
   const performanceMetrics = document.getElementById('performanceMetrics');
   
   if (sampleReports.length === 0) {
-    performanceMetrics.innerHTML = `
-      <div class="card-header bg-white">
+  performanceMetrics.innerHTML = `
+    <div class="card-header bg-white">
         <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Performance Metrics</h5>
       </div>
       <div class="card-body text-center py-5">

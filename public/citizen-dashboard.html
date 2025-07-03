@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/citizen-dashboard.css" />
+  <link rel="stylesheet" href="/css/achievements.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <style>
     :root {
       --primary-color: #0d6efd;
@@ -148,6 +150,47 @@
       height: 100%;
       object-fit: cover;
     }
+
+    /* Welcome Section Styles */
+    .welcome-stats .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #6c757d;
+    }
+
+    .welcome-card {
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .welcome-card:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .progress-group {
+      margin-bottom: 1rem;
+    }
+
+    .progress-group .progress {
+      height: 6px;
+      background-color: rgba(0,0,0,0.05);
+    }
+
+    /* Quick Actions */
+    #quickActionContainer .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    #quickActionContainer .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
@@ -251,152 +294,182 @@
   </header>
   <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
 
-  <div class="container-fluid px-3 px-md-3">
-    <!-- Welcome Banner -->
-    <div class="card mb-4 p-4 shadow-sm">
-      <h3 id="greeting" class="mb-2 fw-semibold">🎉 Welcome back, Citizen! 👋</h3>
-      <p id="achievementHighlight" class="mb-1 text-primary fw-semibold">🌟 You've made 0 reports this month – Keep it up! 🏆</p>
-      <p id="impactSummary" class="mb-1 text-muted">📊 Your impact: --</p>
-      <p class="mb-0 small text-muted">
-        <span id="locationInfo"><i class="fas fa-map-marker-alt text-danger"></i> --</span>
-        <span id="urgentAlerts" class="ms-3 badge bg-danger d-none"><i class="fas fa-exclamation-circle"></i> <span id="urgentCount">0</span> urgent issues</span>
-      </p>
+  <!-- Main Dashboard Content -->
+  <div class="container-fluid dashboard-content">
+    <div class="dashboard-grid">
+      <!-- Welcome Section -->
+      <div id="welcomeContainer" class="welcome-section">
+        <!-- Dynamic welcome content will be inserted here -->
     </div>
 
     <!-- Quick Actions -->
-    <div class="row mb-4" id="quickActions">
-      <!-- three cards copied from previous markup -->
-      <div class="col-md-4 mb-3">
-        <a href="/report.html" class="text-decoration-none">
-          <div class="card text-center feature-card h-100">
-            <div class="card-body">
-              <i class="fas fa-plus-circle fa-3x mb-3 text-primary"></i>
-              <h5 class="card-title">Report New Issue</h5>
-              <p class="card-text small">Help improve your locality by reporting issues.</p>
-            </div>
-          </div>
-        </a>
+      <div id="quickActionContainer" class="quick-actions-section">
+        <!-- Dynamic quick actions will be inserted here -->
       </div>
-      <div class="col-md-4 mb-3">
-        <a href="/map.html" class="text-decoration-none">
-          <div class="card text-center feature-card h-100">
-            <div class="card-body">
-              <i class="fas fa-map-marked-alt fa-3x mb-3 text-success"></i>
-              <h5 class="card-title">View Issues Near You</h5>
-              <p class="card-text small">Explore nearby civic problems on map.</p>
-            </div>
-          </div>
-        </a>
-      </div>
-      <div class="col-md-4 mb-3">
-        <a href="#statsCard" class="text-decoration-none">
-          <div class="card text-center feature-card h-100">
-            <div class="card-body">
-              <i class="fas fa-chart-bar fa-3x mb-3 text-info"></i>
-              <h5 class="card-title">Track Progress &amp; Stats</h5>
-              <p class="card-text small">See how your reports are progressing.</p>
-            </div>
-          </div>
-        </a>
-      </div>
-    </div>
 
-    <!-- Statistics -->
-    <div class="card mb-4" id="statsCard">
-      <div class="card-header bg-light fw-bold">Your Statistics (This Month)</div>
+      <!-- Stats Section -->
+      <section class="stats-section">
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="statReported">0</div>
+            <div class="stat-label">Total Reports</div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-file-earmark-text"></i>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="statResolved">0</div>
+            <div class="stat-label">Resolved Reports</div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-check-circle"></i>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="statRate">0%</div>
+            <div class="stat-label">Resolution Rate</div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-graph-up"></i>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="statPoints">0</div>
+            <div class="stat-label">Impact Points</div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-award"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Your Impact Section -->
+      <section class="impact-section">
+        <div id="impactSummary">
+          <!-- Impact summary will be dynamically populated by JavaScript -->
+      <!-- Impact Metrics Section -->
+      <div id="impactMetricsSection" class="impact-metrics-section">
+        <div class="row mb-4">
+          <div class="col-12">
+            <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Your Impact</h5>
+          </div>
+          <div class="col-md-4">
+            <div class="impact-card">
+              <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-clock text-primary me-2"></i>
+                <h6 class="mb-0">Avg. Resolution Time</h6>
+              </div>
+              <h3 id="avgResolutionTime">0 days</h3>
+              <div class="progress">
+                <div id="resolutionTimeProgress" class="progress-bar bg-primary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="impact-card">
+              <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-smile text-warning me-2"></i>
+                <h6 class="mb-0">Satisfaction Rate</h6>
+              </div>
+              <h3 id="satisfactionRate">0/5</h3>
+              <div class="progress">
+                <div id="satisfactionProgress" class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="impact-card">
+              <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-bolt text-success me-2"></i>
+                <h6 class="mb-0">Response Rate</h6>
+              </div>
+              <h3 id="responseRate">0%</h3>
+              <div class="progress">
+                <div id="responseProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics & Recent Activity Row -->
+      <div class="row g-4">
+        <!-- Metrics -->
+        <div class="col-lg-4">
+          <div class="activity-card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Impact Metrics
+              </h5>
+    </div>
       <div class="card-body">
-        <p class="mb-2">
-          🎯 Issues Reported: <strong id="statReported">0</strong>
-          <span class="ms-3">✅ Resolved: <strong id="statResolved">0</strong></span>
-          <span class="ms-3">⏳ In Progress: <strong id="statProgress">0</strong></span>
-          <span class="ms-3">🔴 New: <strong id="statNew">0</strong></span>
-        </p>
-        <p class="mb-0">
-          📈 Resolution Rate: <strong id="statRate">0%</strong>
-          <span class="ms-3">⭐ Community Rating: <strong id="statRating">0</strong></span>
-          <span class="ms-3">🏆 Civic Points: <strong id="statPoints">0</strong></span>
-        </p>
+              <div id="impactMetrics">
+                <div class="metric-item mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Resolution Time</span>
+                    <span class="fw-bold" id="avgResolutionTime">--</span>
+                  </div>
+                  <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-primary" id="resolutionTimeProgress" role="progressbar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="metric-item mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Satisfaction Rate</span>
+                    <span class="fw-bold" id="satisfactionRate">--</span>
+                  </div>
+                  <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" id="satisfactionProgress" role="progressbar" style="width: 0%"></div>
       </div>
     </div>
-
-    <!-- Impact Metrics -->
-    <div class="card mb-4" id="impactCard">
-      <div class="card-header bg-light fw-bold">Impact Metrics</div>
-      <ul class="list-group list-group-flush" id="impactMetrics">
-        <li class="list-group-item">⚡ 5 streetlights fixed improving safety</li>
-        <li class="list-group-item">🌳 2 park issues resolved benefiting families</li>
-      </ul>
-      <div class="card-footer">
-        <div class="d-flex justify-content-between gap-2">
-          <a href="/impact.html" class="btn btn-primary flex-grow-1">📊 Analytics</a>
-          <a href="/achievements.html" class="btn btn-outline-secondary flex-grow-1">🎖️ Achievements</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Badges & Achievements -->
-    <div class="card mb-4" id="badgesCard">
-      <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
-        <span>Your Badges</span>
-        <a href="/achievements.html" class="btn btn-sm btn-outline-primary">View All</a>
-      </div>
-      <div class="card-body">
-        <div class="d-flex flex-wrap gap-3 mb-3" id="badgesGrid">
-          <div class="text-center">
-            <div class="badge-icon mb-1">🏅</div>
-            <small class="d-block">First Report</small>
-          </div>
-          <div class="text-center">
-            <div class="badge-icon mb-1">🌟</div>
-            <small class="d-block">5 Reports</small>
-          </div>
-          <div class="text-center">
-            <div class="badge-icon mb-1">🏆</div>
-            <small class="d-block">Issue Resolved</small>
-          </div>
-          <div class="text-center">
-            <div class="badge-icon mb-1">💡</div>
-            <small class="d-block">Idea Contributor</small>
-          </div>
-        </div>
-        <div class="alert alert-info mb-0 py-2">
-          <small>🌟 <strong>Next Milestone:</strong> 3 more reports to unlock "Community Champion" badge</small>
+                <div class="metric-item mb-3">
+                  <div class="d-flex justify-content-between">
+                    <span>Response Rate</span>
+                    <span class="fw-bold" id="responseRate">--</span>
+                  </div>
+                  <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-warning" id="responseProgress" role="progressbar" style="width: 0%"></div>
         </div>
       </div>
     </div>
+          </div>
+          </div>
+          </div>
+          </div>
+        </div>
 
-    <!-- Recent Activity -->
-    <div class="card mb-4" id="recentCard">
-      <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
-        <span>Recent Activity</span>
-        <a href="/my-issues.html" class="btn btn-sm btn-outline-primary">View All</a>
-      </div>
-      <div class="list-group list-group-flush" id="recentList">
-        <div class="list-group-item border-0 py-2">
-          <div class="d-flex w-100 justify-content-between">
-            <span>✅ <strong>#CR-1245</strong> - Pothole fixed</span>
-            <small class="text-muted">2h ago</small>
+        <!-- Recent Activity -->
+        <div class="row recent-activity-section">
+          <div class="col-12">
+            <div class="activity-card h-100">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                  <i class="fas fa-history me-2"></i>Recent Activity
+                </h5>
+                <a href="/my-reports.html" class="btn btn-sm btn-outline-primary">
+                  View All
+                </a>
+              </div>
+              <div class="card-body p-0">
+                <div class="row g-3 p-3" id="recentActivityContainer">
+                  <div class="col-12 text-center text-muted py-4">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Loading recent activity...
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <small class="text-muted d-block ps-3">Near Central Park</small>
-        </div>
-        <div class="list-group-item border-0 py-2">
-          <div class="d-flex w-100 justify-content-between">
-            <span>🔄 <strong>#CR-1238</strong> - Streetlight repair in progress</span>
-            <small class="text-muted">1d ago</small>
-          </div>
-          <small class="text-muted d-block ps-3">Maple Street</small>
-        </div>
-        <div class="list-group-item border-0 py-2">
-          <div class="d-flex w-100 justify-content-between">
-            <span>📝 <strong>#CR-1221</strong> - New report submitted</span>
-            <small class="text-muted">2d ago</small>
-          </div>
-          <small class="text-muted d-block ps-3">Community Park</small>
         </div>
       </div>
+      
+      <!-- Badges & Achievements -->
+      <!-- Removed redundant badge section -->
+
     </div>
-
-
   </div>
 
   <!-- Footer -->
