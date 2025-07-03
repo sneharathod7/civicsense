@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Details - CivicSense</title>
+  <!-- Bootstrap 5.3.2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- Custom CSS (optional) -->
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f5f6fa;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #0d6efd 0%, #4e86ff 100%);
+      color: #fff;
+      border-bottom: none;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+    }
+    .badge {
+      font-size: 0.85rem;
+      padding: 0.5em 0.75em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Simple Navbar -->
+  <header class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-primary" href="/citizen-dashboard.html">CivicSense</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/my-reports.html">My Reports</a></li>
+          <li class="nav-item"><a class="nav-link" href="/report.html">New Report</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container py-4">
+    <div id="reportDetailContainer" class="row justify-content-center">
+    <!-- Loading indicator (will be replaced once data is loaded) -->
+    <div class="d-flex justify-content-center align-items-center" style="height: 60vh;">
+      <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p class="mb-0 text-muted">Loading report details...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Page Script -->
+  <script src="/js/report-detail.js" type="module"></script>
+</body>
+</html>

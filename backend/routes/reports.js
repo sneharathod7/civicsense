@@ -80,24 +80,53 @@ router.post('/', protect, async (req, res) => {
 });
 
 // @route   GET api/reports
-// @desc    Get all reports
-// @access  Public
-router.get('/', async (req, res) => {
+// @desc    Get all reports for the authenticated user
+// @access  Private
+router.get('/', protect, async (req, res) => {
   try {
+    console.log('Fetching reports for user:', {
+      userId: req.user?._id,
+      email: req.user?.email
+    });
+
+    // Build query based on available user info
     const query = {};
-    const { userId, userEmail } = req.query;
-    if (userId && userEmail) {
-      query.$or = [{ user: userId }, { userEmail }];
-    } else if (userId) {
-      query.user = userId;
-    } else if (userEmail) {
-      query.userEmail = userEmail;
+    
+    if (req.user?._id) {
+      query.user = req.user._id;
+    } 
+    
+    if (req.user?.email) {
+      query.$or = query.$or || [];
+      query.$or.push({ userEmail: req.user.email });
     }
-    const reports = await Report.find(query).sort({ date: -1 });
-    res.json({ success: true, data: reports });
+    
+    // If no user info is available, return empty array
+    if (!query.user && !query.$or) {
+      console.log('No user information available to fetch reports');
+      return res.json({ success: true, data: [] });
+    }
+
+    console.log('Querying reports with:', query);
+    
+    const reports = await Report.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+      
+    console.log(`Found ${reports.length} reports`);
+    
+    res.json({ 
+      success: true, 
+      data: reports 
+    });
+    
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Error fetching reports:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server Error',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 

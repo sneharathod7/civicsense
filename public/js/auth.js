@@ -65,28 +65,28 @@ function setUserAvatar() {
             const imagePath = user.profileImage || (user.photo ? `/uploads/${user.photo}` : null);
             if (imagePath) {
                 img.src = imagePath;
-                img.alt = 'Profile';
-                img.className = 'avatar-img';
-                avatar.appendChild(img);
+            img.alt = 'Profile';
+            img.className = 'avatar-img';
+            avatar.appendChild(img);
                 return;
             }
         }
         
         // If we get here, no valid image was found, use initials
-        let initial = '?';
+            let initial = '?';
         // Try to get initials from firstName and lastName first
         if (user.firstName && user.lastName) {
             initial = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
         } 
         // Fallback to name if available
         else if (user.name && user.name.trim()) {
-            initial = user.name.trim()[0].toUpperCase();
+                initial = user.name.trim()[0].toUpperCase();
         } 
         // Last resort, use email
         else if (user.email && user.email.trim()) {
-            initial = user.email.trim()[0].toUpperCase();
-        }
-        avatar.textContent = initial;
+                initial = user.email.trim()[0].toUpperCase();
+            }
+            avatar.textContent = initial;
     });
 }
 

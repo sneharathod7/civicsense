@@ -26,6 +26,8 @@ const BADGES = {
 // @route   GET /api/v1/achievements
 // @access  Private
 exports.getAchievements = asyncHandler(async (req, res, next) => {
+    console.log('Fetching achievements for user:', req.user.id);
+
     // Get all user reports with their actual dates
     const userComplaints = await Complaint.find({ user: req.user.id })
         .select('createdAt status updatedAt');
@@ -33,16 +35,25 @@ exports.getAchievements = asyncHandler(async (req, res, next) => {
     const userReports = await Report.find({ user: req.user.id })
         .select('createdAt status updatedAt');
     
+    console.log('User Complaints:', userComplaints.length);
+    console.log('User Reports:', userReports.length);
+    
     const totalReportsCount = userComplaints.length + userReports.length;
     
     // Count resolved reports
     const resolvedComplaints = userComplaints.filter(c => c.status === 'resolved');
     const resolvedReports = userReports.filter(r => r.status === 'resolved');
+    
+    console.log('Resolved Complaints:', resolvedComplaints.length);
+    console.log('Resolved Reports:', resolvedReports.length);
+    
     const totalResolvedCount = resolvedComplaints.length + resolvedReports.length;
 
     // Get user profile data
     const user = await User.findById(req.user.id);
     const profileCompleted = user.profileCompleted || false;
+    
+    console.log('Profile Completed:', profileCompleted);
     
     // Calculate points directly
     const reportPoints = totalReportsCount * 10;
@@ -148,6 +159,8 @@ exports.getAchievements = asyncHandler(async (req, res, next) => {
         }
     }
     
+    console.log('Generated Badges:', badges);
+    
     // Return the response with calculated data
     res.status(200).json({
         success: true,
@@ -161,3 +174,4 @@ exports.getAchievements = asyncHandler(async (req, res, next) => {
         }
     });
 }); 
+ 

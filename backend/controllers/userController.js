@@ -419,8 +419,8 @@ async function updateAchievementPoints(userId, points, reason) {
         upvotesReceived: 0,
         commentsPosted: 0
       }
-    });
-  }
+      });
+    }
 
   achievement.points += points;
   achievement.pointsHistory.push({
@@ -432,7 +432,7 @@ async function updateAchievementPoints(userId, points, reason) {
 
   await achievement.save();
   return achievement;
-}
+    }
 
 // @desc    Update user profile
 // @route   PUT /api/v1/users/profile
@@ -446,8 +446,8 @@ exports.updateProfile = asyncHandler(async (req, res, next) => {
   };
 
   const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
-    new: true,
-    runValidators: true
+        new: true,
+        runValidators: true
   });
 
   // Check if this is the first time the profile is being completed
@@ -460,10 +460,10 @@ exports.updateProfile = asyncHandler(async (req, res, next) => {
     await user.save();
   }
 
-  res.status(200).json({
-    success: true,
+    res.status(200).json({
+      success: true,
     data: user
-  });
+      });
 });
 
 // Helper function to get token from model, create cookie and send response
