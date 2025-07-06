@@ -20,6 +20,16 @@
   let marker = null;
   let selectedImages = []; // Store uploaded images
   
+  // Category to Department mapping
+  const categoryToDepartment = {
+    "roads": "Public Works Department (PWD)",
+    "water": "Water Supply & Sewerage Board",
+    "electric": "Electricity Board (e.g., MSEB, BESCOM)",
+    "environment": "Pollution Control Board / Environment Department",
+    "sanitation": "Municipal Corporation (Sanitation Wing)",
+    "infrastructure": "Urban Development Authority / PWD"
+  };
+  
   // DEBUG: Check if map container exists
   function checkMapContainer() {
     const mapElement = document.getElementById('map');
@@ -374,6 +384,7 @@
     const dropdownBtn = $('#categoryDropdown');
     const dropdownMenu = $('#categoryMenu');
     const iconButtons = $$('.category-icon');
+    const departmentBox = document.getElementById('departmentBox');
     
     if (!dropdownMenu || !iconButtons.length) return;
     
@@ -412,6 +423,11 @@
         
         // Update dropdown button content
         dropdownBtn.innerHTML = `${iconHtml}${label} ▼`;
+      }
+      
+      // Update department field
+      if (departmentBox) {
+        departmentBox.value = categoryToDepartment[value] || '';
       }
     }
     
@@ -452,6 +468,7 @@
       const categoryInput = document.getElementById('selectedCategory');
       const descriptionInput = document.getElementById('aiDescription');
       const addressInput = document.getElementById('addressBox');
+      const departmentBox = document.getElementById('departmentBox');
       
       if (!categoryInput?.value) {
         alert('Please select a category');
@@ -479,6 +496,7 @@
           title: 'Civic Issue Report',
           description: descriptionInput.value,
           category: categoryInput.value,
+          department: departmentBox ? departmentBox.value : '',
           location: {
             type: 'Point',
             coordinates: currentCoords ? [currentCoords.lng, currentCoords.lat] : [0, 0],
@@ -527,6 +545,75 @@
         submitBtn.innerHTML = 'Submit Report';
       }
     });
+  }
+
+  // GEMINI API INTEGRATION
+  async function analyzeImageWithGemini(imageFile) {
+    const API_KEY = 'AIzaSyD9VoQlgmx6ebcwng8WeV7z7lQ5DyAHk9M'; // with quotes
+      // For text-only:
+      const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    // Show loading state
+    const aiStatus = document.getElementById('aiStatus');
+    const descriptionLoader = document.getElementById('descriptionLoader');
+    const aiDescription = document.getElementById('aiDescription');
+    
+    aiStatus.textContent = 'Analyzing...';
+    aiStatus.className = 'badge bg-primary ms-2';
+    descriptionLoader.classList.remove('d-none');
+    aiDescription.disabled = true;
+    aiDescription.placeholder = 'Analyzing image...';
+    
+    try {
+      // Convert image to base64
+      const base64Image = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(imageFile);
+      });
+      
+      const requestBody = {
+        contents: [{
+          parts: [
+            { text: "Describe the public issue visible in this image in a sentence or two as if reporting it to a municipality. Focus on the problem, its location, and any immediate concerns. Be concise and factual." },
+            {
+              inline_data: {
+                mime_type: imageFile.type,
+                data: base64Image
+              }
+            }
+          ]
+        }]
+      };
+      
+      // Log the request body for debugging
+      console.log('Gemini API requestBody:', requestBody);
+      
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Gemini API error response:', errorText);
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 
+             'Could not generate description. Please describe the issue manually.';
+    } catch (error) {
+      console.error('Error analyzing image with Gemini:', error);
+      return 'Error: Could not generate description. Please describe the issue manually.';
+    } finally {
+      // Hide loader
+      descriptionLoader.classList.add('d-none');
+      aiDescription.disabled = false;
+    }
   }
 
   // IMAGE UPLOAD (label + input approach – no programmatic clicks needed)
@@ -582,7 +669,7 @@
       }
     }
     
-    function handleFileSelect(event) {
+    async function handleFileSelect(event) {
       console.log('handleFileSelect fired');
       const file = event.target.files[0];
       if (!file) return;
@@ -595,7 +682,7 @@
       
       const reader = new FileReader();
       
-      reader.onload = function(e) {
+      reader.onload = async function(e) {
         // Add to selected images
         selectedImages = [{
           file: file,
@@ -610,16 +697,41 @@
           aiCard.classList.remove('d-none');
         }
 
-        // Simulate AI analysis delay
-        setTimeout(() => {
-          if (aiIssueType) aiIssueType.textContent = 'Road Infrastructure';
-          if (aiCategory) aiCategory.textContent = selectedCategory || 'Pothole';
-          if (aiGps) aiGps.textContent = currentCoords ? `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Not available';
-          if (aiPriority) aiPriority.textContent = 'High';
-          if (aiDescription) {
-            aiDescription.value = `Auto-generated description for ${selectedCategory || 'pothole'} at ${currentCoords ? `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'unknown location'}`;
+        try {
+          // Get AI-generated description
+          const description = await analyzeImageWithGemini(file);
+          
+          // Update UI with AI results
+          const aiStatus = document.getElementById('aiStatus');
+          aiStatus.textContent = 'Analysis Complete';
+          aiStatus.className = 'badge bg-success ms-2';
+          
+          if (aiIssueType) aiIssueType.textContent = 'Analyzed Issue';
+          if (aiCategory) aiCategory.textContent = selectedCategory || 'Issue';
+          if (aiGps) {
+            aiGps.textContent = currentCoords ? 
+              `${currentCoords.lat.toFixed(6)}, ${currentCoords.lng.toFixed(6)}` : 'Location not available';
           }
-        }, 500);
+          if (aiPriority) {
+            aiPriority.textContent = 'Medium';
+            aiPriority.className = 'badge bg-warning text-dark';
+          }
+          
+          if (aiDescription) {
+            aiDescription.value = description;
+            aiDescription.placeholder = 'Describe the issue...';
+          }
+        } catch (error) {
+          console.error('Error processing image:', error);
+          const aiStatus = document.getElementById('aiStatus');
+          aiStatus.textContent = 'Analysis Failed';
+          aiStatus.className = 'badge bg-danger ms-2';
+          
+          if (aiDescription) {
+            aiDescription.value = '';
+            aiDescription.placeholder = 'Could not generate description. Please describe the issue manually.';
+          }
+        }
       };
       reader.readAsDataURL(file);
     }
