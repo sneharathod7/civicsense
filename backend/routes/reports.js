@@ -13,7 +13,7 @@ router.post('/', protect, async (req, res) => {
     console.log('req.user:', req.user);
     console.log('Authorization header:', req.headers.authorization);
 
-    const { title, description, location, category, images, userEmail } = req.body;
+    const { title, description, location, category, images, userEmail, department } = req.body;
     
     // Compute coordinates robustly
     const coords = Array.isArray(location?.coordinates) && location.coordinates.length === 2
@@ -37,7 +37,8 @@ router.post('/', protect, async (req, res) => {
       images,
       status: 'pending',
       userEmail: req.user?.email || userEmail || 'no-email@example.com',
-      userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile'
+      userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile',
+      department
     };
     if (req.user?.id) {
       reportData.user = req.user.id; // Only set if authenticated
@@ -148,6 +149,38 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ msg: 'Report not found' });
     }
     res.status(500).send('Server Error');
+  }
+});
+
+// @route   GET api/reports/stats
+// @desc    Get report stats for a department
+// @access  Private (admin only)
+router.get('/stats', protect, async (req, res) => {
+  try {
+    // Accept department from query or JWT (prefer JWT if available)
+    let department = req.query.department;
+    if (req.user && req.user.department) {
+      department = req.user.department.name || req.user.department;
+    }
+    if (!department) {
+      return res.status(400).json({ success: false, message: 'Department required' });
+    }
+    // Normalize department string for matching
+    department = department.trim();
+    // Aggregate counts by status
+    const [total, pending, inProgress, resolved] = await Promise.all([
+      Report.countDocuments({ department }),
+      Report.countDocuments({ department, status: { $in: ['pending', 'Pending'] } }),
+      Report.countDocuments({ department, status: { $in: ['in-progress', 'in_progress', 'In Progress'] } }),
+      Report.countDocuments({ department, status: { $in: ['resolved', 'Resolved'] } })
+    ]);
+    res.json({
+      success: true,
+      data: { total, pending, inProgress, resolved }
+    });
+  } catch (err) {
+    console.error('Error fetching department stats:', err);
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
 });
 
