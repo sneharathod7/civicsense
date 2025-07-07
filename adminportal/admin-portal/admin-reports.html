@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Department Reports - CivicSense</title>
+  <!-- Bootstrap 5.3.2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --transition: all 0.3s ease;
+      --success: #198754;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #0dcaf0;
+      --secondary: #6c757d;
+      --light: #f8f9fa;
+      --dark: #212529;
+    }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Header styles */
+    .sticky-top {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255, 255, 255, 0.95);
+      transition: var(--transition);
+    }
+    
+    /* Navigation links */
+    .nav-link {
+      color: #495057;
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 1rem;
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--primary-color);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 1rem;
+      background-color: var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: calc(100% - 2rem);
+    }
+    
+    /* Timeline styles */
+    /* Timeline Styles */
+    .timeline {
+      position: relative;
+      padding-left: 2.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 1.25rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #e9ecef;
+      z-index: 1;
+    }
+    
+    .timeline-item {
+      position: relative;
+      padding-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .timeline-item:last-child {
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    
+    .timeline-marker {
+      position: absolute;
+      left: -2.5rem;
+      top: 0.25rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      border: 2px solid #dee2e6;
+      transition: all 0.3s ease;
+    }
+    
+    .timeline-item.completed .timeline-marker {
+      background-color: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+    
+    .timeline-item.current .timeline-marker {
+      background-color: white;
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+    }
+    
+    .timeline-item.pending .timeline-marker {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+      color: #6c757d;
+    }
+    
+    .timeline-content {
+      position: relative;
+      padding: 0.75rem 1rem;
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      border-left: 3px solid var(--primary);
+    }
+    
+    .timeline-item.completed .timeline-content {
+      border-left-color: var(--success);
+    }
+    
+    .timeline-item.current .timeline-content {
+      border-left-color: var(--primary);
+      background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    .timeline-connector {
+      position: absolute;
+      left: -2.5rem;
+      top: 2.5rem;
+      bottom: -1.5rem;
+      width: 2px;
+      background-color: #e9ecef;
+      z-index: 1;
+    }
+    
+    .timeline-item:last-child .timeline-connector {
+      display: none;
+    }
+    
+    /* Status badges */
+    .badge {
+      font-weight: 500;
+      padding: 0.35em 0.65em;
+    }
+    
+    .badge-status-open {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .badge-status-in-progress {
+      background-color: #0dcaf0;
+      color: #000;
+    }
+    
+    .badge-status-resolved {
+      background-color: #198754;
+      color: white;
+    }
+    
+    .badge-status-closed {
+      background-color: #212529;
+      color: white;
+    }
+    
+    .badge-priority-high {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .badge-priority-medium {
+      background-color: #fd7e14;
+      color: #000;
+    }
+    
+    .badge-priority-low {
+      background-color: #20c997;
+      color: #000;
+    }
+    
+    /* Report Details Styles */
+    .report-details {
+      padding: 0.5rem;
+    }
+    
+    .report-details .card {
+      border: none;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      margin-bottom: 1.5rem;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .report-details .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1rem 1.25rem;
+    }
+    
+    .report-details .card-header h5 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+    }
+    
+    .report-details .card-header .fas {
+      width: 1.5rem;
+      text-align: center;
+      margin-right: 0.5rem;
+      color: var(--primary);
+    }
+    
+    .report-details .card-body {
+      padding: 1.5rem;
+    }
+    
+    .report-details h6 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.75rem;
+    }
+    
+    .report-details p {
+      color: #495057;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+    
+    .report-details strong {
+      color: #343a40;
+      font-weight: 500;
+    }
+    
+    /* Status badges */
+    .badge {
+      font-weight: 500;
+      padding: 0.4em 0.75em;
+      border-radius: 0.25rem;
+      font-size: 0.8em;
+      text-transform: capitalize;
+    }
+    
+    .badge-status-open {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .badge-status-in-progress {
+      background-color: #0dcaf0;
+      color: #000;
+    }
+    
+    .badge-status-resolved {
+      background-color: #198754;
+      color: white;
+    }
+    
+    .badge-status-closed {
+      background-color: #212529;
+      color: white;
+    }
+    
+    .badge-priority-high {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .badge-priority-medium {
+      background-color: #fd7e14;
+      color: #000;
+    }
+    
+    .badge-priority-low {
+      background-color: #20c997;
+      color: #000;
+    }
+    
+    /* Image gallery */
+    .img-thumbnail {
+      border-radius: 0.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid #dee2e6;
+    }
+    
+    .img-thumbnail:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    
+    /* List group overrides */
+    .list-group-item {
+      border-left: 0;
+      border-right: 0;
+      padding: 1rem 0;
+      border-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .list-group-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+    
+    .list-group-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    /* Loading overlay */
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    .nav-link::after {
+      bottom: 0;
+      left: 1rem;
+      background-color: var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: calc(100% - 2rem);
+    }
+    
+    /* Buttons */
+    .btn {
+      transition: var(--transition);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Cards */
+    .card {
+      transition: var(--transition);
+      border-radius: 12px;
+      overflow: hidden;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      transform: translateY(-3px);
+    }
+
+    .card-header {
+      border-bottom: none;
+      padding: 1rem 1.25rem;
+      font-weight: 600;
+    }
+
+    /* Stats Cards */
+    .stats-card {
+      transition: all 0.3s ease;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .icon-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    /* Report Cards */
+    .report-card {
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+
+    .report-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Status Badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-active {
+      background-color: #e3f2fd;
+      color: #0d6efd;
+    }
+
+    .status-in-progress {
+      background-color: #fff3cd;
+      color: #ffc107;
+    }
+
+    .status-resolved {
+      background-color: #d1e7dd;
+      color: #198754;
+    }
+
+    .status-overdue {
+      background-color: #f8d7da;
+      color: #dc3545;
+    }
+
+    /* Category Icons */
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+    }
+
+    /* Progress Steps */
+    .progress-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+    
+    /* Employee assignment modal styles */
+    .avatar-sm {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    
+    .avatar-title {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.25rem;
+    }
+    
+    .assign-employee-btn {
+      transition: all 0.2s ease-in-out;
+    }
+    
+    .assign-employee-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .assign-employee-btn:active {
+      transform: translateY(0);
+    }
+    
+    #employeeList tr {
+      transition: background-color 0.2s ease;
+    }
+    
+    #employeeList tr:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    #noEmployees {
+      padding: 2rem 0;
+    }
+    
+    #noEmployees i {
+      opacity: 0.6;
+      margin-bottom: 1rem;
+    }
+
+    .progress-step .step-dot {
+      width: 16px;
+      height: 16px;
+      background-color: #dee2e6;
+      border-radius: 50%;
+      margin: 0 auto 5px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .progress-step.completed .step-dot {
+      background-color: #28a745;
+    }
+    
+    /* Form controls */
+    .form-control:focus, .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <!-- Admin Navbar (copied from dashboard.html) -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">
+        <i class="fas fa-shield-alt me-2 text-primary"></i>
+        <span>CivicSense</span>
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="fas fa-chart-line me-1"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="admin-reports.html">
+              <i class="fas fa-file-alt me-1"></i> Department Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">
+              <i class="fas fa-file-alt me-1"></i> Reports
+            </a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center">
+          <div class="dropdown">
+            <div
+              class="d-flex align-items-center"
+              role="button"
+              id="userDropdown"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <div class="avatar-circle me-2" id="userInitials">AD</div>
+              <span class="d-none d-md-inline fw-medium text-muted small">Admin</span>
+              <i class="fas fa-chevron-down ms-2 text-muted small"></i>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+              <li>
+                <a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i>Profile</a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#" id="logoutBtn">
+                  <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container-fluid py-5" style="margin-top: 4.5rem;">
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="icon-circle bg-primary bg-opacity-10 text-primary mx-auto">
+              <i class="fas fa-file-alt fa-lg"></i>
+            </div>
+            <h3 class="mb-1" id="totalReports">0</h3>
+            <p class="text-muted mb-0">Total Reports</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="icon-circle bg-warning bg-opacity-10 text-warning mx-auto">
+              <i class="fas fa-spinner fa-lg"></i>
+            </div>
+            <h3 class="mb-1" id="inProgress">0</h3>
+            <p class="text-muted mb-0">In Progress</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="icon-circle bg-success bg-opacity-10 text-success mx-auto">
+              <i class="fas fa-check-circle fa-lg"></i>
+            </div>
+            <h3 class="mb-1" id="resolved">0</h3>
+            <p class="text-muted mb-0">Resolved</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card stats-card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto">
+              <i class="fas fa-exclamation-triangle fa-lg"></i>
+            </div>
+            <h3 class="mb-1" id="overdue">0</h3>
+            <p class="text-muted mb-0">Overdue</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body p-4">
+        <div class="row g-3">
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label">Status</label>
+            <select id="filter-status" class="form-select">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="in progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label">Time Range</label>
+            <select id="filter-time" class="form-select">
+              <option value="">All Time</option>
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label">Deadline</label>
+            <select id="filter-deadline" class="form-select">
+              <option value="">All Deadlines</option>
+              <option value="overdue">Overdue</option>
+              <option value="today">Due Today</option>
+              <option value="week">Next 7 Days</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
+            <button id="btn-apply-filters" class="btn btn-primary w-100">
+              <i class="fas fa-filter me-2"></i>Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="row g-4" id="reportsList">
+      <!-- Reports will be loaded here dynamically -->
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading reports...</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Reports pagination" class="mt-4">
+      <ul class="pagination justify-content-center" id="pagination">
+        <!-- Pagination will be added here by JavaScript -->
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Report Details Modal -->
+  <div class="modal fade" id="reportDetailsModal" tabindex="-1" aria-labelledby="reportDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reportDetailsModalLabel">Report Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="reportDetailsContent">
+          <!-- Dynamic content will be loaded here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="editReportBtn">Edit Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Report Modal -->
+  <div class="modal fade" id="editReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update Report</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="edit-report-form">
+          <div class="modal-body">
+            <input type="hidden" id="edit-report-id" />
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select id="edit-status" class="form-select" required>
+                  <option value="pending">Pending</option>
+                  <option value="in progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Priority</label>
+                <select id="edit-priority" class="form-select" required>
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Assign To</label>
+              <select id="edit-assigned" class="form-select">
+                <option value="">Unassigned</option>
+                <!-- Will be populated with department employees -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Due Date</label>
+              <input type="date" id="edit-due-date" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Add Comment</label>
+              <textarea id="edit-comment" class="form-control" rows="3" placeholder="Add an internal comment or update..."></textarea>
+              <div class="form-text">This will be visible to department staff only.</div>
+            </div>
+            <div id="edit-msg" class="alert d-none" role="alert"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Details Modal -->
+  <div class="modal fade" id="employeeDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content overflow-hidden">
+        <!-- Header with gradient background -->
+        <div class="modal-header bg-gradient-primary text-white border-0 position-relative" style="min-height: 120px;">
+          <div class="d-flex align-items-center w-100">
+            <div class="position-relative me-3">
+              <img src="https://ui-avatars.com/api/?name=Employee&background=fff&color=0D6EFD&size=80" 
+                   class="rounded-circle border border-3 border-white shadow-sm" 
+                   alt="Employee"
+                   id="employeePhoto"
+                   style="width: 80px; height: 80px; object-fit: cover;">
+              <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-white" 
+                    style="width: 15px; height: 15px;"></span>
+            </div>
+            <div class="flex-grow-1">
+              <h4 class="modal-title mb-0 text-dark" id="employeeName">Employee Name</h4>
+              <div class="d-flex align-items-center flex-wrap mt-1">
+                <span class="badge bg-white text-primary me-2 mb-1" id="employeeId">ID: -</span>
+                <span class="badge bg-white text-primary mb-1" id="employeeDepartment">Department</span>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body p-0">
+          <div class="row g-0">
+            <!-- Left Column - Employee Info -->
+            <div class="col-md-6 p-4">
+              <h5 class="mb-4 fw-bold text-primary">Employee Information</h5>
+              
+              <div class="mb-4">
+                <h6 class="text-uppercase small fw-bold text-muted mb-3">Contact Details</h6>
+                <div class="d-flex align-items-center mb-3">
+                  <div class="bg-light rounded-circle p-2 me-3">
+                    <i class="fas fa-envelope text-primary"></i>
+                  </div>
+                  <div>
+                    <p class="mb-0 small text-muted">Email</p>
+                    <a href="#" id="employeeEmail" class="text-decoration-none text-dark fw-medium">email@example.com</a>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                  <div class="bg-light rounded-circle p-2 me-3">
+                    <i class="fas fa-phone text-primary"></i>
+                  </div>
+                  <div>
+                    <p class="mb-0 small text-muted">Phone</p>
+                    <a href="#" id="employeePhone" class="text-decoration-none text-dark fw-medium">+1 234 567 890</a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <h6 class="text-uppercase small fw-bold text-muted mb-3">Department & Status</h6>
+                <div class="d-flex flex-wrap gap-2">
+                  <span class="badge bg-primary bg-opacity-10 text-primary" id="employeeDepartmentBadge">Department</span>
+                  <span class="badge bg-success bg-opacity-10 text-success" id="employeeStatus">Active</span>
+                  <span class="badge bg-info bg-opacity-10 text-info" id="employeeRole">Field Agent</span>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <h6 class="text-uppercase small fw-bold text-muted mb-3">Assigned Report</h6>
+                <div id="assignedReportInfo" class="bg-light rounded p-3">
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-clipboard-check text-primary me-2"></i>
+                    <span class="fw-medium">Current Report:</span>
+                    <span id="currentReport" class="ms-auto fw-medium text-primary">#REP-00123</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="far fa-calendar-alt text-primary me-2"></i>
+                    <span>Assigned: </span>
+                    <span id="assignedDate" class="ms-auto">Jul 7, 2023</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <i class="fas fa-hourglass-half text-primary me-2"></i>
+                    <span>Status: </span>
+                    <span class="badge bg-warning bg-opacity-20 text-warning ms-auto">In Progress</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right Column - Stats & Activity -->
+            <div class="col-md-6 bg-light p-4">
+              <h5 class="mb-4 fw-bold text-primary">Performance & Activity</h5>
+              
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                      <h2 class="mb-1 fw-bold text-primary" id="totalReports">0</h2>
+                      <p class="small text-muted mb-0">Total Reports</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                      <h2 class="mb-1 fw-bold text-success" id="completedReports">0</h2>
+                      <p class="small text-muted mb-0">Completed</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                      <h2 class="mb-1 fw-bold text-warning" id="inProgressReports">0</h2>
+                      <p class="small text-muted mb-0">In Progress</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                      <h2 class="mb-1 fw-bold text-info" id="rating">4.8</h2>
+                      <p class="small text-muted mb-0">Rating</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="activity-timeline">
+                <h6 class="text-uppercase small fw-bold text-muted mb-3">Recent Activity</h6>
+                <div class="d-flex mb-3">
+                  <div class="flex-shrink-0">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 text-primary">
+                      <i class="fas fa-tasks"></i>
+                    </div>
+                  </div>
+                  <div class="ms-3">
+                    <p class="mb-0 fw-medium">Report #REP-00123 marked as In Progress</p>
+                    <p class="small text-muted mb-0">2 hours ago</p>
+                  </div>
+                </div>
+                <div class="d-flex mb-3">
+                  <div class="flex-shrink-0">
+                    <div class="bg-success bg-opacity-10 rounded-circle p-2 text-success">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                  </div>
+                  <div class="ms-3">
+                    <p class="mb-0 fw-medium">Completed report #REP-00122</p>
+                    <p class="small text-muted mb-0">1 day ago</p>
+                  </div>
+                </div>
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <div class="bg-info bg-opacity-10 rounded-circle p-2 text-info">
+                      <i class="fas fa-comment-alt"></i>
+                    </div>
+                  </div>
+                  <div class="ms-3">
+                    <p class="mb-0 fw-medium">Added a note to report #REP-00121</p>
+                    <p class="small text-muted mb-0">2 days ago</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer bg-light border-top">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Close
+          </button>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary" data-action="call">
+              <i class="fas fa-phone-alt me-1"></i> Call
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-action="email">
+              <i class="fas fa-envelope me-1"></i> Email
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Employee Modal -->
+  <div class="modal fade" id="assignEmployeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Assign Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input type="text" id="employeeSearch" class="form-control" placeholder="Search employees...">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Employee ID</th>
+                  <th>Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="employeeList">
+                <!-- Will be populated by JavaScript -->
+                <tr>
+                  <td colspan="4" class="text-center">Loading employees...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="noEmployees" class="text-center d-none">
+            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+            <p>No unassigned employees available in your department.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <!-- Custom JS -->
+  <script src="js/adminReports.js"></script>
+  
+  <script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      });
+    });
+  </script>
+</body>
+</html>

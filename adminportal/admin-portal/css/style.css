@@ -1,0 +1,275 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 60vh;
+    padding: 2rem 0;
+}
+
+.hero-section h1 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+.hero-section .lead {
+    color: #34495e;
+    margin-bottom: 2rem;
+}
+
+/* Feature Cards */
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card .card-body {
+    padding: 2rem;
+}
+
+.feature-card i {
+    color: #3498db;
+}
+
+/* Recent Issues */
+.issue-card {
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.issue-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px 10px 0 0;
+}
+
+.issue-card .card-body {
+    padding: 1.5rem;
+}
+
+.issue-card .status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Status Colors */
+.status-pending {
+    background-color: #f1c40f;
+    color: #fff;
+}
+
+.status-in-progress {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.status-resolved {
+    background-color: #2ecc71;
+    color: #fff;
+}
+
+.status-rejected {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+/* Custom styles here */
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  background: #16a6b6;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  overflow: hidden;
+  padding: 0;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+/* Hide default caret on avatar dropdown toggle */
+.navbar .dropdown-toggle::after {
+  display: none !important;
+}
+/* Ensure avatar nav item sticks to far right */
+.navbar .nav-avatar {
+  margin-left: 0.75rem;
+}
+
+/* Form Styles */
+.form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    color: #2c3e50;
+    margin-bottom: 2rem;
+}
+
+/* Map Styles */
+#map {
+    height: 400px;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .hero-section img {
+        margin-top: 2rem;
+    }
+
+    .feature-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom Button Styles */
+.btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+    padding: 0.8rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* === Civic Trust Theme Enhancements === */
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --dark: #1f2937;
+  --light: #f3f4f6;
+}
+
+body {
+  background-color: var(--light);
+  color: var(--dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Elevation & Motion ------------------------------------------- */
+.card,
+.feature-card,
+.issue-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover,
+.feature-card:hover,
+.issue-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.slide-left {
+  animation: slideLeft 0.6s cubic-bezier(.25,.46,.45,.94) both;
+}
+@keyframes slideLeft {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Buttons ------------------------------------------------------- */
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 14px rgba(29, 78, 216, 0.35);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 3px 8px rgba(29, 78, 216, 0.3);
+}
+
+.shadow-sm { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important; }
+.shadow-lg { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important; }
+ 
