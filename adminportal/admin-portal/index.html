@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicSense | Admin Login</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <div class="login-wrapper">
+    <form id="login-form" class="card">
+      <h2 class="title">Department Login</h2>
+      <div class="form-control">
+        <label for="email">Department Email</label>
+        <input type="email" id="email" placeholder="dept@example.com" required>
+      </div>
+      <div class="form-control">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="********" required>
+      </div>
+      <button type="submit" class="btn-primary">Login</button>
+      <p id="error-msg" class="error" hidden></p>
+    </form>
+  </div>
+
+  <!-- Real authentication script -->
+  <script src="js/login.js"></script>
+</body>
+</html>

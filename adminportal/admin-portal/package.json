@@ -1,0 +1,14 @@
+{
+  "name": "civicsense-admin-portal",
+  "version": "1.0.0",
+  "description": "CivicSense Admin Portal for managing department complaints and employees",
+  "scripts": {
+    "start": "http-server -p 3000 -o",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "14.1.1"
+  }
+}
