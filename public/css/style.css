@@ -272,4 +272,152 @@ body {
 
 .shadow-sm { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important; }
 .shadow-lg { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important; }
+
+/* --- Premium CivicSense Dashboard Enhancements --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --cs-primary: #333446;
+  --cs-secondary: #7F8CAA;
+  --cs-highlight: #B8CFCE;
+  --cs-bg: #EAEFEF;
+  --cs-gradient: linear-gradient(90deg, #333446 0%, #7F8CAA 100%);
+  --cs-gradient-rev: linear-gradient(90deg, #7F8CAA 0%, #333446 100%);
+  --cs-card-radius: 20px;
+  --cs-card-shadow: 0 4px 20px rgba(51, 52, 70, 0.08);
+  --cs-btn-radius: 12px;
+  --cs-btn-shadow: 0 2px 8px rgba(51, 52, 70, 0.10);
+  --cs-font-main: 'Inter', 'Poppins', 'Manrope', sans-serif;
+}
+
+body {
+  background: var(--cs-bg);
+  font-family: var(--cs-font-main);
+  color: var(--cs-primary);
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--cs-font-main);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--cs-primary);
+}
+
+/* Navbar Premium Style */
+.navbar {
+  background: var(--cs-primary) !important;
+  box-shadow: 0 2px 12px rgba(51, 52, 70, 0.10);
+}
+.navbar .navbar-brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: 0.04em;
+}
+.navbar .nav-link {
+  color: #fff !important;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+.navbar .nav-link:hover, .navbar .nav-link.active {
+  color: var(--cs-highlight) !important;
+}
+
+/* Dashboard Card Container */
+.dashboard-card {
+  background: radial-gradient(circle at 60% 40%, #fff 60%, var(--cs-bg) 100%);
+  border-radius: var(--cs-card-radius);
+  box-shadow: var(--cs-card-shadow);
+  padding: 2.5rem 2rem 2rem 2rem;
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.7s cubic-bezier(.4,0,.2,1);
+}
+
+/* Complaints Table Styling */
+#adminComplaintsTable {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--cs-card-shadow);
+  font-family: var(--cs-font-main);
+  font-size: 1.05rem;
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  animation: fadeIn 0.8s cubic-bezier(.4,0,.2,1);
+}
+#adminComplaintsTable thead {
+  background: var(--cs-gradient);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+#adminComplaintsTable th, #adminComplaintsTable td {
+  padding: 1.1rem 1.2rem;
+  border: none;
+}
+#adminComplaintsTable tbody tr {
+  background: linear-gradient(90deg, #fff 80%, var(--cs-bg) 100%);
+  transition: box-shadow 0.3s, transform 0.3s, background 0.3s;
+}
+#adminComplaintsTable tbody tr:hover {
+  background: var(--cs-highlight);
+  box-shadow: 0 4px 16px rgba(127, 140, 170, 0.10);
+  transform: scale(1.015);
+}
+
+/* Table Zebra Striping */
+#adminComplaintsTable tbody tr:nth-child(even) {
+  background: linear-gradient(90deg, #f7fafc 80%, var(--cs-bg) 100%);
+}
+
+/* Action Buttons */
+#adminComplaintsTable .btn {
+  border-radius: var(--cs-btn-radius);
+  font-weight: 600;
+  box-shadow: var(--cs-btn-shadow);
+  transition: background 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s, transform 0.2s;
+  padding: 0.5em 1.2em;
+  font-size: 1rem;
+}
+#adminComplaintsTable .btn-primary {
+  background: var(--cs-gradient);
+  border: none;
+  color: #fff;
+}
+#adminComplaintsTable .btn-primary:hover {
+  background: var(--cs-gradient-rev);
+  color: #fff;
+  transform: scale(1.05);
+}
+#adminComplaintsTable .btn-outline-secondary {
+  border: 2px solid var(--cs-secondary);
+  color: var(--cs-secondary);
+  background: transparent;
+}
+#adminComplaintsTable .btn-outline-secondary:hover {
+  background: var(--cs-secondary);
+  color: #fff;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  #adminComplaintsTable th, #adminComplaintsTable td {
+    padding: 0.7rem 0.5rem;
+    font-size: 0.97rem;
+  }
+  .dashboard-card {
+    padding: 1.2rem 0.7rem;
+  }
+}
+
+/* Smooth Card Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- End Premium Dashboard Enhancements --- */
  
