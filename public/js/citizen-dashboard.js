@@ -1160,7 +1160,7 @@ function populateRecent(reports) {
       cardCol.className = `col-12 ${index < recentReports.length - 1 ? 'mb-3' : ''}`;
       
       cardCol.innerHTML = `
-        <div class="card card-body p-3 hover-lift border-start border-3 border-${color.replace('text-', '')}">
+        <div class="card border-0 card-body p-3 hover-lift border-start border-4 border-${color.replace('text-', '')}">
           <div class="d-flex align-items-center">
             <div class="me-3">
               <span class="activity-icon ${color} fs-4">

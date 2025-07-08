@@ -4,6 +4,13 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary);
+}
+h1, h2, h3, h4, h5, h6,
+p, span, li, a, label {
+  color: var(--primary) !important;
+  font-family: var(--font-primary);
 }
 :root {
   /* Color Palette */
@@ -11,11 +18,11 @@ body {
   --secondary: #456882;
   --tertiary: #D2C1B6;
   --background: #EAEFEF;
-  --text-primary: #000000;
+  --text-primary: var(--primary);
   --text-secondary: #B6B09F;
   
   /* Typography */
-  --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-primary: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-size-base: 1rem;
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.5rem;
@@ -115,15 +122,23 @@ header.sticky-top{background-color:var(--primary)!important;backdrop-filter:blur
 .welcome-stats .stat-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--primary);
+  gap: var(--spacing-sm);
+  color: white !important;
   font-weight: var(--font-weight-medium);
-  padding: 1.25rem 0.75rem;
-  background: #ffffff;
-  border: 1px solid rgba(27, 60, 83, 0.1);
+  padding: var(--spacing-md);
+  /* Lightened gradient for better contrast */
+  background: linear-gradient(135deg, rgba(27, 60, 83, 0.9), rgba(69, 104, 130, 0.85));
   border-radius: var(--border-radius-md);
-  transition: all 0.3s ease;
-  height: 100%;
+  transition: var(--transition-base);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  min-width: 200px;
+}
+
+.welcome-stats .stat-item * {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .welcome-stats .stat-item::before {
@@ -234,6 +249,7 @@ header.sticky-top{background-color:var(--primary)!important;backdrop-filter:blur
   font-size: var(--font-size-lg);
   margin-bottom: var(--spacing-lg);
   position: relative;
+ 
 }
 
 #quickActionContainer .section-title::after {
@@ -252,22 +268,74 @@ header.sticky-top{background-color:var(--primary)!important;backdrop-filter:blur
   border-radius: var(--border-radius-md);
   padding: var(--spacing-lg);
   transition: var(--transition-base);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: none;
   position: relative;
   overflow: hidden;
   color: var(--primary);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .quick-action-card h4,
 .quick-action-card p {
-  color: var(--primary);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: var(--primary) !important;
+  text-shadow: none;
 }
 
 .quick-action-card .action-icon {
-  background: rgba(255, 255, 255, 0.2);
+  /* subtle primary-tinted background */
+  background: rgba(27, 60, 83, 0.12);
   color: var(--primary);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Welcome stats buttons (smaller) */
+.welcome-stats {
+  gap: 1rem !important;
+}
+.welcome-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(27,60,83,0.9), rgba(69,104,130,0.85));
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.welcome-stats .stat-item i {
+  font-size: 1rem;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.welcome-stats .stat-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+/* Recent activity card enhancements */
+.recent-activity .card {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.recent-activity .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* ensure headings and standard text inherit primary color */
+.quick-action-card .action-icon * {
+  color: var(--primary) !important;
 }
 
 .quick-action-card::before {
@@ -285,8 +353,7 @@ header.sticky-top{background-color:var(--primary)!important;backdrop-filter:blur
 
 .quick-action-card:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  border-color: transparent;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .quick-action-card:hover::before {
