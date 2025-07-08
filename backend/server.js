@@ -105,7 +105,10 @@ app.use((req, res, next) => {
 // Mount API routes
 app.use('/api/reports', reportsRoutes);
 
-// Serve static files from the public directory
+// Serve admin portal static files first (more specific path)
+app.use('/adminportal', express.static(path.join(__dirname, '../adminportal')));
+
+// Then serve public directory (less specific path)
 app.use(express.static(path.join(__dirname, '../public')));
 
 // File upload middleware
@@ -191,8 +194,7 @@ app.get('/api/v1/reverse-geocode', async (req, res) => {
   }
 });
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve uploads directory
 app.use('/uploads', express.static(uploadsDir));
 
 // Serve HTML files directly (for multi-page app)

@@ -1,6 +1,5 @@
-/* Base styles and variables */
 body {
-  background-color: #FFFFFF;
+  background-color: #FFFFFF !important;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -17,7 +16,7 @@ p, span, li, a, label {
   --primary: #1B3C53;
   --secondary: #456882;
   --tertiary: #D2C1B6;
-  --background: #EAEFEF;
+  --background: #FFFFFF;
   --text-primary: var(--primary);
   --text-secondary: #B6B09F;
   
@@ -1673,4 +1672,18 @@ canvas:hover {
 .recent-activity-section .activity-card {
   border-radius: 0.75rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Section background overrides – transparent secondary tint */
+.welcome-section,
+#quickActionContainer,
+.stats-section,
+.impact-section,
+#impactMetricsSection {
+  background: rgba(50, 76, 95, 0.08) !important; /* secondary colour at ~8% opacity */
+}
+
+/* Ensure stat cards remain white inside tinted stats-section */
+.stats-section .stat-card {
+  background: #FFFFFF !important;
 }

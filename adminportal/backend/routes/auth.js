@@ -7,7 +7,7 @@ const adminEmailToDepartment = require('../utils/adminMapping');
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const admin = await Admin.findOne({ email });
+  const admin = await Admin.findOne({ email }).select('+password');
   if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
   const isMatch = await bcrypt.compare(password, admin.password);
   if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
