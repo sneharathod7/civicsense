@@ -3,146 +3,114 @@
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 1.5rem;
     background: white;
     height: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--primary, #1B3C53);
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(27, 60, 83, 0.03), rgba(69, 104, 130, 0.05));
+    z-index: 1;
 }
 
 .stats-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-hover, #2a4d6e);
 }
 
 .icon-circle {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 15px;
     transition: all 0.3s ease;
-}
-
-/* Badges Container */
-.badges-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 10px;
-}
-
-.badge-item {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    width: 220px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
+    background: rgba(27, 60, 83, 0.1);
+    color: var(--primary, #1B3C53);
     position: relative;
-    overflow: hidden;
-    border: 1px solid #eee;
+    z-index: 2;
 }
 
-.badge-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+.stats-card:hover .icon-circle {
+    background: var(--primary, #1B3C53);
+    color: white;
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 5px 15px rgba(27, 60, 83, 0.2);
 }
 
-.badge-item.earned {
-    border-left: 4px solid #28a745;
-}
-
-.badge-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-}
-
-.badge-item.earned .badge-icon {
-    transform: scale(1.1);
-}
-
-.badge-info h5 {
-    margin-bottom: 5px;
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.badge-info p {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.badge-info small {
-    color: #adb5bd;
-    font-size: 0.8rem;
-    display: block;
-}
-
-/* Roadmap */
-.roadmap-container {
-    padding: 10px;
-}
-
+/* Roadmap Item */
 .roadmap-item {
     position: relative;
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    padding: 15px;
+    padding: 1.5rem;
     border-radius: 12px;
-    background-color: #f8f9fa;
+    background: white;
     transition: all 0.3s ease;
-    border: 1px solid #eee;
+    border-left: 4px solid var(--primary, #1B3C53);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.roadmap-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(27, 60, 83, 0.03), rgba(69, 104, 130, 0.05));
+    z-index: 1;
 }
 
 .roadmap-item:hover {
-    background-color: #fff;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-hover, #2a4d6e);
 }
 
 .roadmap-item.earned {
-    background-color: rgba(40, 167, 69, 0.05);
-    border-left: 4px solid #28a745;
+    border-left: 4px solid var(--primary, #1B3C53);
 }
 
 .roadmap-item .badge-icon {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
-    margin-right: 15px;
-    margin-bottom: 0;
-}
-
-.roadmap-item .badge-info {
-    flex: 1;
-}
-
-.roadmap-item .progress {
-    height: 25px;
-    border-radius: 12px;
-    background-color: #e9ecef;
-    margin-top: 10px;
-    overflow: hidden;
-}
-
-.roadmap-item .progress-bar {
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: width 0.5s ease-in-out;
+    margin-bottom: 1.25rem;
+    transition: all 0.3s ease;
+    background: rgba(27, 60, 83, 0.1);
+    color: var(--primary, #1B3C53);
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.roadmap-item:hover .badge-icon {
+    background: var(--primary, #1B3C53);
+    color: white;
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 5px 15px rgba(27, 60, 83, 0.2);
+}
+
+.roadmap-item.earned .badge-icon {
+    background: var(--primary, #1B3C53);
+    color: white;
 }
 
 .roadmap-item .badge-percentage {
@@ -156,7 +124,82 @@
 }
 
 .roadmap-item.earned .badge-percentage {
-    color: #28a745;
+    color: var(--primary, #1B3C53);
+}
+
+/* Badges Container */
+.badges-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.badge-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid var(--primary, #1B3C53);
+}
+
+.badge-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(27, 60, 83, 0.03), rgba(69, 104, 130, 0.05));
+    z-index: 1;
+}
+
+.badge-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-hover, #2a4d6e);
+}
+
+.badge-item.earned {
+    border-left: 4px solid var(--primary, #1B3C53);
+}
+
+.badge-item .badge-content {
+    position: relative;
+    z-index: 2;
+}
+
+.badge-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    transition: all 0.3s ease;
+    background: rgba(27, 60, 83, 0.1);
+    color: var(--primary, #1B3C53);
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.badge-item:hover .badge-icon {
+    background: var(--primary, #1B3C53);
+    color: white;
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 5px 15px rgba(27, 60, 83, 0.2);
+}
+
+.badge-item.earned .badge-icon {
+    background: var(--primary, #1B3C53);
+    color: white;
 }
 
 /* Points History Table */
@@ -239,12 +282,14 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .badges-container {
-        justify-content: center;
+        grid-template-columns: 1fr;
+        padding: 0.5rem;
     }
     
     .badge-item {
         width: 100%;
-        max-width: 300px;
+        max-width: 100%;
+        margin-bottom: 1rem;
     }
     
     .roadmap-item {
