@@ -2,9 +2,8 @@
 const loginForm = document.getElementById('login-form');
 const errorMsg = document.getElementById('error-msg');
 
-// Backend API URL - adjust the port if your backend runs on a different one
-// Use relative path because frontend is served by the same Express instance
-const API_URL = '/api/auth/login';
+// Backend API URL - pointing to admin backend
+const API_URL = 'http://localhost:3005/api/auth/login';
 
 if (loginForm) {
   loginForm.addEventListener('submit', async function(event) {
