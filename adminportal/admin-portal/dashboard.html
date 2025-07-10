@@ -44,7 +44,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#employees" data-bs-toggle="tab">
+                        <a class="nav-link" href="admin-employees.html">
                             <i class="fas fa-users me-1"></i> Employees
                         </a>
                     </li>
@@ -137,10 +137,8 @@
                     <tr>
                       <th class="ps-4">ID</th>
                       <th>Title</th>
-                      <th>Category</th>
                       <th>Status</th>
                       <th>Date</th>
-                      <th>Assigned To</th>
                       <th class="text-end pe-4">Actions</th>
                     </tr>
                   </thead>
@@ -155,6 +153,87 @@
       </div>
     </div>
   </main>
+
+  <!-- Complaint Details Modal -->
+  <div class="modal fade" id="complaintDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-file-alt me-2"></i>
+            <span id="complaintTitle">Complaint Details</span>
+            <small class="text-muted d-block" id="complaintId">ID: -</small>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">Report Details</h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <small class="text-muted d-block">Title</small>
+                    <div id="reportTitle">-</div>
+                  </div>
+                  <div class="mb-3">
+                    <small class="text-muted d-block">Description</small>
+                    <div id="reportDescription" class="text-muted">-</div>
+                  </div>
+                  <div class="mb-3">
+                    <small class="text-muted d-block">Category</small>
+                    <div id="reportCategory">-</div>
+                  </div>
+                  <div class="mb-3">
+                    <small class="text-muted d-block">Status</small>
+                    <span id="reportStatus" class="badge">-</span>
+                  </div>
+                  <div class="mb-3">
+                    <small class="text-muted d-block">Date Reported</small>
+                    <div id="reportDate">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">Assignment Details</h6>
+                </div>
+                <div class="card-body" id="assignmentDetails">
+                  <div class="text-center py-4 text-muted">
+                    <i class="fas fa-user-clock fa-2x mb-3"></i>
+                    <p class="mb-0">Not assigned to any employee</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h6 class="mb-0">Updates & Activity</h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="list-group list-group-flush" id="complaintActivity">
+                <div class="list-group-item text-center py-4 text-muted">
+                  <i class="fas fa-spinner fa-spin me-2"></i>Loading activity...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="assignBtn">
+            <i class="fas fa-user-plus me-1"></i> Assign to Employee
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

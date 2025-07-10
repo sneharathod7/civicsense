@@ -2,6 +2,9 @@
 // Provides department-specific report listing with filters, search, pagination and CRUD.
 // Requires Bootstrap 5 and Font-Awesome present in page.
 
+// API Configuration
+const API_BASE = 'http://localhost:3005/api'; // Update this if your API is hosted elsewhere
+
 /* NOTE: the backend routes expected:
    GET    /api/complaints            w/ query params (see loadReports)
    GET    /api/complaints/:id        fetch single report
@@ -61,8 +64,85 @@ document.addEventListener('DOMContentLoaded', () => {
    *  Event Listeners
    * ----------------------------------------------------------------*/
   function setupEventListeners() {
-    // View employee details
+    // Handle completion form submission
+    const completeReportForm = document.getElementById('completeReportForm');
+    if (completeReportForm) {
+      completeReportForm.addEventListener('submit', handleCompleteReport);
+    }
+
+    // Handle click events
     document.addEventListener('click', async (e) => {
+      // Mark as completed button click
+      const markCompletedBtn = e.target.closest('.mark-completed');
+      if (markCompletedBtn) {
+        e.preventDefault();
+        const reportId = markCompletedBtn.dataset.id;
+        showCompleteReportModal(reportId);
+        return;
+      }
+      
+      // View completion image
+      const viewImageBtn = e.target.closest('.view-completion-image');
+      if (viewImageBtn) {
+        e.preventDefault();
+        const imageUrl = viewImageBtn.dataset.image;
+        const imagePreview = document.getElementById('completionImagePreview');
+        const loadingSpinner = document.getElementById('imageLoadingSpinner');
+        const downloadBtn = document.getElementById('downloadImageBtn');
+        const imageInfo = document.getElementById('imageInfo');
+        
+        if (!imagePreview || !loadingSpinner || !downloadBtn || !imageInfo) {
+          console.error('Required elements not found in the DOM');
+          return;
+        }
+        
+        // Show loading state
+        imagePreview.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+        
+        // Set up the image
+        const img = new Image();
+        img.onload = function() {
+          // Update image source
+          imagePreview.src = imageUrl;
+          imagePreview.style.display = 'block';
+          loadingSpinner.style.display = 'none';
+          
+          // Update download link
+          downloadBtn.href = imageUrl;
+          downloadBtn.download = `completion-${Date.now()}.${imageUrl.split('.').pop().split('?')[0]}`;
+          
+          // Update image info
+          imageInfo.textContent = `${this.naturalWidth} × ${this.naturalHeight}px`;
+        };
+        
+        img.onerror = function() {
+          if (loadingSpinner) {
+            loadingSpinner.innerHTML = `
+              <div class="text-center">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                <p class="mb-0">Failed to load image</p>
+              </div>
+            `;
+          }
+        };
+        
+        // Start loading the image
+        img.src = imageUrl;
+        
+        // Show the modal
+        const modalElement = document.getElementById('completionImageModal');
+        if (modalElement) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        } else {
+          console.error('Modal element not found');
+        }
+        
+        return;
+      }
+      
+      // View employee details
       const employeeBtn = e.target.closest('.view-employee');
       if (employeeBtn) {
         e.preventDefault();
@@ -1058,7 +1138,11 @@ function reportCardHTML(r) {
     const reportId = r._id || 'unknown';
     const title = r.title || 'Untitled Report';
     const description = r.description ? r.description.slice(0, 120) : 'No description';
-  
+    const isCompleted = status === 'resolved' || status === 'closed';
+    
+    // Find completion image if exists
+    const completionImage = r.images?.find(img => img.isCompletionImage);
+    
     // Employee assignment section
     let assignSection = '';
     if (r.assignedTo && typeof r.assignedTo === 'object') {
@@ -1092,6 +1176,65 @@ function reportCardHTML(r) {
           </button>
         </div>`;
     }
+    
+    // Completed status section
+    let completedSection = '';
+    if (isCompleted) {
+      const completedDate = r.resolvedAt ? new Date(r.resolvedAt) : new Date(r.updatedAt);
+      const formattedDate = completedDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      // Find the completion comment if it exists
+      const completionComment = r.comments?.find(c => c.status === 'resolved');
+      
+      completedSection = `
+        <div class="completion-status mt-3">
+          <div class="d-flex align-items-start">
+            <div class="flex-shrink-0 me-2">
+              <i class="fas fa-check-circle fa-2x text-success"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-1 text-success fw-bold">
+                  <i class="fas fa-check-circle me-1"></i> Completed
+                </h6>
+                <small class="text-muted">${formattedDate}</small>
+              </div>
+              
+              ${completionComment ? `
+                <div class="alert alert-light p-2 mt-2 mb-2 small">
+                  <i class="fas fa-comment-dots me-1 text-muted"></i>
+                  ${completionComment.text}
+                </div>
+              ` : ''}
+              
+              ${completionImage ? `
+                <div class="mt-2">
+                  <div class="position-relative rounded overflow-hidden" style="height: 120px; background-color: #f8f9fa;">
+                    <img src="${completionImage.url}" 
+                         class="img-fluid h-100 w-100 object-fit-cover cursor-pointer view-completion-image" 
+                         data-bs-toggle="modal" 
+                         data-bs-target="#completionImageModal"
+                         data-image="${completionImage.url}"
+                         alt="Completion Image"
+                         style="cursor: pointer; transition: transform 0.3s ease;">
+                    <div class="position-absolute top-0 end-0 m-2">
+                      <span class="badge bg-dark bg-opacity-75">
+                        <i class="fas fa-expand-arrows-alt me-1"></i> Expand
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
 
     return `
     <div class="col-12 col-md-6 col-lg-4 mb-4">
@@ -1106,10 +1249,19 @@ function reportCardHTML(r) {
           <!-- Employee Assignment Section -->
           ${assignSection}
           
+          <!-- Completed Status Section -->
+          ${isCompleted ? completedSection : ''}
+          
           <div class="d-flex justify-content-between align-items-center mt-2">
-            <span class="badge bg-${priorityClass}">${priority}</span>
-            <div class="btn-group">
-              ${(r.assignedTo || r.status === 'in-progress') ? `
+            ${r.status === 'in-progress' && r.assignedTo ? `
+              <button class="btn btn-sm btn-success mark-completed" 
+                      data-id="${reportId}" 
+                      title="Mark as Completed">
+                <i class="fas fa-check-circle me-1"></i> Mark as Completed
+              </button>
+            ` : ''}
+            <div class="btn-group ms-auto">
+              ${(r.assignedTo || r.status === 'in-progress' || isCompleted) ? `
                 <button class="btn btn-sm btn-outline-info view-employee" 
                         ${r.assignedTo ? `data-employee='${JSON.stringify(r.assignedTo)}'` : `data-report-id='${reportId}'`} 
                         title="View Employee Details">
@@ -1120,9 +1272,6 @@ function reportCardHTML(r) {
                       data-id="${reportId}" 
                       title="View Report Details">
                 <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-link text-danger delete-report" data-id="${r._id}" title="Delete">
-                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
@@ -1401,9 +1550,112 @@ function reportCardHTML(r) {
   }
 
   /* ------------------------------------------------------------------
+   *  Mark Report as Completed
+   * ----------------------------------------------------------------*/
+  function showCompleteReportModal(reportId) {
+    const modal = new bootstrap.Modal(document.getElementById('completeReportModal'));
+    document.getElementById('reportIdToComplete').value = reportId;
+    modal.show();
+  }
+
+  async function handleCompleteReport(e) {
+    e.preventDefault();
+    
+    const reportId = document.getElementById('reportIdToComplete').value;
+    const comment = document.getElementById('completionComment').value;
+    const imageInput = document.getElementById('completionImage');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Validate file input
+    if (!imageInput.files || imageInput.files.length === 0) {
+      showToast('error', 'Please select an image of the completed work');
+      return;
+    }
+    
+    // Validate file type
+    const file = imageInput.files[0];
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      showToast('error', 'Please upload a valid image file (JPEG, PNG, GIF)');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      showToast('error', 'Image size should be less than 5MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('completionImage', file);
+    if (comment) {
+      formData.append('comment', comment);
+    }
+
+    // Disable submit button and show loading state
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Processing...';
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+      
+      const response = await fetch(`${API_BASE}/complaints/${reportId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Don't set Content-Type manually - let the browser set it with the correct boundary
+        },
+        credentials: 'include', // Include cookies if using them for auth
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to mark report as completed');
+      }
+
+      // Close the modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('completeReportModal'));
+      modal.hide();
+      
+      // Show success message
+      showToast('success', 'Report marked as completed successfully!');
+      
+      // Reload the reports to reflect the changes
+      await loadReports();
+      
+      // Reset the form
+      e.target.reset();
+      
+    } catch (error) {
+      console.error('Error completing report:', error);
+      showToast('error', error.message || 'Failed to mark report as completed');
+      
+      // Re-enable the form for retry
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      return;
+    } finally {
+      showLoading(false);
+      
+      // Reset button state if not already done
+      if (!submitBtn.disabled) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i>Mark as Completed';
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------
    *  Delete
    * ----------------------------------------------------------------*/
-  function confirmDeleteReport(id){
+  function confirmDeleteReport(id) {
     if (confirm('Delete this report?')) deleteReport(id);
   }
 

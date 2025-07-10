@@ -1,25 +1,42 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Dashboard initialization started');
+  
   // Check authentication
   const token = localStorage.getItem('token');
   if (!token) {
+    console.log('❌ No token found, redirecting to login');
     window.location.href = '/citizen-login.html';
     return;
   }
 
-  // Initialize user data and avatar
-  await initializeUserData();
-  
-  // Fetch and display reports
-  await fetchReports();
+  console.log('✅ Token found, proceeding with initialization');
 
-  // Setup event listeners
-  setupEventListeners();
-  
-  // Animate metric values
-  animateMetricValues();
-  
-  // Fetch achievements data
-  await fetchAchievements();
+  try {
+    // Initialize user data and avatar
+    await initializeUserData();
+    console.log('✅ User data initialized');
+    
+    // Fetch and display reports
+    const reports = await fetchReports();
+    console.log('✅ Reports fetched:', reports.length);
+
+    // Setup event listeners
+    setupEventListeners();
+    console.log('✅ Event listeners setup');
+    
+    // Animate metric values
+    animateMetricValues();
+    console.log('✅ Metric animations started');
+    
+    // Fetch achievements data
+    await fetchAchievements();
+    console.log('✅ Achievements fetched');
+
+    console.log('🎉 Dashboard initialization completed successfully');
+  } catch (error) {
+    console.error('❌ Dashboard initialization failed:', error);
+    showToast('error', 'Failed to initialize dashboard. Please refresh the page.');
+  }
 });
 
 // Add this function at the top of the file for debugging
@@ -85,6 +102,7 @@ function formatLocation(location) {
 
 async function initializeUserData() {
   try {
+    console.log('🔄 Initializing user data...');
     debugLocalStorage(); // Add this line to debug localStorage
 
     const response = await fetch('/api/v1/auth/me', {
@@ -98,6 +116,7 @@ async function initializeUserData() {
     }
 
     const { data } = await response.json();
+    console.log('👤 User data received:', data);
     
     // Update user info in header with null checks
     const ddUserName = document.getElementById('ddUserName');
@@ -106,26 +125,29 @@ async function initializeUserData() {
 
     if (ddUserName) {
       ddUserName.textContent = `${data.firstName} ${data.lastName}`;
+      console.log('✅ Updated ddUserName');
     } else {
-      console.warn('Element #ddUserName not found');
+      console.warn('⚠️ Element #ddUserName not found');
     }
 
     if (ddUserEmail) {
       ddUserEmail.textContent = data.email;
+      console.log('✅ Updated ddUserEmail');
     } else {
-      console.warn('Element #ddUserEmail not found');
+      console.warn('⚠️ Element #ddUserEmail not found');
     }
     
     // Update greeting with animation and null check
     if (greeting) {
       greeting.style.opacity = '0';
-      greeting.innerText = `🎉 Welcome back, ${data.firstName}! 👋`;
+      greeting.innerText = `${data.firstName}`;
       greeting.style.transition = 'opacity 0.5s ease';
       setTimeout(() => {
         if (greeting) greeting.style.opacity = '1';
       }, 100);
+      console.log('✅ Updated greeting');
     } else {
-      console.warn('Element #greeting not found');
+      console.warn('⚠️ Element #greeting not found');
     }
 
     // Update avatar
@@ -135,8 +157,10 @@ async function initializeUserData() {
     localStorage.setItem('user', JSON.stringify(data));
     localStorage.setItem('userId', data._id);
 
+    console.log('✅ User data initialization completed');
+
   } catch (error) {
-    console.error('Initialization error:', error);
+    console.error('❌ Initialization error:', error);
     showToast('error', 'Failed to initialize user data');
     window.location.href = '/citizen-login.html';
   }
@@ -146,20 +170,23 @@ function updateAvatarDisplay(photoUrl, firstName, lastName) {
   const userAvatar = document.getElementById('userAvatar');
   
   if (!userAvatar) {
-    console.warn('Element #userAvatar not found');
+    console.warn('⚠️ Element #userAvatar not found');
     return;
   }
   
   if (photoUrl) {
     // If there's a photo URL, use it
     userAvatar.src = `/uploads/${photoUrl}`;
+    console.log('✅ Updated avatar with photo URL');
   } else if (firstName && lastName) {
     // If no photo but we have a name, use initials
     const initialsUrl = generateInitialsAvatar(firstName, lastName);
     userAvatar.src = initialsUrl;
+    console.log('✅ Updated avatar with initials');
   } else {
     // Fallback to a default avatar if no photo or name
     userAvatar.src = '/images/default-avatar.png';
+    console.log('✅ Updated avatar with default image');
   }
 }
 
@@ -274,10 +301,12 @@ async function fetchReports() {
 
     // Update UI with the reports data
     if (validReports.length > 0) {
+      console.log('📊 Updating UI with reports data...');
       populateStats(validReports);
       populateRecent(validReports);
       updateWelcomeBanner(validReports);
       createQuickActions(validReports);
+      console.log('✅ UI updated with reports data');
     } else {
       console.log('No valid reports to display');
       // Ensure recent activity section shows appropriate message
@@ -299,7 +328,7 @@ async function fetchReports() {
     return validReports;
     
   } catch (error) {
-    console.error('Error in fetchReports:', error);
+    console.error('❌ Error in fetchReports:', error);
     
     // Show user-friendly error toast
     showToast('error', 'Unable to load your recent activities. Please try again later.');
@@ -327,6 +356,7 @@ async function fetchReports() {
 
 async function fetchAchievements() {
   try {
+    console.log('🏆 Fetching achievements...');
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No auth token found');
@@ -383,12 +413,13 @@ async function fetchAchievements() {
       updateImpactMetrics(data);
       
       console.groupEnd(); // Close the console group
+      console.log('✅ Achievements processed successfully');
     } else {
       console.error('Achievements fetch unsuccessful:', achievementsData);
       throw new Error('Failed to load achievements data');
     }
   } catch (error) {
-    console.error('Error loading achievements:', error);
+    console.error('❌ Error loading achievements:', error);
     showToast('error', 'Failed to load achievements');
     
     // Fallback: ensure badges container is cleared
@@ -439,7 +470,13 @@ function adaptReportForUI(r) {
 }
 
 function updateWelcomeBanner(reports = []) {
+  console.log('🎉 Updating welcome banner...');
   const welcomeContainer = document.getElementById('welcomeContainer');
+  
+  if (!welcomeContainer) {
+    console.warn('⚠️ Welcome container not found');
+    return;
+  }
   
   // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -572,33 +609,9 @@ function updateWelcomeBanner(reports = []) {
     </div>
   `;
 
-  // Quick Action Container
-  const quickActionContainer = document.getElementById('quickActionContainer');
-  quickActionContainer.innerHTML = `
-    <div class="row">
-      <div class="col-12">
-        <h5 class="mb-3">Quick Actions</h5>
-      </div>
-      <div class="col-md-4 mb-3">
-        <a href="/report.html" class="btn btn-outline-primary w-100">
-          <i class="fas fa-plus-circle me-2"></i>Create New Report
-        </a>
-      </div>
-      <div class="col-md-4 mb-3">
-        <a href="/my-reports.html" class="btn btn-outline-secondary w-100">
-          <i class="fas fa-list me-2"></i>View My Reports
-        </a>
-      </div>
-      <div class="col-md-4 mb-3">
-        <a href="/achievements.html" class="btn btn-outline-success w-100">
-          <i class="fas fa-trophy me-2"></i>Check Achievements
-        </a>
-      </div>
-    </div>
-  `;
-
   // Animate the welcome section
   welcomeContainer.classList.add('animate__animated', 'animate__fadeIn');
+  console.log('✅ Welcome banner updated');
 }
 
 function getBadgeTitle(reportCount) {
@@ -626,6 +639,7 @@ function getBadgeTitle(reportCount) {
 }
 
 function updateImpactMetrics(data = {}) {
+  console.log('📊 Updating impact metrics...');
   // Enhanced impact metrics with more context
   const impactData = {
     totalReports: data.totalReports || 0,
@@ -645,6 +659,8 @@ function updateImpactMetrics(data = {}) {
 
   // Animate individual metrics
   animateImpactMetrics(impactData);
+  
+  console.log('✅ Impact metrics updated');
 }
 
 function calculateImpactLevel(userData) {
@@ -830,63 +846,75 @@ function renderImpactSummary(impactData) {
 
     // Prepare badges HTML
     const badgesHtml = (achievements?.badges || [])
+      .slice(0, 3) // Show only first 3 badges
       .map(badge => `
-        <div class="badge-item" title="${badge.description || 'Achievement'}">
-          <img src="${badge.icon || '/images/default-badge.png'}" alt="${badge.name}">
-          <span class="badge-name">${badge.name}</span>
+        <div class="badge-item d-flex align-items-center me-3" title="${badge.description || 'Achievement'}">
+          <div class="badge-icon-small me-2">
+            <i class="fas fa-trophy text-warning"></i>
+          </div>
+          <span class="badge-name small">${badge.name}</span>
         </div>
-      `).join('') || '<p class="text-muted">No badges earned yet</p>';
+      `).join('');
+
+    const progressPercentage = Math.min(100, (impactLevel.points / impactLevel.nextLevel.minPoints) * 100);
 
     const generatedHtml = `
-      <div class="impact-card">
-        <div class="impact-header">
-          <div class="impact-icon ${impactLevel.color}">
-            ${impactLevel.icon}
+      <div class="impact-card glass-card p-4">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center mb-3">
+              <div class="impact-icon me-3" style="font-size: 2rem;">
+                ${impactLevel.icon}
+              </div>
+              <div>
+                <h4 class="mb-1 ${impactLevel.color}">${impactLevel.name}</h4>
+                <p class="text-muted mb-0">${impactLevel.description}</p>
+              </div>
+            </div>
+            
+            <div class="progress mb-2" style="height: 10px;">
+              <div 
+                class="progress-bar bg-primary" 
+                role="progressbar" 
+                style="width: ${progressPercentage}%"
+                aria-valuenow="${impactLevel.points}" 
+                aria-valuemin="${impactLevel.minPoints}" 
+                aria-valuemax="${impactLevel.nextLevel.minPoints}"
+              ></div>
+            </div>
+            <small class="text-muted">
+              ${impactLevel.points} / ${impactLevel.nextLevel.minPoints} points 
+              to reach ${impactLevel.nextLevel.name}
+            </small>
           </div>
-          <div class="impact-header-content">
-            <h3 class="impact-title">${impactLevel.name}</h3>
-            <p class="impact-subtitle">${impactLevel.description}</p>
+          
+          <div class="col-md-4">
+            <div class="text-center">
+              <div class="impact-stat mb-3">
+                <div class="h2 mb-0 text-primary">${impactLevel.points}</div>
+                <small class="text-muted">Total Points</small>
+              </div>
+              <div class="impact-stat">
+                <div class="h5 mb-0 text-success">${achievements?.badges?.length || 0}</div>
+                <small class="text-muted">Badges Earned</small>
+              </div>
+            </div>
           </div>
         </div>
         
-        <div class="impact-progress">
-          <div class="progress">
-            <div 
-              class="progress-bar ${impactLevel.color}" 
-              role="progressbar" 
-              style="width: ${Math.min(100, (impactLevel.points / impactLevel.nextLevel.minPoints) * 100)}%"
-              aria-valuenow="${impactLevel.points}" 
-              aria-valuemin="${impactLevel.minPoints}" 
-              aria-valuemax="${impactLevel.nextLevel.minPoints}"
-            ></div>
+        ${badgesHtml ? `
+          <div class="mt-3 pt-3 border-top">
+            <h6 class="mb-2">Recent Achievements</h6>
+            <div class="d-flex flex-wrap">
+              ${badgesHtml}
+              ${achievements?.badges?.length > 3 ? `
+                <small class="text-muted align-self-center">
+                  +${achievements.badges.length - 3} more
+                </small>
+              ` : ''}
+            </div>
           </div>
-          <div class="impact-progress-text">
-            ${impactLevel.points} / ${impactLevel.nextLevel.minPoints} points 
-            to reach ${impactLevel.nextLevel.name}
-          </div>
-        </div>
-        
-        <div class="impact-details">
-          <div class="impact-stat">
-            <span class="stat-label">Total Points</span>
-            <span class="stat-value">${impactLevel.points}</span>
-          </div>
-          <div class="impact-stat">
-            <span class="stat-label">Civic Level</span>
-            <span class="stat-value">${impactLevel.name}</span>
-          </div>
-          <div class="impact-stat">
-            <span class="stat-label">Badges Earned</span>
-            <span class="stat-value">${achievements?.badges?.length || 0}</span>
-          </div>
-        </div>
-        
-        <div class="impact-badges">
-          <h4 class="badges-title">Your Achievements</h4>
-          <div class="badges-container">
-            ${badgesHtml}
-          </div>
-        </div>
+        ` : ''}
       </div>
     `;
 
@@ -905,12 +933,15 @@ function renderImpactSummary(impactData) {
         - Total Points: ${totalPoints}
         - Civic Level: ${impactData.impactLevel?.name || 'Unknown'}
         - Badges Earned: ${badgesCount}`);
+        
+    console.log('✅ Impact summary rendered successfully');
   } catch (error) {
     console.error('❌ Error rendering impact summary:', error);
   }
 }
 
 function animateImpactMetrics(impactData) {
+  console.log('🎬 Animating impact metrics...');
   const animationOptions = {
     duration: 1500,
     easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
@@ -934,7 +965,10 @@ function animateImpactMetrics(impactData) {
   ];
 
   metrics.forEach(metric => {
-    if (!metric.element) return;
+    if (!metric.element) {
+      console.warn(`⚠️ Metric element not found for value: ${metric.value}`);
+      return;
+    }
 
     let start = 0;
     const end = metric.value;
@@ -959,6 +993,8 @@ function animateImpactMetrics(impactData) {
 
     requestAnimationFrame(update);
   });
+  
+  console.log('✅ Impact metrics animation started');
 }
 
 function calculateAvgResolutionTime(data) {
@@ -967,6 +1003,7 @@ function calculateAvgResolutionTime(data) {
 }
 
 function animateMetricValues() {
+  console.log('🎬 Animating metric values...');
   const metrics = document.querySelectorAll('.metric-value');
   metrics.forEach(metric => {
     const value = metric.innerText;
@@ -989,9 +1026,13 @@ function animateMetricValues() {
       metric.innerText = current + (isPercentage ? '%' : '');
     }, interval);
   });
+  
+  console.log('✅ Metric values animation started');
 }
 
 function populateStats(reports) {
+  console.log('📊 Populating stats with', reports.length, 'reports');
+  
   // Prepare data for stats
   const totalReports = reports.length;
   const resolvedReports = reports.filter(r => r.status === 'resolved').length;
@@ -1001,18 +1042,95 @@ function populateStats(reports) {
   const resolvedPercentage = totalReports > 0 ? Math.round((resolvedReports / totalReports) * 100) : 0;
   const impactPoints = calculateImpactPoints(reports);
 
-  // Update stat values
-  document.getElementById('statReported').textContent = totalReports;
-  document.getElementById('statResolved').textContent = resolvedReports;
-  document.getElementById('statRate').textContent = `${resolvedPercentage}%`;
-  document.getElementById('statPoints').textContent = impactPoints;
+  console.log('Stats calculated:', {
+    totalReports,
+    resolvedReports,
+    resolvedPercentage,
+    impactPoints
+  });
+
+  // Update stat values with null checks
+  const statElements = {
+    statReported: document.getElementById('statReported'),
+    statResolved: document.getElementById('statResolved'),
+    statRate: document.getElementById('statRate'),
+    statPoints: document.getElementById('statPoints'),
+    totalReports: document.getElementById('totalReports'),
+    resolvedIssues: document.getElementById('resolvedIssues'),
+    responseRate: document.getElementById('responseRate'),
+    impactScore: document.getElementById('impactScore')
+  };
+
+  // Update elements if they exist
+  if (statElements.statReported) {
+    statElements.statReported.textContent = totalReports;
+    console.log('✅ Updated statReported:', totalReports);
+  }
+  if (statElements.statResolved) {
+    statElements.statResolved.textContent = resolvedReports;
+    console.log('✅ Updated statResolved:', resolvedReports);
+  }
+  if (statElements.statRate) {
+    statElements.statRate.textContent = `${resolvedPercentage}%`;
+    console.log('✅ Updated statRate:', `${resolvedPercentage}%`);
+  }
+  if (statElements.statPoints) {
+    statElements.statPoints.textContent = impactPoints;
+    console.log('✅ Updated statPoints:', impactPoints);
+  }
+
+  // Update advanced stats
+  if (statElements.totalReports) {
+    statElements.totalReports.textContent = totalReports;
+    console.log('✅ Updated totalReports:', totalReports);
+  }
+  if (statElements.resolvedIssues) {
+    statElements.resolvedIssues.textContent = resolvedReports;
+    console.log('✅ Updated resolvedIssues:', resolvedReports);
+  }
+  if (statElements.responseRate) {
+    statElements.responseRate.textContent = `${resolvedPercentage}%`;
+    console.log('✅ Updated responseRate:', `${resolvedPercentage}%`);
+  }
+  if (statElements.impactScore) {
+    statElements.impactScore.textContent = impactPoints;
+    console.log('✅ Updated impactScore:', impactPoints);
+  }
+
+  // Animate progress bars
+  animateProgressBars(resolvedPercentage, totalReports, resolvedReports, impactPoints);
 
   // Animate resolution rate
   animateResolutionRate(resolvedPercentage);
+  
+  console.log('✅ Stats populated successfully');
+}
+
+function animateProgressBars(resolvedPercentage, totalReports, resolvedReports, impactPoints) {
+  console.log('🎬 Animating progress bars...');
+  
+  const progressBars = [
+    { element: document.getElementById('totalReportsProgress'), target: Math.min(100, (totalReports / 50) * 100) },
+    { element: document.getElementById('resolvedProgress'), target: resolvedPercentage },
+    { element: document.getElementById('responseProgress'), target: resolvedPercentage },
+    { element: document.getElementById('impactProgress'), target: Math.min(100, (impactPoints / 1000) * 100) }
+  ];
+
+  progressBars.forEach(({ element, target }) => {
+    if (element) {
+      setTimeout(() => {
+        element.style.width = `${target}%`;
+      }, 500);
+    }
+  });
+  
+  console.log('✅ Progress bars animated');
 }
 
 function animateResolutionRate(percentage) {
   const rateElement = document.getElementById('statRate');
+  if (!rateElement) return;
+  
   let currentPercentage = 0;
   
   const animationDuration = 1500; // 1.5 seconds
@@ -1160,7 +1278,7 @@ function populateRecent(reports) {
       cardCol.className = `col-12 ${index < recentReports.length - 1 ? 'mb-3' : ''}`;
       
       cardCol.innerHTML = `
-        <div class="card border-0 card-body p-3 hover-lift border-start border-4 border-${color.replace('text-', '')}">
+        <div class="card border-0 glass-card p-3 hover-lift border-start border-4 border-primary">
           <div class="d-flex align-items-center">
             <div class="me-3">
               <span class="activity-icon ${color} fs-4">
@@ -1175,7 +1293,7 @@ function populateRecent(reports) {
                 </span>
               </div>
               <div class="d-flex align-items-center text-muted small mt-1">
-                <span class="badge ${color.replace('text-', 'bg-')} me-2">
+                <span class="badge ${color.replace('text-', 'bg-')} text-white me-2">
                   ${statusText}
                 </span>
                 <i class="far fa-calendar me-1"></i>${timeAgo}
@@ -1238,31 +1356,11 @@ function populateRecent(reports) {
     `;
     recentActivityContainer.appendChild(viewAllDiv);
   }
-  console.log('Recent activity populated successfully');
+  console.log('✅ Recent activity populated successfully');
   console.groupEnd();
 }
 
 function openReportDetailsModal(report) {
-  // Utility function for formatting location
-  function _formatLocationDeprecated(location) {
-    if (!location) return 'Location not available';
-    
-    // Handle different location formats
-    if (typeof location === 'object') {
-      if (location.latitude && location.longitude) {
-        // Precise coordinates
-        return `Point, ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
-      }
-      // If it's a complex object, try to extract meaningful information
-      return Object.values(location)
-        .filter(val => val)
-        .join(', ');
-    }
-    
-    // If it's a string, return as is
-    return location.toString();
-  }
-
   // Utility function for formatting description
   function formatDescription(description) {
     if (!description) return 'No description provided';
@@ -1414,7 +1512,7 @@ function getStatusBadgeClass(status) {
 
 function updateBadges(badges = []) {
   try {
-    console.group('Updating Badges');
+    console.group('🏆 Updating Badges');
     console.log('Input Badges:', JSON.stringify(badges, null, 2));
 
     const badgesContainer = document.getElementById('badgesContainer');
@@ -1484,11 +1582,11 @@ function updateBadges(badges = []) {
 
         // Create badge element
         const badgeElement = document.createElement('div');
-        badgeElement.classList.add('col-md-3', 'col-6');
+        badgeElement.classList.add('col-md-3', 'col-6', 'mb-3');
         
         badgeElement.innerHTML = `
-          <div class="badge-card text-center">
-            <div class="badge-icon">
+          <div class="badge-card text-center h-100">
+            <div class="badge-icon mb-3">
               <i class="fas ${iconClass} ${colorClass} fa-2x"></i>
             </div>
             <h6 class="mt-3">${badge.name || 'Unknown Badge'}</h6>
@@ -1496,7 +1594,7 @@ function updateBadges(badges = []) {
             <small class="text-muted d-block mt-1">
               ${badge.progress ? 
                 `Progress: ${badge.progress.current || 0}/${badge.progress.total || 1}` : 
-                `Earned on: ${badge.earnedAt ? new Date(badge.earnedAt).toLocaleDateString() : 'Unknown date'}`}
+                `Earned: ${badge.earnedAt ? new Date(badge.earnedAt).toLocaleDateString() : 'Recently'}`}
             </small>
           </div>
         `;
@@ -1598,6 +1696,8 @@ function createToastContainer() {
 }
 
 function setupEventListeners() {
+  console.log('🔧 Setting up event listeners...');
+  
   // Logout handler
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
@@ -1606,6 +1706,7 @@ function setupEventListeners() {
       localStorage.clear();
       window.location.href = '/citizen-login.html';
     });
+    console.log('✅ Logout handler setup');
   }
 
   // Theme switch handler
@@ -1620,49 +1721,20 @@ function setupEventListeners() {
       document.documentElement.setAttribute('data-bs-theme', theme);
       localStorage.setItem('theme', theme);
     });
+    console.log('✅ Theme switch handler setup');
   }
-}
-
-function filterAndRender() {
-  let filtered = window.allComplaints || [];
-  // Text search
-  const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  if (q) {
-    filtered = filtered.filter(c => (c.ticketId || c.id).toString().toLowerCase().includes(q) ||
-      (c.issueType || '').toLowerCase().includes(q) ||
-      (c.department || '').toLowerCase().includes(q));
-  }
-  // Status filter
-  const statusVal = document.getElementById('statusFilter').value;
-  if (statusVal) {
-    filtered = filtered.filter(c => c.status === statusVal);
-  }
-  // Category filter (assuming issueType maps)
-  const catVal = document.getElementById('categoryFilter').value;
-  if (catVal) {
-    filtered = filtered.filter(c => c.issueType === catVal);
-  }
-  populateTable(filtered);
-}
-
-function populateTable(complaints) {
-  const tbody = document.getElementById('complaintsTableBody');
-  tbody.innerHTML = '';
-  complaints.forEach((cmp) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${cmp.ticketId || cmp.id}</td>
-      <td>${cmp.issueType}</td>
-      <td>${cmp.department}</td>
-      <td>${cmp.status}</td>
-      <td>${new Date(cmp.createdAt).toLocaleString()}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  
+  console.log('✅ Event listeners setup completed');
 }
 
 function createQuickActions(reports) {
+  console.log('⚡ Creating quick actions...');
   const quickActionContainer = document.getElementById('quickActionContainer');
+  
+  if (!quickActionContainer) {
+    console.warn('⚠️ Quick action container not found');
+    return;
+  }
   
   // Get user data and recent activity
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -1713,10 +1785,10 @@ function createQuickActions(reports) {
         
         ${actions.map(action => `
           <div class="col-md-4">
-            <div class="quick-action-card card h-100 border-0 shadow-sm" data-action="${action.id}">
+            <div class="quick-action-card card h-100 border-0 shadow-sm glass-card" data-action="${action.id}">
               <div class="card-body d-flex align-items-center p-3">
-                <div class="action-icon ${action.iconBg} rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                  <i class="${action.icon} text-${action.color} fs-4"></i>
+                <div class="action-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                  <i class="${action.icon} fs-4"></i>
                 </div>
                 <div class="flex-grow-1">
                   <h6 class="mb-1 fw-bold">${action.title}</h6>
@@ -1746,6 +1818,6 @@ function createQuickActions(reports) {
       card.style.transform = 'translateY(0)';
     });
   });
+  
+  console.log('✅ Quick actions created');
 }
-
-

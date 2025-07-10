@@ -484,6 +484,53 @@
       color: #6c757d;
     }
 
+    /* Completion status styles */
+    .completion-status {
+      border-left: 4px solid #198754;
+      background-color: #f8f9fa;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 0.25rem;
+    }
+    
+    .completion-status .completion-date {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+    
+    /* Modal styles */
+    #completionImageModal .modal-content {
+      background-color: #f8f9fa;
+    }
+    
+    #completionImagePreview {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.25rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    /* Hover effects for completion image */
+    .completion-status img {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .completion-status img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Expand badge */
+    .badge.bg-dark.bg-opacity-75 {
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+    
+    .badge.bg-dark.bg-opacity-75:hover {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+    }
+    
     /* Progress Steps */
     .progress-step {
       flex: 1;
@@ -595,8 +642,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">
-              <i class="fas fa-file-alt me-1"></i> Reports
+            <a class="nav-link" href="admin-employees.html">
+              <i class="fas fa-users me-1"></i> Employees
             </a>
           </li>
         </ul>
@@ -991,6 +1038,99 @@
             <button type="button" class="btn btn-outline-primary" data-action="email">
               <i class="fas fa-envelope me-1"></i> Email
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mark as Completed Modal -->
+  <div class="modal fade" id="completeReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-check-circle me-2"></i>Mark Report as Completed
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="completeReportForm">
+            <input type="hidden" id="reportIdToComplete">
+            
+            <div class="mb-3">
+              <label for="completionImage" class="form-label">
+                <i class="fas fa-image me-1"></i>Upload Completion Image (Required)
+              </label>
+              <input class="form-control" type="file" id="completionImage" accept="image/*" required>
+              <div class="form-text">Please upload an image showing the completed work.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="completionComment" class="form-label">
+                <i class="fas fa-comment me-1"></i>Completion Notes (Optional)
+              </label>
+              <textarea class="form-control" id="completionComment" rows="3" 
+                        placeholder="Add any additional details about the completion..."></textarea>
+            </div>
+            
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times me-1"></i>Cancel
+              </button>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-check-circle me-1"></i>Mark as Completed
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completion Image Modal -->
+  <div class="modal fade" id="completionImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content border-0">
+        <div class="modal-header bg-light border-0">
+          <h5 class="modal-title d-flex align-items-center">
+            <i class="fas fa-image me-2 text-primary"></i>
+            <span>Completion Image</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0 position-relative" style="min-height: 60vh;">
+          <!-- Loading spinner -->
+          <div id="imageLoadingSpinner" class="position-absolute top-50 start-50 translate-middle">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          
+          <!-- Image container with max height -->
+          <div id="imageContainer" class="d-flex justify-content-center align-items-center" style="min-height: 60vh; background-color: #f8f9fa;">
+            <img id="completionImagePreview" src="#" alt="Completion Image" class="img-fluid" style="max-height: 75vh; max-width: 100%; object-fit: contain;">
+          </div>
+          
+          <!-- Navigation arrows (hidden by default) -->
+          <button id="prevImageBtn" class="btn btn-light btn-lg position-absolute top-50 start-0 translate-middle-y ms-3 rounded-circle shadow-sm d-none" style="width: 50px; height: 50px;">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button id="nextImageBtn" class="btn btn-light btn-lg position-absolute top-50 end-0 translate-middle-y me-3 rounded-circle shadow-sm d-none" style="width: 50px; height: 50px;">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="modal-footer bg-light border-0">
+          <div class="d-flex justify-content-between w-100 align-items-center">
+            <div class="text-muted small" id="imageInfo"></div>
+            <div>
+              <a id="downloadImageBtn" href="#" class="btn btn-outline-primary btn-sm me-2" download>
+                <i class="fas fa-download me-1"></i> Download
+              </a>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">
+                <i class="fas fa-times me-1"></i> Close
+              </button>
+            </div>
           </div>
         </div>
       </div>
