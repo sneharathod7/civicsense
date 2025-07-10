@@ -19,6 +19,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files from uploads directory
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log(`Created uploads directory: ${uploadsDir}`);
+}
+app.use('/uploads', express.static(uploadsDir));
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, { 

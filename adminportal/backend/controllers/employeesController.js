@@ -296,8 +296,349 @@ const assignEmployee = async (req, res) => {
   }
 };
 
+// ------------------------------------------------------------------
+//  NEW CONTROLLER FUNCTIONS FOR EMPLOYEE MANAGEMENT
+// ------------------------------------------------------------------
+
+/**
+ * GET /api/employees
+ * List employees for the admin's department with optional search & pagination
+ */
+const getEmployees = async (req, res) => {
+  try {
+    const deptName = req.department;
+    const { search = '', page = 1, limit = 20 } = req.query;
+
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const limitNum = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+
+    // Build query with exact department match (case insensitive)
+    const query = { 
+      $expr: { 
+        $eq: [
+          { $trim: { input: { $toLower: "$department" } } }, 
+          { $trim: { input: deptName.toLowerCase() } } 
+        ] 
+      } 
+    };
+    
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query.$or = [
+        { name: regex },
+        { employeeId: regex },
+        { email: regex },
+        { phone: regex }
+      ];
+    }
+
+    const total = await Employee.countDocuments(query);
+    const employees = await Employee.find(query)
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .lean();
+
+    res.json({ data: employees, total, page: pageNum, totalPages: Math.ceil(total / limitNum) });
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ error: 'Failed to fetch employees', details: error.message });
+  }
+};
+
+/**
+ * POST /api/employees
+ * Add a new employee to the department
+ */
+const createEmployee = async (req, res) => {
+  try {
+    const deptName = req.department;
+    const { employeeId, name, gender = 'other', phone = '', email } = req.body;
+
+    if (!employeeId || !name || !email) {
+      return res.status(400).json({ error: 'employeeId, name and email are required' });
+    }
+
+    // Check duplicates
+    const existing = await Employee.findOne({ employeeId });
+    if (existing) {
+      return res.status(400).json({ error: 'Employee ID already exists' });
+    }
+
+    // Ensure department name matches exactly what's in adminMapping
+    const adminMapping = require('../utils/adminMapping');
+    const normalizedDeptName = Object.values(adminMapping).find(
+      dept => dept.toLowerCase().trim() === deptName.toLowerCase().trim()
+    ) || deptName; // Fallback to original if not found
+
+    const employee = new Employee({
+      employeeId,
+      name,
+      gender: gender.toLowerCase(),
+      phone,
+      email,
+      department: normalizedDeptName, // Use the normalized department name
+      status: 'not assigned'
+    });
+
+    await employee.save();
+
+    res.status(201).json({ success: true, data: employee });
+  } catch (error) {
+    console.error('Error creating employee:', error);
+    res.status(500).json({ error: 'Failed to create employee', details: error.message });
+  }
+};
+
+/**
+ * DELETE /api/employees/:id
+ * Remove an employee document (department restricted)
+ */
+const getEmployeeDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deptName = req.department;
+    
+    const employee = await Employee.findById(id).lean();
+    
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    
+    // Verify department access
+    if (employee.department.toLowerCase().trim() !== deptName.toLowerCase().trim()) {
+      return res.status(403).json({ 
+        error: 'Not authorized to view this employee',
+        details: 'Department mismatch'
+      });
+    }
+    
+    res.json(employee);
+    
+  } catch (error) {
+    console.error('Error fetching employee details:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
+const getEmployeeStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deptName = req.department;
+    
+    // First verify employee exists and belongs to department
+    const employee = await Employee.findOne({
+      _id: id,
+      $expr: {
+        $eq: [
+          { $trim: { input: { $toLower: "$department" } } },
+          { $trim: { input: deptName.toLowerCase() } }
+        ]
+      }
+    }).lean();
+    
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found or unauthorized' });
+    }
+    
+    // Get report statistics
+    const stats = await Report.aggregate([
+      {
+        $match: {
+          assignedTo: employee._id,
+          status: { $exists: true }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          completed: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "resolved"] }, 1, 0]
+            }
+          },
+          inProgress: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "in-progress"] }, 1, 0]
+            }
+          },
+          avgResolutionTime: { $avg: "$resolutionTime" } // in days
+        }
+      }
+    ]);
+    
+    // Format the response
+    const result = stats[0] || {
+      total: 0,
+      completed: 0,
+      inProgress: 0,
+      avgResolutionTime: null
+    };
+    
+    res.json({
+      totalReports: result.total,
+      completedReports: result.completed,
+      inProgress: result.inProgress,
+      avgResolutionTime: result.avgResolutionTime ? Math.round(result.avgResolutionTime * 10) / 10 : null
+    });
+    
+  } catch (error) {
+    console.error('Error fetching employee stats:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
+const getEmployeeActivity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 10 } = req.query;
+    const deptName = req.department;
+    
+    // Verify employee exists and belongs to department
+    const employee = await Employee.findOne({
+      _id: id,
+      $expr: {
+        $eq: [
+          { $trim: { input: { $toLower: "$department" } } },
+          { $trim: { input: deptName.toLowerCase() } }
+        ]
+      }
+    }).lean();
+    
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found or unauthorized' });
+    }
+    
+    // Get recent activity
+    const activity = await ActivityLog.find({
+      'user.id': id,
+      'user.type': 'employee'
+    })
+    .sort({ timestamp: -1 })
+    .limit(parseInt(limit))
+    .lean();
+    
+    res.json(activity);
+    
+  } catch (error) {
+    console.error('Error fetching employee activity:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
+const getEmployeeReports = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 5 } = req.query;
+    const deptName = req.department;
+    
+    // Verify employee exists and belongs to department
+    const employee = await Employee.findOne({
+      _id: id,
+      $expr: {
+        $eq: [
+          { $trim: { input: { $toLower: "$department" } } },
+          { $trim: { input: deptName.toLowerCase() } }
+        ]
+      }
+    }).lean();
+    
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found or unauthorized' });
+    }
+    
+    // Get assigned reports
+    const reports = await Report.find({
+      assignedTo: id,
+      department: { $regex: new RegExp(`^${deptName}$`, 'i') }
+    })
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .select('_id title category status createdAt updatedAt')
+    .lean();
+    
+    res.json(reports);
+    
+  } catch (error) {
+    console.error('Error fetching employee reports:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
+const deleteEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deptName = req.department;
+    
+    // First find the employee to verify department access
+    const employee = await Employee.findById(id).lean();
+    
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    // Check department match case-insensitively
+    if (employee.department.toLowerCase().trim() !== deptName.toLowerCase().trim()) {
+      console.log(`[DELETE] Department mismatch: ${employee.department} vs ${deptName}`);
+      return res.status(403).json({ 
+        error: 'Not authorized to delete this employee',
+        details: 'Department mismatch',
+        employeeDepartment: employee.department,
+        userDepartment: deptName
+      });
+    }
+
+    // Check if employee is assigned to any reports
+    const assignedReports = await Report.countDocuments({
+      assignedTo: id,
+      status: { $nin: ['resolved', 'closed'] }
+    });
+    
+    if (assignedReports > 0) {
+      return res.status(400).json({
+        error: 'Cannot delete employee',
+        details: 'Employee is currently assigned to active reports',
+        assignedReports
+      });
+    }
+    
+    // Proceed with deletion
+    await Employee.findByIdAndDelete(id);
+    
+    // Log the deletion
+    await new ActivityLog({
+      action: 'Employee Deleted',
+      details: `Employee ${employee.name} (${employee.employeeId}) was deleted`,
+      user: {
+        id: req.user.id,
+        type: 'admin',
+        name: req.user.name
+      },
+      target: {
+        id: employee._id,
+        type: 'employee',
+        name: employee.name
+      }
+    }).save();
+    
+    res.json({ message: 'Employee deleted successfully' });
+    
+  } catch (error) {
+    console.error('Error deleting employee:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
 // Export the controller functions
 module.exports = {
   getUnassigned,
+  getEmployees,
+  createEmployee,
+  getEmployeeDetails,
+  getEmployeeStats,
+  getEmployeeActivity,
+  getEmployeeReports,
+  deleteEmployee,
   assignEmployee
 };

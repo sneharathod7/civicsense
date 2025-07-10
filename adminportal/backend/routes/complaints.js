@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const department = require('../middleware/department');
 const { getComplaints } = require('../controllers/complaintsController');
-const { getReport, updateReport, deleteReport } = require('../controllers/reportActionsController');
+const { getReport, updateReport, deleteReport, markAsCompleted } = require('../controllers/reportActionsController');
 const Report = require('../models/Report');
 
 // GET /api/complaints
@@ -50,5 +50,8 @@ router.patch('/:id', auth, department, updateReport);
 
 // DELETE /api/complaints/:id
 router.delete('/:id', auth, department, deleteReport);
+
+// POST /api/complaints/:id/complete - Mark a report as completed with optional image and comment
+router.post('/:id/complete', auth, department, markAsCompleted);
 
 module.exports = router;

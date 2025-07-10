@@ -1,6 +1,46 @@
 const Report = require('../models/Report');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../../uploads/completed');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log(`Created uploads directory: ${uploadsDir}`);
+}
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../../uploads/completed');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `completed-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed (jpeg, jpg, png, gif)'));
+    }
+  }
+}).single('completionImage');
 
 /**
  * GET /api/complaints/:id
@@ -170,4 +210,86 @@ exports.deleteReport = async (req, res) => {
     console.error('Failed to delete report:', err);
     res.status(500).json({ error: 'Failed to delete report' });
   }
+};
+
+/**
+ * POST /api/reports/:id/complete
+ * Mark a report as completed with optional image and comment
+ */
+exports.markAsCompleted = (req, res) => {
+  const { id } = req.params;
+  const comment = req.body.comment || 'Marked as completed';
+  
+  // Handle file upload
+  upload(req, res, async (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ error: 'File upload error: ' + err.message });
+    } else if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    try {
+      const report = await Report.findById(id);
+      if (!report) {
+        return res.status(404).json({ error: 'Report not found' });
+      }
+
+      // Check if user has permission (same department or admin)
+      if (req.user.department !== report.department && (!req.user.roles || !req.user.roles.includes('admin'))) {
+        return res.status(403).json({ error: 'Not authorized to complete this report' });
+      }
+
+      // Check if file was uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: 'Completion image is required' });
+      }
+
+      // Prepare update data
+      const updateData = {
+        status: 'resolved',
+        resolvedAt: new Date(),
+        $push: {
+          comments: {
+            text: comment,
+            postedBy: req.user?.name || 'Admin',
+            status: 'resolved'
+          },
+          images: {
+            url: `/uploads/completed/${req.file.filename}`,
+            thumbnailUrl: `/uploads/completed/${req.file.filename}`,
+            uploadedAt: new Date(),
+            isCompletionImage: true
+          }
+        }
+      };
+
+      // Update the report
+      const updatedReport = await Report.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true }
+      ).populate('assignedTo', 'name email');
+
+      res.json({
+        success: true,
+        message: 'Report marked as completed successfully',
+        report: updatedReport
+      });
+    } catch (error) {
+      console.error('Error marking report as completed:', error);
+      
+      // Clean up uploaded file if there was an error
+      if (req.file) {
+        const filePath = path.join(uploadsDir, req.file.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to mark report as completed',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
 };
