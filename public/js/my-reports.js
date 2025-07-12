@@ -91,8 +91,8 @@ async function loadUserData() {
       document.getElementById('ddUserName').textContent = `${userData.data.firstName} ${userData.data.lastName}`;
       document.getElementById('ddUserEmail').textContent = userData.data.email;
       
-      // Use the global setUserAvatar function from auth.js
-      window.setUserAvatar();
+      // Update avatar display
+      updateAvatarDisplay(userData.data.photo, userData.data.firstName, userData.data.lastName);
     } else {
       throw new Error(userData.message || 'Failed to load user data');
     }
@@ -100,6 +100,42 @@ async function loadUserData() {
     console.error('Error loading user data:', error);
     showToast('error', 'Failed to load user data');
   }
+}
+
+// Update avatar display with initials fallback
+function updateAvatarDisplay(photoUrl, firstName, lastName) {
+  const userAvatar = document.getElementById('userAvatar');
+  const avatarInitials = document.getElementById('avatarInitials');
+  
+  if (photoUrl) {
+    // If there's a photo URL, use it
+    userAvatar.src = `/uploads/${photoUrl}`;
+    userAvatar.style.display = 'block';
+    if (avatarInitials) avatarInitials.style.display = 'none';
+    
+    // Handle image load error
+    userAvatar.onerror = function() {
+      this.style.display = 'none';
+      if (avatarInitials) {
+        avatarInitials.style.display = 'flex';
+        avatarInitials.textContent = getInitials(firstName, lastName);
+      }
+    };
+  } else {
+    // Show initials if no image
+    userAvatar.style.display = 'none';
+    if (avatarInitials) {
+      avatarInitials.style.display = 'flex';
+      avatarInitials.textContent = getInitials(firstName, lastName);
+    }
+  }
+}
+
+// Get user initials
+function getInitials(firstName, lastName) {
+  const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+  const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+  return first + last || 'U';
 }
 
 // Setup theme toggle

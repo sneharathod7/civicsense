@@ -255,46 +255,9 @@ function updateAvatarDisplay(user) {
     const userAvatarImg = document.getElementById('userAvatar');
     const avatarInitials = document.getElementById('avatarInitials');
     
-    if (user.profilePicture && user.profilePicture.trim() !== '') {
+    if (user.photo && user.photo.trim() !== '') {
         // Show image if available
-        userAvatarImg.src = user.profilePicture;
-        userAvatarImg.style.display = 'block';
-        if (avatarInitials) avatarInitials.style.display = 'none';
-        
-        // Handle image load error
-        userAvatarImg.onerror = function() {
-            this.style.display = 'none';
-            if (avatarInitials) {
-                avatarInitials.style.display = 'flex';
-                avatarInitials.textContent = getInitials(user.firstName, user.lastName);
-            }
-        };
-    } else {
-        // Show initials if no image
-        userAvatarImg.style.display = 'none';
-        if (avatarInitials) {
-            avatarInitials.style.display = 'flex';
-            avatarInitials.textContent = getInitials(user.firstName, user.lastName);
-        }
-    }
-}
-
-// Get user initials
-function getInitials(firstName, lastName) {
-    const first = firstName ? firstName.charAt(0).toUpperCase() : '';
-    const last = lastName ? lastName.charAt(0).toUpperCase() : '';
-    return first + last || 'U';
-    updateAvatarDisplay(user);
-}
-
-// Update avatar display with initials fallback
-function updateAvatarDisplay(user) {
-    const userAvatarImg = document.getElementById('userAvatar');
-    const avatarInitials = document.getElementById('avatarInitials');
-    
-    if (user.profilePicture && user.profilePicture.trim() !== '') {
-        // Show image if available
-        userAvatarImg.src = user.profilePicture;
+        userAvatarImg.src = `/uploads/${user.photo}`;
         userAvatarImg.style.display = 'block';
         if (avatarInitials) avatarInitials.style.display = 'none';
         

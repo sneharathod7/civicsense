@@ -1778,15 +1778,30 @@
       const avatar = document.getElementById('profileAvatarMain');
       const headerAvatar = document.getElementById('userAvatar');
       
-      if (user.avatar || user.profileImage) {
-        const avatarSrc = user.avatar || user.profileImage;
+      if (user.photo) {
+        const avatarSrc = `/uploads/${user.photo}`;
         if (avatar) avatar.src = avatarSrc;
         if (headerAvatar) headerAvatar.src = avatarSrc;
       } else {
-        // Show default avatar
-        const name = user.name || user.email || '';
+        // Show default avatar or generate initials
         if (avatar) avatar.src = '/img/avatar-placeholder.png';
         if (headerAvatar) headerAvatar.src = '/img/avatar-placeholder.png';
+        
+        // Optional: Generate initials if name is available
+        let initial = '?';
+        if (user.firstName && user.lastName) {
+          initial = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+        } else if (user.name) {
+          initial = user.name.trim()[0].toUpperCase();
+        } else if (user.email) {
+          initial = user.email.trim()[0].toUpperCase();
+        }
+        
+        const avatarInitials = document.getElementById('avatarInitials');
+        if (avatarInitials) {
+          avatarInitials.textContent = initial;
+          avatarInitials.style.display = user.photo ? 'none' : 'flex';
+        }
       }
     }
 
