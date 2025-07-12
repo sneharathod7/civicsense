@@ -133,6 +133,20 @@
       console.log('assignedTo type:', typeof complaint.assignedTo);
       console.log('assignedTo value:', complaint.assignedTo);
       
+      // Setup Assign button
+      const assignBtn = document.getElementById('assignBtn');
+      if (complaint.assignedTo) {
+        assignBtn.disabled = true;
+        assignBtn.innerHTML = '<i class="fas fa-user-check me-1"></i> Assigned';
+      } else {
+        assignBtn.disabled = false;
+        assignBtn.innerHTML = '<i class="fas fa-user-plus me-1"></i> Assign to Employee';
+        assignBtn.onclick = () => {
+          // Redirect to manage-reports with the report id as query parameter
+          window.location.href = `manage-reports.html?reportId=${complaint._id}`;
+        };
+      }
+
       // Update modal with complaint details
       document.getElementById('complaintTitle').textContent = complaint.title || 'Untitled Complaint';
       document.getElementById('complaintId').textContent = `ID: ${complaint._id || ''}`;
@@ -235,11 +249,12 @@
               </div>
             ` : ''}`;
         }
-        // If assignedTo is just an ID, fetch the employee details
-        try {
-          const empRes = await fetch(`/api/employees/${complaint.assignedTo}`, {
-            headers: getAuthHeaders()
-          });
+        // If assignedTo is just an ID (string), fetch employee details
+        if (typeof complaint.assignedTo === 'string') {
+          try {
+            const empRes = await fetch(`/api/employees/${complaint.assignedTo}`, {
+              headers: getAuthHeaders()
+            });
           
           if (empRes.ok) {
             const employee = await empRes.json();
@@ -271,14 +286,15 @@
           } else {
             throw new Error('Failed to fetch employee details');
           }
-        } catch (error) {
-          console.error('Error fetching employee:', error);
-          assignmentDetails.innerHTML = `
-            <div class="alert alert-warning">
-              <i class="fas fa-exclamation-triangle me-2"></i>
-              Unable to load employee details
-            </div>
-          `;
+          } catch (error) {
+            console.error('Error fetching employee:', error);
+            assignmentDetails.innerHTML = `
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Unable to load employee details
+              </div>
+            `;
+          }
         }
       } else {
         // No employee assigned

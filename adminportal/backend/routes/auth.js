@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const adminEmailToDepartment = require('../utils/adminMapping');
 
 router.post('/login', async (req, res) => {
+  console.log('Login request received:', req.body);
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email }).select('+password');
   if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
