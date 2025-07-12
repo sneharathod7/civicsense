@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Report = require('../models/Report');
 const { sendReportNotification } = require('../services/emailService');
+const fs = require('fs');
+const path = require('path');
 const { protect } = require('../middleware/auth');
 
 // @route   POST api/reports
@@ -13,7 +15,42 @@ router.post('/', protect, async (req, res) => {
     console.log('req.user:', req.user);
     console.log('Authorization header:', req.headers.authorization);
 
-    const { title, description, location, category, images, userEmail, department } = req.body;
+    const { title, description, location, category, images: incomingImages = [], userEmail, department } = req.body;
+
+    // Persist images to /uploads and build relative paths array
+    const imagePaths = [];
+    if (Array.isArray(incomingImages) && incomingImages.length > 0) {
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      try {
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        incomingImages.forEach((imgStr, idx) => {
+          if (!imgStr) return;
+
+          let base64 = imgStr;
+          let extension = 'jpg';
+
+          // If we received a full data URL, separate header and detect extension
+          const match = imgStr.match(/^data:(image\/\w+);base64,(.+)$/);
+          if (match) {
+            extension = match[1].split('/')[1];
+            base64 = match[2];
+          }
+
+          const filename = `report_${Date.now()}_${idx}.${extension}`;
+          const filePath = path.join(uploadsDir, filename);
+          try {
+            fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
+            imagePaths.push(`/uploads/${filename}`);
+          } catch (writeErr) {
+            console.error('Error writing image file:', writeErr);
+          }
+        });
+      } catch (dirErr) {
+        console.error('Error ensuring uploads directory:', dirErr);
+      }
+    }
     
     // Compute coordinates robustly
     const coords = Array.isArray(location?.coordinates) && location.coordinates.length === 2
@@ -34,7 +71,7 @@ router.post('/', protect, async (req, res) => {
       description,
       location: locObj,
       category,
-      images,
+      images: imagePaths,
       status: 'pending',
       userEmail: req.user?.email || userEmail || 'no-email@example.com',
       userMobile: req.user?.mobile || req.body.userMobile || 'no-mobile',

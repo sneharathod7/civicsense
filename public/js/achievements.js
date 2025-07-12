@@ -102,6 +102,14 @@ const POINTS = {
     commentPosted: 2
 };
 
+// Pagination settings
+const PAGINATION = {
+    itemsPerPage: 10,
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0
+};
+
 // DOM Elements
 const totalReportsEl = document.getElementById('totalReports');
 const resolvedReportsEl = document.getElementById('resolvedReports');
@@ -115,6 +123,14 @@ const nextMilestoneEl = document.getElementById('nextMilestone');
 const ddUserNameEl = document.getElementById('ddUserName');
 const ddUserEmailEl = document.getElementById('ddUserEmail');
 const userAvatarEl = document.getElementById('userAvatar');
+const paginationContainerEl = document.getElementById('paginationContainer');
+const pageInfoEl = document.getElementById('pageInfo');
+const prevBtnEl = document.getElementById('prevBtn');
+const nextBtnEl = document.getElementById('nextBtn');
+const pageNumbersEl = document.getElementById('pageNumbers');
+
+// Global data storage
+let allPointsHistory = [];
 
 // Theme toggle functionality
 function setupThemeToggle() {
@@ -147,6 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadAchievements();
         setupThemeToggle();
         setupLogoutHandler();
+        setupPaginationHandlers();
     } catch (error) {
         console.error('Error initializing page:', error);
         showToast('error', 'Failed to initialize page');
@@ -164,6 +181,27 @@ function setupLogoutHandler() {
     }
 }
 
+// Setup pagination event handlers
+function setupPaginationHandlers() {
+    if (prevBtnEl) {
+        prevBtnEl.addEventListener('click', () => {
+            if (PAGINATION.currentPage > 1) {
+                PAGINATION.currentPage--;
+                renderPointsHistory(allPointsHistory);
+            }
+        });
+    }
+
+    if (nextBtnEl) {
+        nextBtnEl.addEventListener('click', () => {
+            if (PAGINATION.currentPage < PAGINATION.totalPages) {
+                PAGINATION.currentPage++;
+                renderPointsHistory(allPointsHistory);
+            }
+        });
+    }
+}
+
 // Load user data
 async function loadUserData() {
     try {
@@ -174,7 +212,7 @@ async function loadUserData() {
 
         const response = await fetch('/api/v1/auth/me', {
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Cache-Control': 'no-cache'
             }
         });
@@ -208,7 +246,81 @@ function updateUserInterface(user) {
     ddUserNameEl.textContent = `${user.firstName} ${user.lastName}`;
     ddUserEmailEl.textContent = user.email;
     
-    // Avatar is now handled by auth.js setUserAvatar function
+    // Update avatar display
+    updateAvatarDisplay(user);
+}
+
+// Update avatar display with initials fallback
+function updateAvatarDisplay(user) {
+    const userAvatarImg = document.getElementById('userAvatar');
+    const avatarInitials = document.getElementById('avatarInitials');
+    
+    if (user.profilePicture && user.profilePicture.trim() !== '') {
+        // Show image if available
+        userAvatarImg.src = user.profilePicture;
+        userAvatarImg.style.display = 'block';
+        if (avatarInitials) avatarInitials.style.display = 'none';
+        
+        // Handle image load error
+        userAvatarImg.onerror = function() {
+            this.style.display = 'none';
+            if (avatarInitials) {
+                avatarInitials.style.display = 'flex';
+                avatarInitials.textContent = getInitials(user.firstName, user.lastName);
+            }
+        };
+    } else {
+        // Show initials if no image
+        userAvatarImg.style.display = 'none';
+        if (avatarInitials) {
+            avatarInitials.style.display = 'flex';
+            avatarInitials.textContent = getInitials(user.firstName, user.lastName);
+        }
+    }
+}
+
+// Get user initials
+function getInitials(firstName, lastName) {
+    const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+    const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return first + last || 'U';
+    updateAvatarDisplay(user);
+}
+
+// Update avatar display with initials fallback
+function updateAvatarDisplay(user) {
+    const userAvatarImg = document.getElementById('userAvatar');
+    const avatarInitials = document.getElementById('avatarInitials');
+    
+    if (user.profilePicture && user.profilePicture.trim() !== '') {
+        // Show image if available
+        userAvatarImg.src = user.profilePicture;
+        userAvatarImg.style.display = 'block';
+        if (avatarInitials) avatarInitials.style.display = 'none';
+        
+        // Handle image load error
+        userAvatarImg.onerror = function() {
+            this.style.display = 'none';
+            if (avatarInitials) {
+                avatarInitials.style.display = 'flex';
+                avatarInitials.textContent = getInitials(user.firstName, user.lastName);
+            }
+        };
+    } else {
+        // Show initials if no image
+        userAvatarImg.style.display = 'none';
+        if (avatarInitials) {
+            avatarInitials.style.display = 'flex';
+            avatarInitials.textContent = getInitials(user.firstName, user.lastName);
+        }
+    }
+}
+
+// Get user initials
+function getInitials(firstName, lastName) {
+    const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+    const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return first + last || 'U';
 }
 
 // Load all achievement data
@@ -243,7 +355,11 @@ async function loadAchievements() {
             updateStats(data);
             renderBadges(data.badges || []);
             renderRoadmap(data);
-            renderPointsHistory(data.pointsHistory || []);
+            
+            // Store points history globally for pagination
+            allPointsHistory = data.pointsHistory || [];
+            renderPointsHistory(allPointsHistory);
+            
             updateProgressIndicators(data);
         } else {
             throw new Error('Failed to load achievements data');
@@ -298,7 +414,7 @@ function renderBadges(badges = []) {
     
     if (!badges || badges.length === 0) {
         const emptyState = document.createElement('div');
-        emptyState.className = 'text-center text-muted p-4';
+        emptyState.className = 'empty-state';
         emptyState.innerHTML = `
             <i class="fas fa-award fa-3x mb-3"></i>
             <h5>No Badges Yet</h5>
@@ -313,22 +429,26 @@ function renderBadges(badges = []) {
         badgeEl.style.animation = `fadeInUp ${0.3 + index * 0.1}s ease-out forwards`;
         badgesContainerEl.appendChild(badgeEl);
     });
+
+    // Update badge count
+    const badgeCountEl = document.getElementById('badgeCount');
+    if (badgeCountEl) {
+        badgeCountEl.textContent = badges.length;
+    }
 }
 
 // Create badge element
 function createBadgeElement(badge) {
     const div = document.createElement('div');
-    div.className = 'badge-item earned fade-in-up';
+    div.className = 'badge-card';
     
     div.innerHTML = `
         <div class="badge-icon">
-            <i class="fas ${getBadgeIcon(badge.name)} fa-2x"></i>
+            <i class="fas ${getBadgeIcon(badge.name)}"></i>
         </div>
-        <div class="badge-info">
-            <h5>${badge.name}</h5>
-            <p>${badge.description || ''}</p>
-            <small>Earned ${formatDate(badge.earnedAt)}</small>
-        </div>
+        <h6>${badge.name}</h6>
+        <p>${badge.description || ''}</p>
+        <small class="text-muted">Earned ${formatDate(badge.earnedAt)}</small>
     `;
     
     return div;
@@ -343,7 +463,12 @@ function getBadgeIcon(badgeName) {
         'Expert Reporter': 'fa-clipboard-check',
         'Problem Solver': 'fa-check-circle',
         'Solution Seeker': 'fa-check-double',
-        'Change Maker': 'fa-award'
+        'Change Maker': 'fa-award',
+        'Engaged Citizen': 'fa-star',
+        'Active Citizen': 'fa-stars',
+        'Super Citizen': 'fa-crown',
+        'Profile Pioneer': 'fa-user-check',
+        'Profile Pro': 'fa-portrait'
     };
     
     return iconMap[badgeName] || 'fa-medal';
@@ -364,14 +489,16 @@ function renderRoadmap(data) {
     
     // Create sections for each badge type
     Object.entries(BADGES).forEach(([type, badges]) => {
-        // Skip profile badges
+        // Skip profile badges for now
         if (type === 'profile') return;
+        
         const section = document.createElement('div');
         section.className = 'mb-4';
-        section.innerHTML = `<h5 class="mb-3">${type.charAt(0).toUpperCase() + type.slice(1)} Badges</h5>`;
         
-        const badgesList = document.createElement('div');
-        badgesList.className = 'list-group';
+        const sectionTitle = document.createElement('h5');
+        sectionTitle.className = 'mb-3';
+        sectionTitle.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Badges`;
+        section.appendChild(sectionTitle);
         
         badges.forEach(badge => {
             let currentProgress, earned;
@@ -394,10 +521,9 @@ function renderRoadmap(data) {
                     earned = false;
             }
             
-            badgesList.appendChild(createRoadmapItem(badge, earned, currentProgress));
+            section.appendChild(createRoadmapItem(badge, earned, currentProgress));
         });
         
-        section.appendChild(badgesList);
         roadmapContainerEl.appendChild(section);
     });
 }
@@ -413,31 +539,21 @@ function createRoadmapItem(badge, earned, currentProgress) {
         100
     );
     
-    // Determine progress text
-    const progressText = earned 
-        ? 'Completed' 
-        : `${currentProgress}/${badge.requirement}`;
-    
     div.innerHTML = `
-        <div class="badge-icon">
+        <div class="roadmap-icon">
             <i class="fas ${getBadgeIcon(badge.name)}"></i>
         </div>
-        <div class="badge-info">
-            <h5>${badge.name}</h5>
+        <div class="roadmap-info">
+            <h6>${badge.name}</h6>
             <p>${badge.description}</p>
             <div class="progress">
                 <div class="progress-bar ${earned ? 'bg-success' : ''}" 
-                     role="progressbar" 
-                     style="width: ${progressPercentage}%" 
-                     aria-valuenow="${progressPercentage}" 
-                     aria-valuemin="0" 
-                     aria-valuemax="100">
-                    ${progressText}
+                     style="width: ${progressPercentage}%">
                 </div>
             </div>
-        </div>
-        <div class="badge-percentage">
-            ${Math.round(progressPercentage)}%
+            <small class="text-muted">
+                ${earned ? 'Completed' : `${currentProgress}/${badge.requirement} (${Math.round(progressPercentage)}%)`}
+            </small>
         </div>
     `;
     
@@ -446,15 +562,30 @@ function createRoadmapItem(badge, earned, currentProgress) {
 
 // Update progress indicators
 function updateProgressIndicators(data) {
-    if (badgeProgressEl) {
-        const nextBadgePoints = Math.ceil(data.points / 100) * 100;
-        const progress = (data.points / nextBadgePoints) * 100;
-        badgeProgressEl.style.width = `${Math.min(progress, 100)}%`;
-        badgeProgressEl.setAttribute('aria-valuenow', progress);
-        
-        if (nextMilestoneEl) {
-            nextMilestoneEl.textContent = `Next milestone: ${nextBadgePoints} points`;
-        }
+    if (nextMilestoneEl) {
+        // Find next milestone
+        const nextMilestone = findNextMilestone(data);
+        nextMilestoneEl.textContent = nextMilestone;
+    }
+}
+
+// Find next milestone
+function findNextMilestone(data) {
+    const milestones = [
+        { points: 100, name: 'Engaged Citizen' },
+        { points: 500, name: 'Active Citizen' },
+        { points: 1000, name: 'Super Citizen' },
+        { points: 2000, name: 'Community Leader' },
+        { points: 5000, name: 'Civic Champion' }
+    ];
+    
+    const currentPoints = data.points || 0;
+    const nextMilestone = milestones.find(m => m.points > currentPoints);
+    
+    if (nextMilestone) {
+        return `Next: ${nextMilestone.name} (${nextMilestone.points} points)`;
+    } else {
+        return 'All milestones achieved!';
     }
 }
 
@@ -472,7 +603,7 @@ function formatDate(dateString) {
     });
 }
 
-// Render points history with animations
+// Render points history with pagination
 function renderPointsHistory(history) {
     if (!pointsHistoryTableEl) return;
     
@@ -487,26 +618,146 @@ function renderPointsHistory(history) {
             </td>
         `;
         pointsHistoryTableEl.appendChild(emptyRow);
+        if (paginationContainerEl) {
+            paginationContainerEl.style.display = 'none';
+        }
         return;
     }
     
-    // Sort history by date (newest first) and render each entry
-    history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-          .forEach((entry, index) => {
-              const row = document.createElement('tr');
-              row.className = 'fade-in-up';
-              row.style.animation = `fadeInUp ${0.3 + index * 0.05}s ease-out forwards`;
-              
-              row.innerHTML = `
-                  <td>${formatDate(entry.timestamp)}</td>
-                  <td class="${entry.type === 'earned' ? 'text-success' : 'text-danger'}">
-                      ${entry.type === 'earned' ? '+' : '-'}${entry.points}
-                  </td>
-                  <td>${entry.reason}</td>
-              `;
-              
-              pointsHistoryTableEl.appendChild(row);
-          });
+    // Sort history by date (newest first)
+    const sortedHistory = [...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    // Calculate pagination
+    PAGINATION.totalItems = sortedHistory.length;
+    PAGINATION.totalPages = Math.ceil(PAGINATION.totalItems / PAGINATION.itemsPerPage);
+    
+    // Ensure current page is valid
+    if (PAGINATION.currentPage > PAGINATION.totalPages) {
+        PAGINATION.currentPage = PAGINATION.totalPages;
+    }
+    if (PAGINATION.currentPage < 1) {
+        PAGINATION.currentPage = 1;
+    }
+    
+    // Get items for current page
+    const startIndex = (PAGINATION.currentPage - 1) * PAGINATION.itemsPerPage;
+    const endIndex = startIndex + PAGINATION.itemsPerPage;
+    const currentPageItems = sortedHistory.slice(startIndex, endIndex);
+    
+    // Render current page items
+    currentPageItems.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.className = 'fade-in-up';
+        row.style.animation = `fadeInUp ${0.3 + index * 0.05}s ease-out forwards`;
+        
+        const pointsClass = entry.type === 'earned' ? 'text-success' : 'text-danger';
+        const pointsPrefix = entry.type === 'earned' ? '+' : '-';
+        
+        row.innerHTML = `
+            <td>${formatDate(entry.timestamp)}</td>
+            <td class="${pointsClass}">
+                <strong>${pointsPrefix}${entry.points}</strong>
+            </td>
+            <td>${entry.reason}</td>
+        `;
+        
+        pointsHistoryTableEl.appendChild(row);
+    });
+    
+    // Update pagination UI
+    updatePaginationUI();
+}
+
+// Update pagination UI
+function updatePaginationUI() {
+    if (!paginationContainerEl) return;
+    
+    // Show pagination container
+    paginationContainerEl.style.display = 'flex';
+    
+    // Update page info
+    const startItem = (PAGINATION.currentPage - 1) * PAGINATION.itemsPerPage + 1;
+    const endItem = Math.min(PAGINATION.currentPage * PAGINATION.itemsPerPage, PAGINATION.totalItems);
+    
+    if (pageInfoEl) {
+        pageInfoEl.textContent = `${startItem}-${endItem} of ${PAGINATION.totalItems}`;
+    }
+    
+    // Update previous button
+    if (prevBtnEl) {
+        prevBtnEl.disabled = PAGINATION.currentPage <= 1;
+    }
+    
+    // Update next button
+    if (nextBtnEl) {
+        nextBtnEl.disabled = PAGINATION.currentPage >= PAGINATION.totalPages;
+    }
+    
+    // Update page numbers
+    updatePageNumbers();
+}
+
+// Update page numbers
+function updatePageNumbers() {
+    if (!pageNumbersEl) return;
+    
+    pageNumbersEl.innerHTML = '';
+    
+    // Don't show page numbers if there's only one page
+    if (PAGINATION.totalPages <= 1) return;
+    
+    // Calculate visible page range
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, PAGINATION.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(PAGINATION.totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // Add first page and ellipsis if needed
+    if (startPage > 1) {
+        addPageNumber(1);
+        if (startPage > 2) {
+            addEllipsis();
+        }
+    }
+    
+    // Add visible page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        addPageNumber(i);
+    }
+    
+    // Add ellipsis and last page if needed
+    if (endPage < PAGINATION.totalPages) {
+        if (endPage < PAGINATION.totalPages - 1) {
+            addEllipsis();
+        }
+        addPageNumber(PAGINATION.totalPages);
+    }
+}
+
+// Add page number button
+function addPageNumber(pageNum) {
+    const btn = document.createElement('button');
+    btn.className = `pagination-btn ${pageNum === PAGINATION.currentPage ? 'active' : ''}`;
+    btn.textContent = pageNum;
+    btn.addEventListener('click', () => {
+        PAGINATION.currentPage = pageNum;
+        renderPointsHistory(allPointsHistory);
+    });
+    pageNumbersEl.appendChild(btn);
+}
+
+// Add ellipsis
+function addEllipsis() {
+    const ellipsis = document.createElement('span');
+    ellipsis.className = 'pagination-ellipsis';
+    ellipsis.textContent = '...';
+    ellipsis.style.padding = '0.5rem';
+    ellipsis.style.color = 'var(--text-secondary)';
+    pageNumbersEl.appendChild(ellipsis);
 }
 
 // Show toast notification
@@ -553,4 +804,31 @@ function createToast(type, message) {
     `;
     
     return toast;
-} 
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .pagination-ellipsis {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+    }
+`;
+document.head.appendChild(style);

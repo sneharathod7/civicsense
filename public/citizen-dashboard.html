@@ -136,7 +136,7 @@
       left: 0;
       right: 0;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 1);
       backdrop-filter: blur(30px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.2);
       transition: var(--transition-smooth);
@@ -443,6 +443,34 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border-radius: 16px;
+    }
+
+    .avatar-initials {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      background: var(--premium-gradient);
+      border-radius: 16px;
+      border-radius: 16px;
+    }
+
+    .avatar-initials {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      background: var(--premium-gradient);
+      border-radius: 16px;
     }
 
     /* Main Content */
@@ -1402,10 +1430,11 @@
         <div class="user-profile">
           <div class="profile-avatar" id="profileAvatar">
             <img id="userAvatar" src="/images/default-avatar.png" alt="User Avatar">
+            <div id="avatarInitials" class="avatar-initials" style="display: none;">U</div>
           </div>
           
           <!-- Dropdown Menu -->
-          <div class="dropdown-menu dropdown-menu-end shadow-sm" style="display: none;">
+          <div class="dropdown-menu dropdown-menu-end shadow-sm" id="profileDropdown" style="display: none; position: absolute; right: -70px; top: 60px; min-width: 250px; max-width: 280px; z-index: 1050; margin-top: 0.5rem;">
             <div class="px-3 py-2 border-bottom">
               <div class="fw-semibold" id="ddUserName">Loading...</div>
               <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
@@ -1819,7 +1848,7 @@
       
       lastScrollTop = scrollTop;
     });
-
+        
     // Parallax effect for hero section
     window.addEventListener('scroll', () => {
       const scrolled = window.pageYOffset;

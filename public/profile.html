@@ -1,147 +1,1132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Profile - CivicSense+</title>
+  <title>User Profile – CivicVerse</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/profile.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --primary-color: #0d6efd;
-      --primary-hover: #0b5ed7;
-      --transition: all 0.3s ease;
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --premium-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      --dark-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text-primary: #1a202c;
+      --text-secondary: #4a5568;
+      --text-accent: #667eea;
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-glow: 0 0 30px rgba(102, 126, 234, 0.3);
+      --border-radius: 20px;
+      --border-radius-lg: 28px;
+      --transition-smooth: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      --transition-elastic: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
-    html { scroll-behavior: smooth; }
-    .sticky-top { backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.95); transition: var(--transition); }
-    .nav-link { color: #495057; font-weight: 500; position: relative; padding: 0.5rem 1rem; transition: var(--transition); }
-    .nav-link:hover, .nav-link.active { color: var(--primary-color); }
-    .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 1rem; background-color: var(--primary-color); transition: var(--transition); }
-    .nav-link:hover::after, .nav-link.active::after { width: calc(100% - 2rem); }
-    .btn { transition: var(--transition); }
-    .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
-    .btn-primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); transform: translateY(-1px); }
-    .card { transition: var(--transition); border: 1px solid rgba(0,0,0,0.1); }
-    .footer { margin-top: 2rem; }
-    .footer .container { padding: 1rem; }
-    .footer h6 { font-size: 0.9rem; margin-bottom: 0.75rem; }
-    .footer ul { margin-bottom: 0; }
-    .footer li { margin-bottom: 0.5rem; }
-    .footer a { font-size: 0.875rem; }
-    .card:hover { box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1); transform: translateY(-2px); }
-    .dropdown-menu { border: none; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1); border-radius: 0.5rem; padding: 0.5rem; }
-    .dropdown-item { border-radius: 0.375rem; padding: 0.5rem 1rem; transition: var(--transition); }
-    .form-check-input:checked { background-color: var(--primary-color); border-color: var(--primary-color); }
-    .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+    [data-bs-theme="dark"] {
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --text-accent: #90cdf4;
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --glass-bg: rgba(0, 0, 0, 0.3);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Premium Animated Background */
+    .premium-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: var(--bg-primary);
+    }
+
+    .premium-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(-45deg, #667eea20, #764ba220, #f093fb20, #f5576c20);
+      background-size: 400% 400%;
+      animation: premiumShift 20s ease infinite;
+    }
+
+    @keyframes premiumShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Advanced Floating Elements */
+    .floating-orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--premium-gradient);
+      opacity: 0.1;
+      filter: blur(1px);
+      animation: orbFloat 25s infinite linear;
+    }
+
+    .orb:nth-child(odd) {
+      animation-direction: reverse;
+    }
+
+    @keyframes orbFloat {
+      0% { 
+        transform: translateY(100vh) rotate(0deg) scale(0.8);
+        opacity: 0;
+      }
+      10% { opacity: 0.1; }
+      90% { opacity: 0.1; }
+      100% { 
+        transform: translateY(-100vh) rotate(360deg) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    /* Premium Header */
+    .premium-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 1);
+      backdrop-filter: blur(30px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      transition: var(--transition-smooth);
+      padding: 0.5rem 0;
+    }
+
+    [data-bs-theme="dark"] .premium-header {
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80px;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--premium-gradient);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-elastic);
+    }
+
+    .logo-icon::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: translateX(-100%);
+      transition: var(--transition-smooth);
+    }
+
+    .logo-icon:hover::before {
+      transform: translateX(100%);
+    }
+
+    .logo-icon:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .logo-text h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: var(--premium-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .logo-text:hover h1 {
+      transform: translateY(-2px);
+    }
+
+    .logo-text .subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 0;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-link {
+      position: relative;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 16px;
+      transition: var(--transition-smooth);
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--premium-gradient);
+      transition: var(--transition-elastic);
+      z-index: -1;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--premium-gradient);
+      transition: var(--transition-smooth);
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover::before,
+    .nav-link.active::before {
+      left: 0;
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 80%;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .action-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition-elastic);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--premium-gradient);
+      opacity: 0;
+      transition: var(--transition-smooth);
+      z-index: -1;
+    }
+
+    .action-btn:hover::before {
+      opacity: 1;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px) scale(1.1);
+      box-shadow: var(--shadow-heavy);
+      color: white;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: var(--secondary-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .theme-toggle {
+      position: relative;
+      width: 70px;
+      height: 36px;
+      background: var(--glass-bg);
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      overflow: hidden;
+    }
+
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--premium-gradient);
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .theme-toggle:hover::before {
+      opacity: 0.1;
+    }
+
+    .theme-toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 32px;
+      height: 32px;
+      background: var(--premium-gradient);
+      border-radius: 50%;
+      transition: var(--transition-elastic);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .theme-toggle.dark .theme-toggle-slider {
+      transform: translateX(34px);
+    }
+
+    .user-profile {
+      position: relative;
+    }
+
+    .profile-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: var(--premium-gradient);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: var(--transition-elastic);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .profile-avatar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: translateX(-100%);
+      transition: var(--transition-smooth);
+    }
+
+    .profile-avatar:hover::before {
+      transform: translateX(100%);
+    }
+
+    .profile-avatar:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    .avatar-initials {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      background: var(--premium-gradient);
+      border-radius: 16px;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-top: 100px;
+      padding: 2.5rem;
+      max-width: 1600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Premium Cards */
+    .premium-card {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-light);
+      transition: var(--transition-elastic);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .premium-card:hover::before {
+      opacity: 1;
+    }
+
+    .premium-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-heavy);
+    }
+
+    .premium-card-header {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 1.5rem 2rem;
+      border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+
+    .premium-card-header h5 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .premium-card-header i {
+      color: var(--text-accent);
+      font-size: 1.25rem;
+    }
+
+    .premium-card-body {
+      padding: 2.5rem;
+    }
+
+    /* Profile Header Section */
+    .profile-header-card {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: 3rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-light);
+    }
+
+    .profile-header-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -25%;
+      width: 600px;
+      height: 600px;
+      background: var(--premium-gradient);
+      border-radius: 50%;
+      opacity: 0.1;
+      animation: heroFloat 20s infinite ease-in-out;
+    }
+
+    @keyframes heroFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-30px, -20px) rotate(180deg); }
+    }
+
+    .profile-avatar-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .profile-avatar-main {
+      width: 120px;
+      height: 120px;
+      border-radius: 28px;
+      background: var(--premium-gradient);
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      object-fit: cover;
+      transition: var(--transition-elastic);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .profile-avatar-main:hover {
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .avatar-upload-btn {
+      position: absolute;
+      bottom: -10px;
+      right: -10px;
+      background: var(--premium-gradient);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-elastic);
+      box-shadow: var(--shadow-medium);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .avatar-upload-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: var(--shadow-heavy);
+    }
+
+    /* Premium Buttons */
+    .btn-premium {
+      background: var(--premium-gradient);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 16px;
+      transition: var(--transition-elastic);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-premium::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: translateX(-100%);
+      transition: var(--transition-smooth);
+    }
+
+    .btn-premium:hover::before {
+      transform: translateX(100%);
+    }
+
+    .btn-premium:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-heavy);
+      color: white;
+    }
+
+    .btn-premium-outline {
+      background: transparent;
+      border: 2px solid var(--text-accent);
+      color: var(--text-accent);
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 16px;
+      transition: var(--transition-elastic);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-premium-outline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--premium-gradient);
+      transition: var(--transition-elastic);
+      z-index: -1;
+    }
+
+    .btn-premium-outline:hover::before {
+      left: 0;
+    }
+
+    .btn-premium-outline:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-heavy);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Premium Badges */
+    .premium-badge {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: var(--transition-smooth);
+    }
+
+    .premium-badge.success {
+      background: rgba(72, 187, 120, 0.2);
+      color: #38a169;
+      border-color: rgba(72, 187, 120, 0.3);
+    }
+
+    .premium-badge.warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #d97706;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    /* Form Controls */
+    .premium-form-control {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      transition: var(--transition-smooth);
+    }
+
+    .premium-form-control:focus {
+      background: var(--bg-secondary);
+      border-color: var(--text-accent);
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      outline: none;
+    }
+
+    .premium-form-control:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Stats Card */
+    .stats-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      text-align: center;
+      transition: var(--transition-elastic);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--premium-gradient);
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .stats-card:hover::before {
+      opacity: 0.1;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-heavy);
+    }
+
+    .stats-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.85rem;
+    }
+
+    /* Progress Bar */
+    .premium-progress {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .premium-progress-bar {
+      height: 100%;
+      background: var(--premium-gradient);
+      border-radius: 4px;
+      transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-progress-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: progressShimmer 2s infinite;
+    }
+
+    @keyframes progressShimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Verification Badge */
+    .verification-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .verification-badge.verified {
+      background: rgba(72, 187, 120, 0.2);
+      color: #38a169;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-heavy);
+    }
+
+    .modal-header {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+      background: var(--glass-bg);
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-heavy);
+      padding: 1rem 0;
+      margin-top: 1rem;
+    }
+
+    .dropdown-item {
+      padding: 0.8rem 1.5rem;
+      transition: var(--transition-smooth);
+      color: var(--text-primary);
+    }
+
+    .dropdown-item:hover {
+      background: var(--premium-gradient);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    /* Premium Footer */
+    .premium-footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.03), transparent);
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .premium-footer:hover::before {
+      opacity: 1;
+    }
+
+    .footer-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 2rem;
+    }
+
+    .footer-section h6 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .footer-section h6::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      width: 30px;
+      height: 2px;
+      background: var(--premium-gradient);
+      border-radius: 1px;
+    }
+
+    .footer-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      position: relative;
+      display: inline-block;
+      padding: 0.25rem 0;
+    }
+
+    .footer-link::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--premium-gradient);
+      transition: var(--transition-smooth);
+    }
+
+    .footer-link:hover {
+      color: var(--text-accent);
+      transform: translateX(5px);
+    }
+
+    .footer-link:hover::before {
+      width: 100%;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .footer-version {
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      display: inline-block;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: var(--text-accent);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header-content {
+        padding: 1rem;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .main-content {
+        padding: 1.5rem;
+        margin-top: 90px;
+      }
+      
+      .profile-header-card {
+        padding: 2rem 1.5rem;
+      }
+      
+      .premium-card-body {
+        padding: 1.5rem;
+      }
+
+      .premium-card-header {
+        padding: 1rem 1.5rem;
+      }
+    }
+
+    /* Scroll Reveal Animation */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .scroll-reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
-    <!-- Header -->
-  <header class="sticky-top bg-white shadow-sm">
-    <div class="container-fluid">
-      <div class="row align-items-center py-2">
-        <!-- Left Section -->
-        <div class="col-lg-3 d-flex align-items-center">
-          <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
-            <div class="d-flex align-items-center">
-              <i class="fas fa-landmark fs-3 text-primary me-2"></i>
-              <div>
-                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
-                <div class="small text-muted">Smart Governance</div>
-              </div>
-            </div>
-          </a>
+  <!-- Premium Background -->
+  <div class="premium-bg"></div>
+  
+  <!-- Floating Orbs -->
+  <div class="floating-orbs">
+    <div class="orb" style="left: 10%; width: 40px; height: 40px; animation-delay: 0s;"></div>
+    <div class="orb" style="left: 20%; width: 60px; height: 60px; animation-delay: 5s;"></div>
+    <div class="orb" style="left: 30%; width: 30px; height: 30px; animation-delay: 10s;"></div>
+    <div class="orb" style="left: 40%; width: 50px; height: 50px; animation-delay: 15s;"></div>
+    <div class="orb" style="left: 50%; width: 35px; height: 35px; animation-delay: 20s;"></div>
+    <div class="orb" style="left: 60%; width: 45px; height: 45px; animation-delay: 25s;"></div>
+    <div class="orb" style="left: 70%; width: 55px; height: 55px; animation-delay: 30s;"></div>
+    <div class="orb" style="left: 80%; width: 25px; height: 25px; animation-delay: 35s;"></div>
+    <div class="orb" style="left: 90%; width: 40px; height: 40px; animation-delay: 40s;"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="premium-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <i class="fas fa-landmark"></i>
         </div>
-        <!-- Center Navigation -->
-        <div class="col-lg-6">
-          <div class="d-flex flex-column">
-            <div class="d-flex justify-content-center gap-2">
-              <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
-              <a href="/report.html" class="nav-link">New Report</a>
-              <a href="/my-reports.html" class="nav-link">My Reports</a>
-              <a href="/achievements.html" class="nav-link">Achievements</a>
-              <a href="/rewards.html" class="nav-link">Rewards</a>
-            </div>
+        <div class="logo-text">
+          <h1>CivicVerse</h1>
+          <p class="subtitle">Smart Governance</p>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
+        <a href="/report.html" class="nav-link">New Report</a>
+        <a href="/my-reports.html" class="nav-link">My Reports</a>
+        <a href="/achievements.html" class="nav-link">Achievements</a>
+        <a href="/rewards.html" class="nav-link">Rewards</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="action-btn" id="notifBell">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </button>
+        
+        <div class="theme-toggle" id="themeToggle">
+          <div class="theme-toggle-slider">
+            <i class="fas fa-moon"></i>
           </div>
         </div>
-        <!-- Right Section -->
-        <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
-          <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
-            <i class="fas fa-bell fs-5"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
-          </button>
-          <div class="form-check form-switch my-0">
-            <input class="form-check-input" type="checkbox" id="themeSwitch">
-            <label class="form-check-label" for="themeSwitch"><i class="fas fa-moon"></i></label>
+
+        <div class="user-profile">
+          <div class="profile-avatar" id="profileAvatar">
+            <img id="userAvatar" src="/images/default-avatar.png" alt="User Avatar">
+            <div id="avatarInitials" class="avatar-initials" style="display: none;">U</div>
           </div>
-          <div class="dropdown">
-            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              <div class="avatar-circle"><img src="/img/avatar-placeholder.png" alt="User Avatar" id="userAvatar"></div>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
-              <li class="px-3 py-2 border-bottom">
-                <div class="fw-semibold" id="ddUserName">Username</div>
-                <small class="text-muted" id="ddUserEmail">user@email.com</small>
-              </li>
-              <li><a class="dropdown-item" href="/profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
-              <li><a class="dropdown-item" href="/my-reports.html"><i class="fas fa-list me-2"></i>My Reports</a></li>
-              <li><a class="dropdown-item" href="/achievements.html"><i class="fas fa-trophy me-2"></i>Achievements</a></li>
-              <li><a class="dropdown-item" href="/rewards.html"><i class="fas fa-gift me-2"></i>Rewards</a></li>
-              <li><a class="dropdown-item" href="/settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
-              <li><hr class="dropdown-divider m-1"></li>
-              <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
-              <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
-              <li><hr class="dropdown-divider m-1"></li>
-              <li><a class="dropdown-item text-danger logout-link" id="logoutBtn" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-            </ul>
+          
+          <!-- Dropdown Menu -->
+          <div class="dropdown-menu dropdown-menu-end shadow-sm" id="profileDropdown" style="display: none; position: absolute; right: -70px; top: 60px; min-width: 250px; max-width: 280px; z-index: 1050; margin-top: 0.5rem;">
+            <div class="px-3 py-2 border-bottom">
+              <div class="fw-semibold" id="ddUserName">Loading...</div>
+              <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
+            </div>
+            <a class="dropdown-item d-flex align-items-center gap-2" href="/profile.html">
+              <i class="fas fa-user"></i> Profile
+            </a>
+            <a class="dropdown-item d-flex align-items-center gap-2" href="/my-reports.html">
+              <i class="fas fa-list"></i> My Reports
+            </a>
+            <a class="dropdown-item d-flex align-items-center gap-2" href="/achievements.html">
+              <i class="fas fa-trophy"></i> Achievements
+            </a>
+            <a class="dropdown-item d-flex align-items-center gap-2" href="/rewards.html">
+              <i class="fas fa-gift"></i> Rewards
+            </a>
+            <a class="dropdown-item d-flex align-items-center gap-2" href="/settings.html">
+              <i class="fas fa-cog"></i> Settings
+            </a>
+            <hr class="dropdown-divider">
+            <a class="dropdown-item text-muted small" href="/support.html">
+              <i class="fas fa-question-circle me-2"></i>Support
+            </a>
+            <a class="dropdown-item text-muted small" href="/privacy.html">
+              <i class="fas fa-shield-alt me-2"></i>Privacy
+            </a>
+            <hr class="dropdown-divider">
+            <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="logoutBtn">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
           </div>
         </div>
       </div>
     </div>
   </header>
-  <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
 
-  <main class="container py-4">
+  <main class="main-content">
     <!-- Profile Header -->
-    <div class="card mb-4 shadow-sm">
-      <div class="card-body p-4">
-        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
-          <div class="profile-avatar-container me-md-4 mb-3 mb-md-0">
-            <img src="/img/avatar-placeholder.png" alt="Profile Photo" class="profile-avatar rounded-circle" id="profileAvatar">
-            <label for="avatarInput" class="avatar-upload-btn" id="avatarUploadBtn">
-              <i class="fas fa-camera"></i>
-              <span class="ms-2">Change Photo</span>
-            </label>
-            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+    <div class="profile-header-card scroll-reveal">
+      <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+        <div class="profile-avatar-container me-md-4 mb-3 mb-md-0">
+          <img src="/img/avatar-placeholder.png" alt="Profile Photo" class="profile-avatar-main" id="profileAvatarMain">
+          <label for="avatarInput" class="avatar-upload-btn" id="avatarUploadBtn">
+            <i class="fas fa-camera"></i>
+            <span class="ms-1">Change</span>
+          </label>
+          <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+        </div>
+        <div class="flex-grow-1">
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start mb-3">
+            <h1 class="h2 mb-0 me-3" id="profileName" style="font-family: 'Space Grotesk', sans-serif; font-weight: 800; color: var(--text-primary);">John Doe</h1>
+            <span class="premium-badge success">
+              <i class="fas fa-star text-warning"></i> 4.8
+            </span>
           </div>
-          <div class="flex-grow-1">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start mb-2">
-              <h1 class="h3 mb-0 me-3" id="profileName">John Doe</h1>
-              <span class="badge bg-success bg-opacity-10 text-success mb-2">
-                <i class="fas fa-star text-warning"></i> 4.8
-              </span>
-            </div>
-            <div class="text-muted mb-2">
-              <i class="fas fa-award text-primary me-1"></i> Civic Champion
-              <span class="mx-2">•</span>
-              <i class="far fa-calendar-alt text-primary me-1"></i> Member since Jan 2023
-            </div>
-            <div class="text-muted">
-              <i class="fas fa-map-marker-alt text-primary me-1"></i> <span id="userLocation">New Delhi, India</span>
-            </div>
+          <div class="text-muted mb-2">
+            <i class="fas fa-award text-primary me-1"></i> Civic Champion
+            <span class="mx-2">•</span>
+            <i class="far fa-calendar-alt text-primary me-1"></i> Member since Jan 2023
           </div>
-          <div class="mt-3 mt-md-0 d-flex gap-2">
-            <button class="btn btn-outline-primary" id="editProfileBtn">
-              <i class="fas fa-edit me-1"></i> Edit Profile
-            </button>
-            <button class="btn btn-primary" id="saveProfileBtn" style="display: none;">
-              <i class="fas fa-save me-1"></i> Save Changes
-            </button>
+          <div class="text-muted">
+            <i class="fas fa-map-marker-alt text-primary me-1"></i> <span id="userLocation">New Delhi, India</span>
           </div>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+          <button class="btn-premium-outline" id="editProfileBtn">
+            <i class="fas fa-edit me-1"></i> Edit Profile
+          </button>
+          <button class="btn-premium" id="saveProfileBtn" style="display: none;">
+            <i class="fas fa-save me-1"></i> Save Changes
+          </button>
         </div>
       </div>
     </div>
@@ -150,105 +1135,105 @@
       <!-- Left Column -->
       <div class="col-lg-8">
         <!-- Contact Information -->
-        <div class="card mb-4 shadow-sm">
-          <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="fas fa-address-card me-2"></i>Contact Information</h5>
+        <div class="premium-card mb-4 scroll-reveal">
+          <div class="premium-card-header">
+            <h5><i class="fas fa-address-card"></i>Contact Information</h5>
           </div>
-          <div class="card-body">
+          <div class="premium-card-body">
             <!-- Email -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-envelope me-2 text-primary"></i>
-                  <span>Email</span>
-                  <span class="verification-badge verified">
+                  <span style="font-weight: 600;">Email</span>
+                  <span class="verification-badge verified ms-2">
                     <i class="fas fa-check-circle me-1"></i> Verified
                   </span>
                 </div>
-                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
+                <button class="btn-premium-outline btn-sm" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
                   Change
                 </button>
               </div>
-              <div class="ms-4 ps-3 text-muted" id="userEmail"></div>
+              <div class="ms-4 ps-3 text-muted" id="userEmail" style="word-break: break-all; font-size: 0.95rem;">imt_2023079@iiitm.ac.in</div>
             </div>
 
             <!-- Phone -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-phone me-2 text-primary"></i>
-                  <span>Phone</span>
-                  <span class="verification-badge verified">
+                  <span style="font-weight: 600;">Phone</span>
+                  <span class="verification-badge verified ms-2">
                     <i class="fas fa-check-circle me-1"></i> Verified
                   </span>
                 </div>
-                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePhoneModal">
+                <button class="btn-premium-outline btn-sm" data-bs-toggle="modal" data-bs-target="#changePhoneModal">
                   Change
                 </button>
               </div>
-              <div class="ms-4 ps-3 text-muted" id="userPhone"></div>
+              <div class="ms-4 ps-3 text-muted" id="userPhone" style="font-size: 0.95rem;">+918330940363</div>
             </div>
 
             <!-- Address -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-map-marker-alt me-2 text-primary"></i>
-                  <span>Address</span>
+                  <span style="font-weight: 600;">Address</span>
                 </div>
               </div>
-              <div class="ms-4 ps-3">
-                <input type="text" class="form-control" id="address" disabled>
+              <div class="ms-4 ps-3 text-muted" style="font-size: 0.95rem; line-height: 1.4;">
+                Mangalpet, Bhanapur, Narayanpet
               </div>
             </div>
 
             <!-- City -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-city me-2 text-primary"></i>
-                  <span>City</span>
+                  <span style="font-weight: 600;">City</span>
                 </div>
               </div>
-              <div class="ms-4 ps-3">
-                <input type="text" class="form-control" id="city" disabled>
+              <div class="ms-4 ps-3 text-muted" style="font-size: 0.95rem;">
+                Sangareddy
               </div>
             </div>
 
             <!-- State -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-map me-2 text-primary"></i>
-                  <span>State</span>
+                  <span style="font-weight: 600;">State</span>
                 </div>
               </div>
-              <div class="ms-4 ps-3">
-                <input type="text" class="form-control" id="state" disabled>
+              <div class="ms-4 ps-3 text-muted" style="font-size: 0.95rem;">
+                Telangana
               </div>
             </div>
 
             <!-- PIN Code -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-map-pin me-2 text-primary"></i>
-                  <span>PIN Code</span>
+                  <span style="font-weight: 600;">PIN Code</span>
                 </div>
               </div>
-              <div class="ms-4 ps-3">
-                <input type="text" class="form-control" id="pinCode" disabled pattern="[0-9]{6}" maxlength="6">
+              <div class="ms-4 ps-3 text-muted" style="font-size: 0.95rem;">
+                502286
               </div>
             </div>
 
             <!-- Password Change Button -->
             <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+              <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <i class="fas fa-lock me-2 text-primary"></i>
-                  <span>Password</span>
+                  <span style="font-weight: 600;">Password</span>
                 </div>
-                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                <button class="btn-premium-outline btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                   Change Password
                 </button>
               </div>
@@ -260,94 +1245,61 @@
       <!-- Right Column -->
       <div class="col-lg-4">
         <!-- Civic Stats -->
-        <div class="card mb-2 shadow-sm">
-          <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Civic Stats</h5>
+        <div class="premium-card mb-4 scroll-reveal">
+          <div class="premium-card-header">
+            <h5><i class="fas fa-chart-line"></i>Civic Stats</h5>
           </div>
-          <div class="card-body">
-            <div class="text-center mb-4">
-              <div class="display-4 fw-bold text-primary">47</div>
-              <div class="text-muted">Total Reports</div>
+          <div class="premium-card-body">
+            <div class="stats-card mb-4">
+              <div id="totalReportsCount" class="stats-value">47</div>
+              <div class="stats-label">Total Reports</div>
             </div>
             <div class="d-flex justify-content-between mb-3">
-              <span class="text-muted">Resolved</span>
-              <span class="fw-bold">89%</span>
+              <span class="text-muted" style="font-weight: 500;">Resolved</span>
+              <span id="resolvedPercentageText" class="fw-bold">89%</span>
             </div>
-            <div class="progress mb-4" style="height: 8px;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: 89%;" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-            <div class="d-flex justify-content-between mb-3">
-              <div>
-                <i class="fas fa-star text-warning"></i>
-                <span class="ms-1">Citizen Score</span>
-              </div>
-              <span class="fw-bold">4.8/5.0</span>
+            <div class="premium-progress mb-4">
+              <div id="resolvedProgressBar" class="premium-progress-bar" style="width: 89%;"></div>
             </div>
             <div class="d-flex justify-content-between mb-4">
               <div>
                 <i class="fas fa-trophy text-warning"></i>
-                <span class="ms-1">Points</span>
+                <span class="ms-1" style="font-weight: 500;">Impact Points</span>
               </div>
-              <span class="fw-bold">1,245</span>
+              <span id="pointsValue" class="fw-bold">1,245</span>
             </div>
             <div class="d-grid">
-              <button class="btn btn-outline-primary">View Detailed Stats</button>
+              <button class="btn-premium-outline">View Detailed Stats</button>
             </div>
           </div>
         </div>
 
         <!-- Specialization Areas -->
-        <div class="card mb-4 shadow-sm">
-          <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="fas fa-tags me-2"></i>Specialization Areas</h5>
+        <div class="premium-card mb-4 scroll-reveal">
+          <div class="premium-card-header">
+            <h5><i class="fas fa-tags"></i>Specialization Areas</h5>
           </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <div class="d-flex justify-content-between mb-1">
-                <span><i class="fas fa-trash-alt text-danger me-1"></i> Waste Management</span>
-                <small class="text-muted">85%</small>
-              </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <div class="d-flex justify-content-between mb-1">
-                <span><i class="fas fa-road text-primary me-1"></i> Road Maintenance</span>
-                <small class="text-muted">72%</small>
-              </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: 72%;" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-            <div class="mb-0">
-              <div class="d-flex justify-content-between mb-1">
-                <span><i class="fas fa-lightbulb text-warning me-1"></i> Street Lighting</span>
-                <small class="text-muted">63%</small>
-              </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 63%;" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
+          <div class="premium-card-body">
+            <div id="specializationContainer"></div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Account Settings Section -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-header bg-light">
-        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Account Security</h5>
+    <div class="premium-card mb-4 scroll-reveal">
+      <div class="premium-card-header">
+        <h5><i class="fas fa-shield-alt"></i>Account Security</h5>
       </div>
-      <div class="card-body">
+      <div class="premium-card-body">
         <div class="row">
           <div class="col-md-6 mb-3">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="mb-1">Change Password</h6>
+                <h6 class="mb-1" style="font-weight: 600;">Change Password</h6>
                 <p class="small text-muted mb-0">Last changed 3 months ago</p>
               </div>
-              <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+              <button class="btn-premium-outline btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                 Change
               </button>
             </div>
@@ -356,10 +1308,10 @@
           <div class="col-md-6 mb-3">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="mb-1">Login Activity</h6>
+                <h6 class="mb-1" style="font-weight: 600;">Login Activity</h6>
                 <p class="small text-muted mb-0">View recent login attempts</p>
               </div>
-              <button class="btn btn-outline-secondary btn-sm" id="viewLoginActivityBtn">
+              <button class="btn-premium-outline btn-sm" id="viewLoginActivityBtn">
                 View
               </button>
             </div>
@@ -367,20 +1319,16 @@
           <div class="col-md-6">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="mb-1">Connected Devices</h6>
+                <h6 class="mb-1" style="font-weight: 600;">Connected Devices</h6>
                 <p class="small text-muted mb-0">2 devices active</p>
               </div>
-              <button class="btn btn-outline-secondary btn-sm" id="manageDevicesBtn">
+              <button class="btn-premium-outline btn-sm" id="manageDevicesBtn">
                 Manage
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    </div>
-  </div>
     </div>
   </main>
 
@@ -395,12 +1343,12 @@
         <div class="modal-body">
           <div class="mb-3">
             <label for="newEmail" class="form-label">New Email Address</label>
-            <input type="email" class="form-control" id="newEmail" required>
+            <input type="email" class="premium-form-control" id="newEmail" required>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="changeEmailBtn">Update Email</button>
+          <button type="button" class="btn-premium-outline" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-premium" id="changeEmailBtn">Update Email</button>
         </div>
       </div>
     </div>
@@ -417,12 +1365,12 @@
         <div class="modal-body">
           <div class="mb-3">
             <label for="newPhone" class="form-label">New Phone Number</label>
-            <input type="tel" class="form-control" id="newPhone" required>
+            <input type="tel" class="premium-form-control" id="newPhone" required>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="changePhoneBtn">Update Phone</button>
+          <button type="button" class="btn-premium-outline" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-premium" id="changePhoneBtn">Update Phone</button>
         </div>
       </div>
     </div>
@@ -439,20 +1387,20 @@
         <div class="modal-body">
           <div class="mb-3">
             <label for="currentPassword" class="form-label">Current Password</label>
-            <input type="password" class="form-control" id="currentPassword" required>
+            <input type="password" class="premium-form-control" id="currentPassword" required>
           </div>
           <div class="mb-3">
             <label for="newPassword" class="form-label">New Password</label>
-            <input type="password" class="form-control" id="newPassword" required minlength="6">
+            <input type="password" class="premium-form-control" id="newPassword" required minlength="6">
           </div>
           <div class="mb-3">
             <label for="confirmPassword" class="form-label">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+            <input type="password" class="premium-form-control" id="confirmPassword" required minlength="6">
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="changePasswordBtn">Update Password</button>
+          <button type="button" class="btn-premium-outline" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-premium" id="changePasswordBtn">Update Password</button>
         </div>
       </div>
     </div>
@@ -484,7 +1432,7 @@
                     <i class="fas fa-desktop me-2"></i> Windows 10, Chrome
                   </td>
                   <td>New Delhi, India</td>
-                  <td><span class="badge bg-success">Active</span></td>
+                  <td><span class="premium-badge success">Active</span></td>
                 </tr>
                 <tr>
                   <td>2 hours ago</td>
@@ -492,7 +1440,7 @@
                     <i class="fas fa-mobile-alt me-2"></i> Android, Chrome
                   </td>
                   <td>New Delhi, India</td>
-                  <td><span class="badge bg-secondary">Inactive</span></td>
+                  <td><span class="premium-badge">Inactive</span></td>
                 </tr>
                 <tr>
                   <td>Yesterday, 14:32</td>
@@ -500,15 +1448,15 @@
                     <i class="fas fa-mobile-alt me-2"></i> iPhone, Safari
                   </td>
                   <td>Gurgaon, India</td>
-                  <td><span class="badge bg-secondary">Inactive</span></td>
+                  <td><span class="premium-badge">Inactive</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-outline-danger">Sign out all other devices</button>
+          <button type="button" class="btn-premium-outline" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn-premium" style="background: var(--secondary-gradient);">Sign out all other devices</button>
         </div>
       </div>
     </div>
@@ -530,7 +1478,7 @@
                 <div class="text-muted small">Current session • New Delhi, India</div>
                 <div class="text-muted small">Last active: Just now</div>
               </div>
-              <button class="btn btn-sm btn-outline-danger">Sign out</button>
+              <button class="btn-premium-outline btn-sm" style="background: var(--secondary-gradient); color: white; border: none;">Sign out</button>
             </div>
           </div>
           <div class="device-item border-bottom py-3">
@@ -540,41 +1488,130 @@
                 <div class="text-muted small">Active 2 hours ago • New Delhi, India</div>
                 <div class="text-muted small">Last active: 2 hours ago</div>
               </div>
-              <button class="btn btn-sm btn-outline-danger">Sign out</button>
+              <button class="btn-premium-outline btn-sm" style="background: var(--secondary-gradient); color: white; border: none;">Sign out</button>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-outline-danger">Sign out all other devices</button>
+          <button type="button" class="btn-premium-outline" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn-premium" style="background: var(--secondary-gradient);">Sign out all other devices</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="bg-light border-top mt-5">
-    <div class="container py-3">
+  <!-- Premium Footer -->
+  <footer class="premium-footer">
+    <div class="footer-content">
       <div class="row">
-        <!-- Left Column -->
-        <div class="col-md-6 mb-3 mb-md-0">
-          <h6 class="fw-bold mb-3">Legal</h6>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-1"><a href="/privacy-policy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
-            <li><a href="/terms.html" class="text-decoration-none text-muted">Terms of Service</a></li>
-          </ul>
+        <!-- Legal Section -->
+        <div class="col-md-3 mb-4">
+          <div class="footer-section">
+            <h6>Legal & Privacy</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a href="/privacy-policy.html" class="footer-link">
+                  <i class="fas fa-shield-alt me-2"></i>Privacy Policy
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/terms.html" class="footer-link">
+                  <i class="fas fa-file-contract me-2"></i>Terms of Service
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/cookies.html" class="footer-link">
+                  <i class="fas fa-cookie-bite me-2"></i>Cookie Policy
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-        <!-- Right Column -->
-        <div class="col-md-6 mb-3 mb-md-0">
-          <h6 class="fw-bold mb-3">Quick Links</h6>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-1"><a href="/about.html" class="text-decoration-none text-muted">About Us</a></li>
-            <li class="mb-1"><a href="/citizen-dashboard.html" class="text-decoration-none text-muted">Dashboard</a></li>
-            <li><a href="/contact.html" class="text-decoration-none text-muted">Contact Us</a></li>
-          </ul>
+        
+        <!-- Quick Links Section -->
+        <div class="col-md-3 mb-4">
+          <div class="footer-section">
+            <h6>Quick Links</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a href="/about.html" class="footer-link">
+                  <i class="fas fa-info-circle me-2"></i>About CivicVerse
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/citizen-dashboard.html" class="footer-link">
+                  <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/contact.html" class="footer-link">
+                  <i class="fas fa-envelope me-2"></i>Contact Us
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Support Section -->
+        <div class="col-md-3 mb-4">
+          <div class="footer-section">
+            <h6>Support & Help</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a href="/support.html" class="footer-link">
+                  <i class="fas fa-life-ring me-2"></i>Help Center
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/faq.html" class="footer-link">
+                  <i class="fas fa-question-circle me-2"></i>FAQ
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/feedback.html" class="footer-link">
+                  <i class="fas fa-comment-dots me-2"></i>Feedback
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Community Section -->
+        <div class="col-md-3 mb-4">
+          <div class="footer-section">
+            <h6>Community</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a href="/community.html" class="footer-link">
+                  <i class="fas fa-users me-2"></i>Community Forum
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/news.html" class="footer-link">
+                  <i class="fas fa-newspaper me-2"></i>News & Updates
+                </a>
+              </li>
+              <li class="mb-2">
+                <a href="/events.html" class="footer-link">
+                  <i class="fas fa-calendar-alt me-2"></i>Events
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-      <div class="text-center text-muted small mt-2">Last Updated On: 24 June 2025 | v-2.1.5</div>
+      
+      <div class="footer-bottom">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+          <div class="mb-3 mb-md-0">
+            <p class="mb-0">© 2025 CivicVerse. Empowering communities through technology.</p>
+          </div>
+          <div class="footer-version">
+            <i class="fas fa-code-branch me-2"></i>
+            Version 2.1.5 | Updated June 24, 2025
+          </div>
+        </div>
+      </div>
     </div>
   </footer>
 
@@ -586,45 +1623,139 @@
   
   <!-- Profile JavaScript -->
   <script src="/js/profile.js"></script>
+  <!-- Profile Stats Script -->
+  <script src="/js/profile-stats.js"></script>
+
   <script>
-    // Theme toggle & nav highlight copied from dashboard
-    document.addEventListener('DOMContentLoaded', function() {
-      const themeSwitch = document.getElementById('themeSwitch');
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      if (currentTheme === 'dark') {
-        document.documentElement.setAttribute('data-bs-theme', 'dark');
-        if (themeSwitch) themeSwitch.checked = true;
-      }
-      if (themeSwitch) {
-        themeSwitch.addEventListener('change', function() {
-          if (this.checked) {
-            document.documentElement.setAttribute('data-bs-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-          } else {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
-            localStorage.setItem('theme', 'light');
-          }
-        });
-      }
-      const currentPage = window.location.pathname.split('/').pop();
-      document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
-          link.classList.add('active');
-        } else {
-          link.classList.remove('active');
+    // Scroll Reveal Animation
+    function revealOnScroll() {
+      const reveals = document.querySelectorAll('.scroll-reveal');
+      
+      reveals.forEach(reveal => {
+        const windowHeight = window.innerHeight;
+        const elementTop = reveal.getBoundingClientRect().top;
+        const elementVisible = 100;
+        
+        if (elementTop < windowHeight - elementVisible) {
+          reveal.classList.add('revealed');
         }
       });
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          window.location.href = '/landing.html';
-        });
+    }
+
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll(); // Initial check
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeSlider = themeToggle.querySelector('.theme-toggle-slider');
+    const themeIcon = themeSlider.querySelector('i');
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    
+    if (savedTheme === 'dark') {
+      themeToggle.classList.add('dark');
+      themeIcon.classList.remove('fa-moon');
+      themeIcon.classList.add('fa-sun');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = themeToggle.classList.contains('dark');
+      
+      if (isDark) {
+        themeToggle.classList.remove('dark');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        themeToggle.classList.add('dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
       }
     });
-  </script>
-  
-  <script>
+
+    // Profile Dropdown
+    const profileAvatar = document.getElementById('profileAvatar');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    let dropdownOpen = false;
+
+    profileAvatar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownOpen = !dropdownOpen;
+      dropdownMenu.style.display = dropdownOpen ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', () => {
+      dropdownOpen = false;
+      dropdownMenu.style.display = 'none';
+    });
+
+    // Notification Bell Animation
+    const notifBell = document.getElementById('notifBell');
+    notifBell.addEventListener('click', () => {
+      notifBell.style.animation = 'bounce 0.6s ease';
+      setTimeout(() => {
+        notifBell.style.animation = '';
+      }, 600);
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        // Add active class
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    // Add scroll effects
+    let lastScrollTop = 0;
+    const header = document.querySelector('.premium-header');
+    
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (scrollTop > lastScrollTop && scrollTop > 100) {
+        header.style.transform = 'translateY(-100%)';
+      } else {
+        header.style.transform = 'translateY(0)';
+      }
+      
+      lastScrollTop = scrollTop;
+    });
+
+    // Stagger animation for cards
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, index * 100);
+        }
+      });
+    }, observerOptions);
+
+    // Observe all cards for stagger animation
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.premium-card, .stats-card');
+      cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+      });
+    });
+
     // Populate profile info from localStorage
     function populateProfile() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -632,34 +1763,32 @@
       
       // Set user name and email
       if (user.name) document.getElementById('profileName').textContent = user.name;
-      if (user.email) document.getElementById('profileEmail').textContent = user.email;
+      if (user.email) {
+        const emailElement = document.getElementById('userEmail');
+        if (emailElement) emailElement.textContent = user.email;
+      }
       
-      // Set avatar
-      const avatar = document.getElementById('profileAvatar');
+      // Set phone if available
+      if (user.phone) {
+        const phoneElement = document.getElementById('userPhone');
+        if (phoneElement) phoneElement.textContent = user.phone;
+      }
+      
+      // Set avatar in profile section
+      const avatar = document.getElementById('profileAvatarMain');
+      const headerAvatar = document.getElementById('userAvatar');
+      
       if (user.avatar || user.profileImage) {
-        const img = document.createElement('img');
-        img.src = user.avatar || user.profileImage;
-        img.alt = 'Profile';
-        img.className = 'avatar-img';
-        avatar.innerHTML = '';
-        avatar.appendChild(img);
+        const avatarSrc = user.avatar || user.profileImage;
+        if (avatar) avatar.src = avatarSrc;
+        if (headerAvatar) headerAvatar.src = avatarSrc;
       } else {
-        // Show initials if no avatar
+        // Show default avatar
         const name = user.name || user.email || '';
-        const initials = name.trim() ? 
-          name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
-        avatar.innerHTML = '';
-        avatar.textContent = initials;
-        avatar.style.backgroundColor = '#4e73df';
-        avatar.style.display = 'flex';
-        avatar.style.alignItems = 'center';
-        avatar.style.justifyContent = 'center';
-        avatar.style.color = 'white';
-        avatar.style.fontWeight = 'bold';
+        if (avatar) avatar.src = '/img/avatar-placeholder.png';
+        if (headerAvatar) headerAvatar.src = '/img/avatar-placeholder.png';
       }
     }
-
-    document.addEventListener('DOMContentLoaded', populateProfile);
 
     // Helper function to show alerts
     function showAlert(message, type) {
@@ -687,6 +1816,8 @@
 
     // Handle avatar upload through the camera icon
     document.addEventListener('DOMContentLoaded', function() {
+      populateProfile();
+      
       const uploadBtn = document.querySelector('.avatar-upload-btn');
       if (uploadBtn) {
         uploadBtn.addEventListener('click', function(e) {
@@ -715,25 +1846,23 @@
           
           const reader = new FileReader();
           reader.onload = function(e) {
-            const avatar = document.getElementById('profileAvatar');
-            if (avatar) {
-              avatar.src = e.target.result;
-              
-              // In a real app, upload the file to your server here
-              const userData = JSON.parse(localStorage.getItem('user') || '{}');
-              userData.avatar = e.target.result;
-              localStorage.setItem('user', JSON.stringify(userData));
-              
-              showAlert('Profile picture updated successfully!', 'success');
-            }
+            const avatarMain = document.getElementById('profileAvatarMain');
+            const avatarHeader = document.getElementById('userAvatar');
+            
+            if (avatarMain) avatarMain.src = e.target.result;
+            if (avatarHeader) avatarHeader.src = e.target.result;
+            
+            // In a real app, upload the file to your server here
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            userData.avatar = e.target.result;
+            localStorage.setItem('user', JSON.stringify(userData));
+            
+            showAlert('Profile picture updated successfully!', 'success');
           };
           reader.readAsDataURL(file);
         });
       }
-    });
-
-    // Initialize modals
-    document.addEventListener('DOMContentLoaded', function() {
+      
       // Login Activity Modal
       const viewLoginActivityBtn = document.getElementById('viewLoginActivityBtn');
       if (viewLoginActivityBtn) {
@@ -752,64 +1881,12 @@
         });
       }
       
-      // Form submissions
-      const changeEmailForm = document.getElementById('changeEmailForm');
-      if (changeEmailForm) {
-        changeEmailForm.addEventListener('submit', function(e) {
+      // Logout functionality
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
           e.preventDefault();
-          // Add email change logic here
-          const modal = bootstrap.Modal.getInstance(document.getElementById('changeEmailModal'));
-          modal.hide();
-          alert('A verification email has been sent to your new email address.');
-        });
-      }
-      
-      const changePhoneForm = document.getElementById('changePhoneForm');
-      if (changePhoneForm) {
-        changePhoneForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          // Add phone change logic here
-          const modal = bootstrap.Modal.getInstance(document.getElementById('changePhoneModal'));
-          modal.hide();
-          alert('Your phone number has been updated successfully!');
-        });
-      }
-      
-      const changePasswordForm = document.getElementById('changePasswordForm');
-      if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          // Add password change logic here
-          const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
-          modal.hide();
-          alert('Your password has been updated successfully!');
-        });
-      }
-      
-      // Send verification code for phone
-      const sendVerificationCodeBtn = document.getElementById('sendVerificationCode');
-      if (sendVerificationCodeBtn) {
-        sendVerificationCodeBtn.addEventListener('click', function() {
-          // Add send verification code logic here
-          this.disabled = true;
-          this.textContent = 'Sending...';
-          
-          // Simulate API call
-          setTimeout(() => {
-            this.textContent = 'Resend Code (60)';
-            let countdown = 60;
-            const timer = setInterval(() => {
-              countdown--;
-              this.textContent = `Resend Code (${countdown})`;
-              if (countdown <= 0) {
-                clearInterval(timer);
-                this.textContent = 'Resend Code';
-                this.disabled = false;
-              }
-            }, 1000);
-            
-            alert('Verification code sent to your phone number.');
-          }, 1000);
+          window.location.href = '/landing.html';
         });
       }
     });
