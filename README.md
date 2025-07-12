@@ -237,6 +237,7 @@ Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 For questions, bug reports, or feature requests, open an issue or reach out via:
 
 - Email: codealpha786@gmail.com
+- Email: rathodsneha277@gmail.com
 ---
 
 *© 2025 CivicSense. All rights reserved.*
