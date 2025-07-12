@@ -1,404 +1,1284 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📝 New Report - CivicVerse</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    :root {
-      --primary-color: #0d6efd;
-      --primary-hover: #0b5ed7;
-      --transition: all 0.3s ease;
-    }
-    
-    html {
-      scroll-behavior: smooth;
-    }
-    
-    .sticky-top {
-      backdrop-filter: blur(10px);
-      background-color: rgba(255, 255, 255, 0.95);
-      transition: var(--transition);
-    }
-    
-    .nav-link {
-      color: #495057;
-      font-weight: 500;
-      position: relative;
-      padding: 0.5rem 1rem;
-      transition: var(--transition);
-    }
-    
-    .nav-link:hover,
-    .nav-link.active {
-      color: var(--primary-color);
-    }
-    
-    .category-icon {
-      width: 108px;
-      height: 90px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid transparent;
-      border-radius: .5rem;
-      transition: all .2s ease;
-    }
-    
-    .category-icon.selected,
-    .dropdown-item.active {
-      border-color: var(--bs-primary);
-      background-color: rgba(13,110,253,.15);
-    }
-    
-    #map { 
-      height: 450px; 
-      border-radius: 0.5rem;
-      border: 1px solid #dee2e6;
-    }
-    
-    .avatar-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #f8f9fa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border: 2px solid #e9ecef;
-    }
-    
-    .avatar-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 New Report - CivicVerse</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --premium-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --dark-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-accent: #667eea;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 30px rgba(102, 126, 234, 0.3);
+            --border-radius: 20px;
+            --border-radius-lg: 28px;
+            --transition-smooth: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --transition-elastic: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
 
-    /* Dropdown styles */
-    .dropdown-menu {
-      margin-top: 0.5rem;
-      border: none;
-      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-    }
+        [data-bs-theme="dark"] {
+            --text-primary: #f7fafc;
+            --text-secondary: #a0aec0;
+            --text-accent: #90cdf4;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --glass-bg: rgba(0, 0, 0, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
 
-    .dropdown-menu .dropdown-item {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .dropdown-menu .dropdown-item:hover {
-      background-color: #f8f9fa;
-    }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
 
-    .dropdown-menu .dropdown-item i {
-      width: 1.25rem;
-      text-align: center;
-    }
+        /* Premium Animated Background */
+        .premium-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: var(--bg-primary);
+        }
 
-    .dropdown-menu .dropdown-divider {
-      margin: 0.5rem 0;
-    }
+        .premium-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #667eea20, #764ba220, #f093fb20, #f5576c20);
+            background-size: 400% 400%;
+            animation: premiumShift 20s ease infinite;
+        }
 
-    .dropdown-menu .text-muted.small {
-      font-size: 0.875rem;
-    }
-    
-    .ai-result {
-      background-color: #f8f9fa;
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin-top: 1rem;
-    }
-  </style>
+        @keyframes premiumShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Advanced Floating Elements */
+        .floating-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--premium-gradient);
+            opacity: 0.1;
+            filter: blur(1px);
+            animation: orbFloat 25s infinite linear;
+        }
+
+        .orb:nth-child(odd) {
+            animation-direction: reverse;
+        }
+
+        @keyframes orbFloat {
+            0% { 
+                transform: translateY(100vh) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            10% { opacity: 0.1; }
+            90% { opacity: 0.1; }
+            100% { 
+                transform: translateY(-100vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Premium Header */
+        .premium-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition-smooth);
+            padding: 0.5rem 0;
+        }
+
+        [data-bs-theme="dark"] .premium-header {
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--premium-gradient);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-elastic);
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: var(--transition-smooth);
+        }
+
+        .logo-icon:hover::before {
+            transform: translateX(100%);
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-text h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: var(--premium-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .logo-text:hover h1 {
+            transform: translateY(-2px);
+        }
+
+        .logo-text .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 16px;
+            transition: var(--transition-smooth);
+            overflow: hidden;
+            font-size: 0.95rem;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--premium-gradient);
+            transition: var(--transition-elastic);
+            z-index: -1;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--premium-gradient);
+            transition: var(--transition-smooth);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            left: 0;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition-elastic);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--premium-gradient);
+            opacity: 0;
+            transition: var(--transition-smooth);
+            z-index: -1;
+        }
+
+        .action-btn:hover::before {
+            opacity: 1;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: var(--shadow-heavy);
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            background: var(--secondary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 70px;
+            height: 36px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--premium-gradient);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .theme-toggle:hover::before {
+            opacity: 0.1;
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 32px;
+            height: 32px;
+            background: var(--premium-gradient);
+            border-radius: 50%;
+            transition: var(--transition-elastic);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .theme-toggle.dark .theme-toggle-slider {
+            transform: translateX(34px);
+        }
+
+        .user-profile {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            background: var(--premium-gradient);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: var(--transition-elastic);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .profile-avatar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: var(--transition-smooth);
+        }
+
+        .profile-avatar:hover::before {
+            transform: translateX(100%);
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 100px;
+            padding: 2.5rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Form Sections */
+        .form-section {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-lg);
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .form-section:hover::before {
+            opacity: 1;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--text-accent);
+        }
+
+        /* Category Selection */
+        .category-icons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-icon {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-elastic);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--premium-gradient);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .category-icon:hover::before,
+        .category-icon.selected::before {
+            opacity: 0.1;
+        }
+
+        .category-icon:hover,
+        .category-icon.selected {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--text-accent);
+        }
+
+        .category-icon .fs-3 {
+            font-size: 2.5rem !important;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .category-icon small {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Map Styles */
+        #map {
+            height: 450px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Form Controls */
+        .form-control,
+        .form-select {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.875rem 1.25rem;
+            color: var(--text-primary);
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: var(--bg-secondary);
+            border-color: var(--text-accent);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            border-radius: 12px;
+            padding: 0.875rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition-elastic);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition-smooth);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--premium-gradient);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--text-accent);
+            color: var(--text-accent);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--premium-gradient);
+            border-color: transparent;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Image Upload */
+        .image-upload-area {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--text-accent);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .preview-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* AI Analysis Card */
+        .ai-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .ai-card .card-header {
+            background: var(--premium-gradient);
+            color: white;
+            border: none;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .ai-card .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-heavy);
+            padding: 1rem 0;
+            margin-top: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 0.8rem 1.5rem;
+            transition: var(--transition-smooth);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item:hover {
+            background: var(--premium-gradient);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* Premium Footer */
+        .premium-footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.03), transparent);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .premium-footer:hover::before {
+            opacity: 1;
+        }
+
+        .footer-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 3rem 2.5rem 2rem;
+        }
+
+        .footer-section h6 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer-section h6::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--premium-gradient);
+            border-radius: 1px;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            position: relative;
+            display: inline-block;
+            padding: 0.25rem 0;
+        }
+
+        .footer-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--premium-gradient);
+            transition: var(--transition-smooth);
+        }
+
+        .footer-link:hover {
+            color: var(--text-accent);
+            transform: translateX(5px);
+        }
+
+        .footer-link:hover::before {
+            width: 100%;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Scroll Reveal Animation */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 1.5rem;
+                margin-top: 90px;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 1.25rem;
+            }
+            
+            .category-icons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="sticky-top bg-white shadow-sm">
-    <div class="container-fluid">
-      <div class="row align-items-center py-2">
-        <!-- Left Section (25%) -->
-        <div class="col-lg-3 d-flex align-items-center">
-          <a class="navbar-brand text-decoration-none" href="/citizen-dashboard.html">
-            <div class="d-flex align-items-center">
-              <i class="fas fa-landmark fs-3 text-primary me-2"></i>
-              <div>
-                <span class="fw-bold fs-4 text-primary">CivicVerse</span>
-                <div class="small text-muted">Smart Governance</div>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <!-- Center Navigation (50%) -->
-        <div class="col-lg-6">
-          <div class="d-flex flex-column">
-            <div class="d-flex justify-content-center gap-2">
-              <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
-              <a href="/report.html" class="nav-link active">New Report</a>
-              <a href="/my-reports.html" class="nav-link">My Reports</a>
-              <a href="/achievements.html" class="nav-link">Achievements</a>
-              <a href="/rewards.html" class="nav-link">Rewards</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Section (25%) -->
-        <div class="col-lg-3 d-flex justify-content-end align-items-center gap-3">
-          <button class="btn btn-link text-dark position-relative p-2" id="notifBell">
-            <i class="fas fa-bell fs-5"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              3
-            </span>
-          </button>
-          <div class="form-check form-switch my-0">
-            <input class="form-check-input" type="checkbox" id="themeSwitch">
-            <label class="form-check-label" for="themeSwitch">
-              <i class="fas fa-moon"></i>
-            </label>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-link p-0 text-dark dropdown-toggle d-flex align-items-center gap-2" 
-                    type="button" 
-                    data-bs-toggle="dropdown" 
-                    aria-expanded="false">
-              <div class="avatar-circle">
-                <img id="userAvatar" src="/images/default-avatar.png" alt="User Avatar">
-              </div>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-              <li class="px-3 py-2 border-bottom">
-                <div class="fw-semibold" id="ddUserName">Loading...</div>
-                <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2" href="/profile.html">
-                  <i class="fas fa-user"></i> Profile
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2" href="/my-reports.html">
-                  <i class="fas fa-list"></i> My Reports
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2" href="/achievements.html">
-                  <i class="fas fa-trophy"></i> Achievements
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2" href="/rewards.html">
-                  <i class="fas fa-gift"></i> Rewards
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2" href="/settings.html">
-                  <i class="fas fa-cog"></i> Settings
-                </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-muted small" href="/support.html"><i class="fas fa-question-circle me-2"></i>Support</a></li>
-              <li><a class="dropdown-item text-muted small" href="/privacy.html"><i class="fas fa-shield-alt me-2"></i>Privacy</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="logoutBtn">
-                  <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <!-- Premium Background -->
+    <div class="premium-bg"></div>
+    
+    <!-- Floating Orbs -->
+    <div class="floating-orbs">
+        <div class="orb" style="left: 10%; width: 40px; height: 40px; animation-delay: 0s;"></div>
+        <div class="orb" style="left: 20%; width: 60px; height: 60px; animation-delay: 5s;"></div>
+        <div class="orb" style="left: 30%; width: 30px; height: 30px; animation-delay: 10s;"></div>
+        <div class="orb" style="left: 40%; width: 50px; height: 50px; animation-delay: 15s;"></div>
+        <div class="orb" style="left: 50%; width: 35px; height: 35px; animation-delay: 20s;"></div>
+        <div class="orb" style="left: 60%; width: 45px; height: 45px; animation-delay: 25s;"></div>
+        <div class="orb" style="left: 70%; width: 55px; height: 55px; animation-delay: 30s;"></div>
+        <div class="orb" style="left: 80%; width: 25px; height: 25px; animation-delay: 35s;"></div>
+        <div class="orb" style="left: 90%; width: 40px; height: 40px; animation-delay: 40s;"></div>
     </div>
-  </header>
-  
-  <div style="height: 40px;"></div> <!-- Spacer for fixed header -->
-  
-  <div class="container py-4">
-    <form id="reportForm" enctype="multipart/form-data">
-      <!-- Category Selection -->
-      <section class="mb-5" id="categorySection">
-        <h2 class="h5 mb-3">Category Selection</h2>
-        <div class="dropdown mb-3">
-          <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            Select Category ▼
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="roads"><span class="me-2">🛣️</span> Roads</a></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="water"><span class="me-2">💧</span> Water</a></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="electric"><span class="me-2">⚡</span> Electric</a></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="environment"><span class="me-2">🌳</span> Environment</a></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="sanitation"><span class="me-2">🚛</span> Sanitation</a></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="infrastructure"><span class="me-2">🏗️</span> Infrastructure</a></li>
-          </ul>
-        </div>
-        <div class="d-flex flex-wrap gap-3" id="categoryIcons">
-          <button type="button" class="btn btn-light category-icon" data-value="roads"><span class="fs-3">🛣️</span><small>Roads</small></button>
-          <button type="button" class="btn btn-light category-icon" data-value="water"><span class="fs-3">💧</span><small>Water</small></button>
-          <button type="button" class="btn btn-light category-icon" data-value="electric"><span class="fs-3">⚡</span><small>Electric</small></button>
-          <button type="button" class="btn btn-light category-icon" data-value="environment"><span class="fs-3">🌳</span><small>Environment</small></button>
-          <button type="button" class="btn btn-light category-icon" data-value="sanitation"><span class="fs-3">🚛</span><small>Sanitation</small></button>
-          <button type="button" class="btn btn-light category-icon" data-value="infrastructure"><span class="fs-3">🏗️</span><small>Infrastructure</small></button>
-        </div>
-        <input type="hidden" id="selectedCategory" name="category" required>
-        <div class="mt-3">
-          <label for="departmentBox" class="form-label">Department</label>
-          <input type="text" class="form-control" id="departmentBox" name="department" readonly required>
-        </div>
-      </section>
 
-      <!-- Location Selection -->
-      <section class="mb-5" id="locationSection">
-        <h2 class="h5 mb-3">Location</h2>
-        <p class="text-muted mb-3">📍 <span id="currentLocation">Click on the map to select a location</span></p>
-        <div id="map"></div>
-        <div class="mt-3">
-          <label for="addressBox" class="form-label">Address</label>
-          <input type="text" class="form-control" id="addressBox" name="address" placeholder="Enter address" required>
-        </div>
-        <div class="mt-2">
-          <label for="additionalAddress" class="form-label">Additional Details (Optional)</label>
-          <input type="text" class="form-control" id="additionalAddress" name="additionalAddress" placeholder="Floor, Landmark, etc.">
-        </div>
-      </section>
-
-      <!-- Image Upload -->
-      <section class="mb-5" id="imageSection">
-        <h2 class="h5 mb-1">Image Upload & AI Analysis</h2>
-        <p class="text-muted">🤖 AI will analyze your image automatically</p>
-        <!-- IMAGE INPUT BUTTONS -->
-        <div class="d-flex gap-2 mb-3">
-          <!-- Native label + input approach ensures file picker always opens -->
-          <label class="btn btn-primary m-0">
-            <i class="fas fa-camera me-2"></i>Camera
-            <input type="file" id="cameraInput"
-       accept="image/*" capture="environment"
-       style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
-          </label>
-          <label class="btn btn-outline-primary m-0">
-            <i class="fas fa-images me-2"></i>Gallery
-            <input type="file" id="galleryInput" accept="image/*" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
-          </label>
-        </div>
-
-        <!-- IMAGE PREVIEW -->
-        <div id="previewWrapper" class="d-none mb-3">
-          <img id="previewImage" class="img-fluid rounded" style="max-height:200px;" alt="Preview">
-          <button type="button" class="btn btn-sm btn-danger mt-2" id="removeImage">
-            <i class="fas fa-trash me-1"></i> Remove Image
-          </button>
-        </div>
-
-        <!-- AI ANALYSIS CARD -->
-        <div id="aiCard" class="card d-none mb-4">
-          <div class="card-header bg-light">
-            <h5 class="h6 mb-0">
-              <i class="fas fa-robot me-2"></i>AI Analysis
-              <span id="aiStatus" class="badge bg-primary ms-2">Analyzing...</span>
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <p class="mb-2"><strong>Issue Type:</strong> <span id="aiIssueType" class="text-muted">-</span></p>
-                <p class="mb-2"><strong>Category:</strong> <span id="aiCategory" class="text-muted">-</span></p>
-                <p class="mb-2"><strong>GPS Location:</strong> <span id="aiGps" class="text-muted">-</span></p>
-                <p class="mb-2"><strong>Priority:</strong> <span id="aiPriority" class="badge bg-warning text-dark">-</span></p>
-              </div>
-              <div class="col-md-12 mt-3">
-                <label for="aiDescription" class="form-label fw-semibold">Generated Description</label>
-                <div class="position-relative">
-                  <textarea class="form-control" id="aiDescription" name="description" rows="3" required 
-                            placeholder="AI is analyzing your image..."></textarea>
-                  <div id="descriptionLoader" class="position-absolute top-0 end-0 p-2 d-none">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
+    <!-- Header -->
+    <header class="premium-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-landmark"></i>
                 </div>
-                <div class="form-text">Feel free to edit the generated description as needed.</div>
-              </div>
+                <div class="logo-text">
+                    <h1>CivicVerse</h1>
+                    <p class="subtitle">Smart Governance</p>
+                </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Submission Settings -->
-      <section class="mb-5" id="settingsSection">
-        <h2 class="h5 mb-3">Submission Settings</h2>
-        <div class="card">
-          <div class="card-body">
-            <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="identityToggle" name="isAnonymous">
-              <label class="form-check-label" for="identityToggle">Submit Anonymously</label>
+            <nav class="nav-links">
+                <a href="/citizen-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="/report.html" class="nav-link active">New Report</a>
+                <a href="/my-reports.html" class="nav-link">My Reports</a>
+                <a href="/achievements.html" class="nav-link">Achievements</a>
+                <a href="/rewards.html" class="nav-link">Rewards</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="action-btn" id="notifBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                
+                <div class="theme-toggle" id="themeToggle">
+                    <div class="theme-toggle-slider">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                </div>
+
+                <div class="user-profile">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <img id="userAvatar" src="/images/default-avatar.png" alt="User Avatar">
+                    </div>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="dropdown-menu dropdown-menu-end shadow-sm" style="display: none;">
+                        <div class="px-3 py-2 border-bottom">
+                            <div class="fw-semibold" id="ddUserName">Loading...</div>
+                            <div class="small text-muted" id="ddUserEmail">loading@email.com</div>
+                        </div>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/profile.html">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/my-reports.html">
+                            <i class="fas fa-list"></i> My Reports
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/achievements.html">
+                            <i class="fas fa-trophy"></i> Achievements
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/rewards.html">
+                            <i class="fas fa-gift"></i> Rewards
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/settings.html">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr class="dropdown-divider">
+                        <a class="dropdown-item text-muted small" href="/support.html">
+                            <i class="fas fa-question-circle me-2"></i>Support
+                        </a>
+                        <a class="dropdown-item text-muted small" href="/privacy.html">
+                            <i class="fas fa-shield-alt me-2"></i>Privacy
+                        </a>
+                        <hr class="dropdown-divider">
+                        <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="notificationToggle" checked>
-              <label class="form-check-label" for="notificationToggle">Notify me about updates</label>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <form id="reportForm" enctype="multipart/form-data">
+            <!-- Category Selection -->
+            <section class="form-section scroll-reveal" id="categorySection">
+                <h2 class="section-title">
+                    <i class="fas fa-tags"></i>
+                    Category Selection
+                </h2>
+                <div class="dropdown mb-3">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Select Category ▼
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="roads"><span class="me-2">🛣️</span> Roads</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="water"><span class="me-2">💧</span> Water</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="electric"><span class="me-2">⚡</span> Electric</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="environment"><span class="me-2">🌳</span> Environment</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="sanitation"><span class="me-2">🚛</span> Sanitation</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="infrastructure"><span class="me-2">🏗️</span> Infrastructure</a></li>
+                    </ul>
+                </div>
+                <div class="category-icons" id="categoryIcons">
+                    <button type="button" class="category-icon" data-value="roads">
+                        <span class="fs-3">🛣️</span>
+                        <small>Roads</small>
+                    </button>
+                    <button type="button" class="category-icon" data-value="water">
+                        <span class="fs-3">💧</span>
+                        <small>Water</small>
+                    </button>
+                    <button type="button" class="category-icon" data-value="electric">
+                        <span class="fs-3">⚡</span>
+                        <small>Electric</small>
+                    </button>
+                    <button type="button" class="category-icon" data-value="environment">
+                        <span class="fs-3">🌳</span>
+                        <small>Environment</small>
+                    </button>
+                    <button type="button" class="category-icon" data-value="sanitation">
+                        <span class="fs-3">🚛</span>
+                        <small>Sanitation</small>
+                    </button>
+                    <button type="button" class="category-icon" data-value="infrastructure">
+                        <span class="fs-3">🏗️</span>
+                        <small>Infrastructure</small>
+                    </button>
+                </div>
+                <input type="hidden" id="selectedCategory" name="category" required>
+                <div class="mt-3">
+                    <label for="departmentBox" class="form-label">Department</label>
+                    <input type="text" class="form-control" id="departmentBox" name="department" readonly required>
+                </div>
+            </section>
+
+            <!-- Location Selection -->
+            <section class="form-section scroll-reveal" id="locationSection">
+                <h2 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Location
+                </h2>
+                <p class="text-muted mb-3">📍 <span id="currentLocation">Click on the map to select a location</span></p>
+                <div id="map"></div>
+                <div class="mt-3">
+                    <label for="addressBox" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="addressBox" name="address" placeholder="Enter address" required>
+                </div>
+                <div class="mt-3">
+                    <label for="additionalAddress" class="form-label">Additional Details (Optional)</label>
+                    <input type="text" class="form-control" id="additionalAddress" name="additionalAddress" placeholder="Floor, Landmark, etc.">
+                </div>
+            </section>
+
+            <!-- Image Upload -->
+            <section class="form-section scroll-reveal" id="imageSection">
+                <h2 class="section-title">
+                    <i class="fas fa-camera"></i>
+                    Image Upload & AI Analysis
+                </h2>
+                <p class="text-muted mb-3">🤖 AI will analyze your image automatically</p>
+                
+                <!-- IMAGE INPUT BUTTONS -->
+                <div class="d-flex gap-3 mb-3">
+                    <label class="btn btn-primary">
+                        <i class="fas fa-camera me-2"></i>Camera
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
+                    </label>
+                    <label class="btn btn-outline-primary">
+                        <i class="fas fa-images me-2"></i>Gallery
+                        <input type="file" id="galleryInput" accept="image/*" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;">
+                    </label>
+                </div>
+
+                <!-- IMAGE PREVIEW -->
+                <div id="previewWrapper" class="preview-wrapper d-none">
+                    <img id="previewImage" class="img-fluid rounded" style="max-height:200px;" alt="Preview">
+                    <button type="button" class="btn btn-sm btn-danger mt-2" id="removeImage">
+                        <i class="fas fa-trash me-1"></i> Remove Image
+                    </button>
+                </div>
+
+                <!-- AI ANALYSIS CARD -->
+                <div id="aiCard" class="ai-card d-none mt-4">
+                    <div class="card-header">
+                        <h5 class="h6 mb-0">
+                            <i class="fas fa-robot me-2"></i>AI Analysis
+                            <span id="aiStatus" class="badge bg-light text-primary ms-2">Analyzing...</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Issue Type:</strong> <span id="aiIssueType" class="text-muted">-</span></p>
+                                <p class="mb-2"><strong>Category:</strong> <span id="aiCategory" class="text-muted">-</span></p>
+                                <p class="mb-2"><strong>GPS Location:</strong> <span id="aiGps" class="text-muted">-</span></p>
+                                <p class="mb-2"><strong>Priority:</strong> <span id="aiPriority" class="badge bg-warning text-dark">-</span></p>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <label for="aiDescription" class="form-label fw-semibold">Generated Description</label>
+                                <div class="position-relative">
+                                    <textarea class="form-control" id="aiDescription" name="description" rows="3" required 
+                                              placeholder="AI is analyzing your image..."></textarea>
+                                    <div id="descriptionLoader" class="position-absolute top-0 end-0 p-2 d-none">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-text">Feel free to edit the generated description as needed.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Submission Settings -->
+            <section class="form-section scroll-reveal" id="settingsSection">
+                <h2 class="section-title">
+                    <i class="fas fa-cog"></i>
+                    Submission Settings
+                </h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="identityToggle" name="isAnonymous">
+                            <label class="form-check-label" for="identityToggle">Submit Anonymously</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="notificationToggle" checked>
+                            <label class="form-check-label" for="notificationToggle">Notify me about updates</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Expected resolution time: <strong>3-5 business days</strong>
+                </div>
+            </section>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" id="previewReport">
+                    <i class="fas fa-eye me-2"></i>Preview
+                </button>
+                <button type="submit" class="btn btn-primary px-4" id="submitReport">
+                    <i class="fas fa-paper-plane me-2"></i>Submit Report
+                </button>
             </div>
-            <div class="alert alert-info">
-              <i class="fas fa-info-circle me-2"></i>
-              Expected resolution time: <strong>3-5 business days</strong>
+        </form>
+    </main>
+
+    <!-- Premium Footer -->
+    <footer class="premium-footer">
+        <div class="footer-content">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="footer-section">
+                        <h6>CivicVerse</h6>
+                        <p class="text-muted small">Empowering citizens to build better communities through technology.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="footer-section">
+                        <h6>Quick Links</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <a href="/about.html" class="footer-link">
+                                    <i class="fas fa-info-circle me-2"></i>About Us
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/contact.html" class="footer-link">
+                                    <i class="fas fa-envelope me-2"></i>Contact
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/faq.html" class="footer-link">
+                                    <i class="fas fa-question-circle me-2"></i>FAQs
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="footer-section">
+                        <h6>Legal</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <a href="/privacy.html" class="footer-link">
+                                    <i class="fas fa-shield-alt me-2"></i>Privacy Policy
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/terms.html" class="footer-link">
+                                    <i class="fas fa-file-contract me-2"></i>Terms of Service
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-          </div>
+            
+            <div class="footer-bottom">
+                <p class="mb-0">© 2025 CivicVerse. All rights reserved.</p>
+            </div>
         </div>
-      </section>
+    </footer>
 
-      <!-- Submit Button -->
-      <div class="d-flex justify-content-between">
-        <button type="button" class="btn btn-outline-secondary" id="previewReport">
-          <i class="fas fa-eye me-2"></i>Preview
-        </button>
-        <button type="submit" class="btn btn-primary px-4" id="submitReport">
-          <i class="fas fa-paper-plane me-2"></i>Submit Report
-        </button>
-      </div>
-    </form>
-  </div>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/report.js"></script>
+    
+    <script>
+        // Scroll Reveal Animation
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.scroll-reveal');
+            
+            reveals.forEach(reveal => {
+                const windowHeight = window.innerHeight;
+                const elementTop = reveal.getBoundingClientRect().top;
+                const elementVisible = 100;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('revealed');
+                }
+            });
+        }
 
-  <!-- Footer -->
-  <footer class="bg-light border-top mt-5">
-    <div class="container py-3">
-      <div class="row">
-        <div class="col-md-6">
-          <h5>CivicVerse</h5>
-          <p class="text-muted small">Empowering citizens to build better communities through technology.</p>
-        </div>
-        <div class="col-md-3">
-          <h6>Quick Links</h6>
-          <ul class="list-unstyled small">
-            <li><a href="/about.html" class="text-muted">About Us</a></li>
-            <li><a href="/contact.html" class="text-muted">Contact</a></li>
-            <li><a href="/faq.html" class="text-muted">FAQs</a></li>
-          </ul>
-        </div>
-        <div class="col-md-3">
-          <h6>Legal</h6>
-          <ul class="list-unstyled small">
-            <li><a href="/privacy.html" class="text-muted">Privacy Policy</a></li>
-            <li><a href="/terms.html" class="text-muted">Terms of Service</a></li>
-          </ul>
-        </div>
-      </div>
-      <hr>
-      <div class="text-center text-muted small">
-        &copy; 2025 CivicVerse. All rights reserved.
-      </div>
-    </div>
-  </footer>
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Initial check
 
-  <!-- Bootstrap JS Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Custom JS -->
-  <script src="/js/report.js"></script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeSlider = themeToggle.querySelector('.theme-toggle-slider');
+        const themeIcon = themeSlider.querySelector('i');
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        
+        if (savedTheme === 'dark') {
+            themeToggle.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = themeToggle.classList.contains('dark');
+            
+            if (isDark) {
+                themeToggle.classList.remove('dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeToggle.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Profile Dropdown
+        const profileAvatar = document.getElementById('profileAvatar');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+        let dropdownOpen = false;
+
+        profileAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownOpen = !dropdownOpen;
+            dropdownMenu.style.display = dropdownOpen ? 'block' : 'none';
+        });
+
+        document.addEventListener('click', () => {
+            dropdownOpen = false;
+            dropdownMenu.style.display = 'none';
+        });
+
+        // Notification Bell Animation
+        const notifBell = document.getElementById('notifBell');
+        notifBell.addEventListener('click', () => {
+            notifBell.style.animation = 'bounce 0.6s ease';
+            setTimeout(() => {
+                notifBell.style.animation = '';
+            }, 600);
+        });
+
+        // Category Selection
+        const categoryIcons = document.querySelectorAll('.category-icon');
+        categoryIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                categoryIcons.forEach(i => i.classList.remove('selected'));
+                icon.classList.add('selected');
+                document.getElementById('selectedCategory').value = icon.dataset.value;
+            });
+        });
+
+        // Add scroll effects
+        let lastScrollTop = 0;
+        const header = document.querySelector('.premium-header');
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                header.style.transform = 'translateY(0)';
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Add active class
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>

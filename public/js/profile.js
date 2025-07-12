@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Load user data when page loads
   getUserData();
+
   
   // Toggle edit mode
   if (editProfileBtn && saveProfileBtn) {
@@ -362,7 +363,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('address').value = data.address || '';
       document.getElementById('city').value = data.city || '';
       document.getElementById('state').value = data.state || '';
-      document.getElementById('pinCode').value = data.pinCode || '';
+      const pin = data.pinCode ?? data.pincode ?? data.pin_code ?? data.zip ?? data.postalCode ?? '';
+      document.getElementById('pinCode').value = pin;
       
       // Update header user info
       document.getElementById('ddUserName').textContent = `${data.firstName} ${data.lastName}`;
