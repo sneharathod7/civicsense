@@ -24,16 +24,18 @@ router.get('/', auth, department, getEmployees);
 // Add new employee
 router.post('/', auth, department, createEmployee);
 
+// Unassigned employees for assignment dropdown
+router.get('/unassigned', auth, department, getUnassigned);
+
 // Employee details routes
-router.get('/:id', auth, department, getEmployeeDetails);
-router.get('/:id/stats', auth, department, getEmployeeStats);
-router.get('/:id/activity', auth, department, getEmployeeActivity);
-router.get('/:id/reports', auth, department, getEmployeeReports);
+router.get('/:id([0-9a-fA-F]{24})', auth, department, getEmployeeDetails);
+router.get('/:id([0-9a-fA-F]{24})/stats', auth, department, getEmployeeStats);
+router.get('/:id([0-9a-fA-F]{24})/activity', auth, department, getEmployeeActivity);
+router.get('/:id([0-9a-fA-F]{24})/reports', auth, department, getEmployeeReports);
 
 // Delete employee by id
-router.delete('/:id', auth, department, deleteEmployee);
+router.delete('/:id([0-9a-fA-F]{24})', auth, department, deleteEmployee);
 
-// Unassigned employees (legacy)
-router.get('/unassigned', auth, department, getUnassigned);
+
 
 module.exports = router;

@@ -185,8 +185,9 @@
       
       // Update activity
       const activityList = document.getElementById('employeeActivity');
-      if (activity.length > 0) {
-        activityList.innerHTML = activity.map(act => `
+      if (activityList) {
+        if (activity.length > 0) {
+          activityList.innerHTML = activity.map(act => `
           <div class="list-group-item">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -198,10 +199,11 @@
           </div>
         `).join('');
       } else {
-        activityList.innerHTML = `
-          <div class="list-group-item text-center py-4 text-muted">
-            No recent activity found
-          </div>`;
+          activityList.innerHTML = `
+            <div class="list-group-item text-center py-4 text-muted">
+              No recent activity found
+            </div>`;
+        }
       }
       
       // Update assigned reports

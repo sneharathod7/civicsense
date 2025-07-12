@@ -53,7 +53,8 @@ exports.getReport = async (req, res) => {
   try {
     // First, find the report with all necessary fields
     let report = await Report.findOne({ _id: id, department: deptName })
-      .select('title description category status priority location images createdAt updatedAt department reportedBy userId user userEmail')
+      .select('title description category status priority location images createdAt updatedAt department dueDate reportedBy userId user userEmail assignedTo')
+      .populate({ path: 'assignedTo', model: 'Employee', select: 'employeeId name email phone department' })
       .lean();
     
     if (!report) {
@@ -235,7 +236,11 @@ exports.markAsCompleted = (req, res) => {
       }
 
       // Check if user has permission (same department or admin)
-      if (req.user.department !== report.department && (!req.user.roles || !req.user.roles.includes('admin'))) {
+      const deptReq = (req.department || '').toLowerCase().trim();
+      const deptReport = (report.department || '').toLowerCase().trim();
+      const isAdmin = Array.isArray(req.user.roles) && req.user.roles.includes('admin');
+      if (deptReq !== deptReport && !isAdmin) {
+        console.warn(`[COMPLETE] Unauthorized: deptReq=${deptReq}, deptReport=${deptReport}, isAdmin=${isAdmin}`);
         return res.status(403).json({ error: 'Not authorized to complete this report' });
       }
 
