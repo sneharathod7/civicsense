@@ -4,29 +4,639 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CivicSense | Admin Login</title>
-  <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/login.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-dark: #3730a3;
+      --secondary-color: #7c3aed;
+      --accent-color: #06b6d4;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-light: #9ca3af;
+      --bg-primary: #f9fafb;
+      --bg-secondary: #ffffff;
+      --border-color: #e5e7eb;
+      --border-light: #f3f4f6;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      animation: backgroundShift 20s ease-in-out infinite;
+    }
+
+    @keyframes backgroundShift {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 3rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      animation: slideInUp 0.8s ease-out;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .title::after {
+      content: '';
+      position: absolute;
+      bottom: -0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    .admin-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      border-radius: var(--radius-xl);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+      }
+    }
+
+    .admin-icon {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      text-align: center;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .form-control {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .form-control label {
+      display: block;
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      color: var(--text-light);
+      font-size: 1.125rem;
+      z-index: 10;
+      transition: color 0.3s ease;
+    }
+
+    .form-control input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: 1rem;
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-control input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    .form-control input:focus + .input-icon {
+      color: var(--primary-color);
+    }
+
+    .form-control input::placeholder {
+      color: var(--text-light);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: 1.125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .btn-primary .spinner {
+      display: none;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 0.5rem;
+    }
+
+    .btn-primary.loading .spinner {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: var(--error-color);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-md);
+      display: none;
+      animation: slideInDown 0.3s ease;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .security-features {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .security-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .security-icon {
+      color: var(--success-color);
+      font-size: 1rem;
+    }
+
+    .floating-shapes {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      top: 60%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 80px;
+      height: 80px;
+      bottom: 20%;
+      left: 20%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 120px;
+      height: 120px;
+      top: 30%;
+      right: 30%;
+      animation-delay: 6s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+      }
+
+      .title {
+        font-size: 2rem;
+      }
+
+      .admin-badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+      }
+
+      .form-control input {
+        padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+      }
+
+      .input-icon {
+        left: 0.875rem;
+      }
+    }
+
+    .version-info {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .help-link {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      color: var(--primary-color);
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .help-link:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+  </style>
 </head>
 <body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
   <div class="login-wrapper">
     <form id="login-form" class="card">
-      <h2 class="title">Department Login</h2>
+      <div class="admin-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      
+      <h2 class="title">Admin Portal</h2>
+      
+      <div class="admin-badge">
+        <i class="fas fa-user-shield"></i>
+        <span>Department Access</span>
+      </div>
+
       <div class="form-control">
         <label for="email">Department Email</label>
-        <input type="email" id="email" placeholder="dept@example.com" required>
+        <div class="input-wrapper">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" id="email" placeholder="department@civicsense.gov" required>
+        </div>
       </div>
+
       <div class="form-control">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="********" required>
+        <label for="password">Secure Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="password" placeholder="Enter your secure password" required>
+        </div>
       </div>
-      <button type="submit" class="btn-primary">Login</button>
-      <p id="error-msg" class="error" hidden></p>
+
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Access Admin Panel</span>
+        <div class="spinner"></div>
+      </button>
+
+      <div id="error-msg" class="error"></div>
+
+      <div class="security-features">
+        <div class="security-item">
+          <i class="fas fa-shield-check security-icon"></i>
+          <span>256-bit SSL Encryption</span>
+        </div>
+        <div class="security-item">
+          <i class="fas fa-user-lock security-icon"></i>
+          <span>Multi-factor Authentication</span>
+        </div>
+        <div class="security-item">
+          <i class="fas fa-history security-icon"></i>
+          <span>Session Timeout Protection</span>
+        </div>
+      </div>
     </form>
   </div>
 
-  <!-- Global API base patch -->
+  <a href="#" class="help-link">
+    <i class="fas fa-question-circle"></i>
+    Need Help?
+  </a>
+
+  <div class="version-info">
+    CivicSense Admin v2.1.0
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('login-form');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = form.querySelector('.btn-primary');
+      const errorMsg = document.getElementById('error-msg');
+
+      // Enhanced form submission with loading state
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Clear previous errors
+        errorMsg.classList.remove('show');
+        errorMsg.textContent = '';
+        
+        // Add loading state
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        // Simulate authentication delay
+        setTimeout(() => {
+          // Remove loading state
+          submitBtn.classList.remove('loading');
+          submitBtn.disabled = false;
+          
+          // Call original login function if it exists
+          if (typeof window.handleLogin === 'function') {
+            window.handleLogin(e);
+          } else {
+            // Fallback validation
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!email || !password) {
+              showError('Please fill in all fields');
+              return;
+            }
+            
+            if (!isValidEmail(email)) {
+              showError('Please enter a valid email address');
+              return;
+            }
+            
+            // Here you would typically make an API call
+            console.log('Login attempt:', { email, password: '***' });
+          }
+        }, 1000);
+      });
+
+      // Show error message
+      function showError(message) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add('show');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          errorMsg.classList.remove('show');
+        }, 5000);
+      }
+
+      // Email validation
+      function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
+
+      // Enhanced input interactions
+      [emailInput, passwordInput].forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+          this.parentElement.style.transform = 'translateY(0)';
+        });
+
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            form.dispatchEvent(new Event('submit'));
+          }
+        });
+      });
+
+      // Clear error on input
+      [emailInput, passwordInput].forEach(input => {
+        input.addEventListener('input', function() {
+          if (errorMsg.classList.contains('show')) {
+            errorMsg.classList.remove('show');
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- Original scripts -->
   <script src="js/apiBase.js"></script>
-  <!-- Real authentication script -->
   <script src="js/login.js"></script>
 </body>
 </html>

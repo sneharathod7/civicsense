@@ -5,52 +5,673 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CivicSense – Verify Account</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/login-signup.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+      --accent-color: #f093fb;
+      --text-dark: #2d3748;
+      --text-light: #718096;
+      --bg-light: #f7fafc;
+      --border-color: #e2e8f0;
+      --success-color: #48bb78;
+      --error-color: #f56565;
+      --shadow-soft: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .top-nav {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 1rem 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .top-nav a {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .top-nav a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: width 0.3s ease;
+    }
+
+    .top-nav a:hover::after {
+      width: 100%;
+    }
+
+    .top-nav a:hover {
+      color: var(--primary-color);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .civic-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: var(--shadow-medium);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 48px;
+      width: 100%;
+      max-width: 440px;
+      margin: 2rem auto;
+      transition: all 0.3s ease;
+      animation: slideInUp 0.6s ease-out;
+    }
+
+    .civic-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .civic-title {
+      color: var(--text-dark);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      position: relative;
+    }
+
+    .civic-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    .subtitle {
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .form-label {
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .form-check-input:focus {
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-check-label {
+      color: var(--text-dark);
+      font-weight: 500;
+      margin-left: 0.5rem;
+    }
+
+    .btn {
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success-color), #38a169);
+      border: none;
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
+
+    .btn-success::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-success:hover::before {
+      left: 100%;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+    }
+
+    .btn-success:active {
+      transform: translateY(0);
+    }
+
+    .btn-link {
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-link:hover {
+      color: var(--primary-color);
+    }
+
+    .btn-link:disabled {
+      color: var(--text-light);
+      opacity: 0.6;
+    }
+
+    .otp-input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text-dark);
+    }
+
+    .otp-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: white;
+      transform: scale(1.05);
+    }
+
+    .otp-input.filled {
+      border-color: var(--success-color);
+      background: rgba(72, 187, 120, 0.1);
+    }
+
+    .resend-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .resend-btn:hover:not(:disabled) {
+      color: var(--primary-color);
+      transform: translateY(-2px);
+    }
+
+    .resend-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .link-styled {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .link-styled::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: width 0.3s ease;
+    }
+
+    .link-styled:hover::after {
+      width: 100%;
+    }
+
+    .link-styled:hover {
+      color: var(--secondary-color);
+    }
+
+    .text-center.small {
+      color: var(--text-light);
+      margin-top: 1.5rem;
+    }
+
+    .alert {
+      border-radius: 12px;
+      border: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      animation: slideInDown 0.3s ease;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .welcome-icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .floating-shapes {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      top: 20%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 120px;
+      height: 120px;
+      top: 60%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      bottom: 20%;
+      left: 20%;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .civic-card {
+        padding: 32px 24px;
+        margin: 1rem;
+        border-radius: 20px;
+      }
+
+      .civic-title {
+        font-size: 1.75rem;
+      }
+
+      .otp-input {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+      }
+
+      body {
+        padding: 0;
+      }
+    }
+
+    .loading-spinner {
+      display: none;
+      margin-left: 0.5rem;
+    }
+
+    .btn.loading .loading-spinner {
+      display: inline-block;
+    }
+
+    .otp-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .verification-icon {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .method-selection {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-check-inline {
+      margin-right: 1.5rem;
+    }
+
+    .form-check-input {
+      margin-right: 0.5rem;
+    }
+
+    .timer-text {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+  </style>
 </head>
-<body class="bg-light">
-  <div class="bg-white border-bottom py-2 mb-3">
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="top-nav">
     <div class="container d-flex justify-content-between small">
-      <a href="/landing.html" class="text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Back to Home</a>
-      <a href="tel:+911123456789" class="text-decoration-none">Need Help? <i class="fas fa-phone-alt"></i></a>
+      <a href="/landing.html">
+        <i class="fas fa-arrow-left me-1"></i> Back to Home
+      </a>
+      <a href="tel:+911123456789">
+        Need Help? <i class="fas fa-phone-alt ms-1"></i>
+      </a>
     </div>
   </div>
-  <div class="container pb-5">
-    <div class="civic-card" style="max-width: 420px; margin:auto;">
-      <h3 class="text-center civic-title mb-3">🔒 Account Verification</h3>
-      <p class="text-center text-muted small" id="verifySubText"></p>
+
+  <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+    <div class="civic-card">
+      <div class="text-center mb-4">
+        <div class="welcome-icon verification-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h2 class="civic-title">Account Verification</h2>
+        <p class="subtitle" id="verifySubText">Secure your account with OTP verification</p>
+      </div>
+      
       <form id="verifyForm">
-        <div class="mb-2 text-center">
-          <label class="form-label mb-1">Send OTP via</label><br>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="otpMethod" id="viaEmail" value="email" checked>
-            <label class="form-check-label" for="viaEmail">Email</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="otpMethod" id="viaSms" value="sms">
-            <label class="form-check-label" for="viaSms">SMS</label>
+        <div class="method-selection">
+          <div class="mb-2 text-center">
+            <label class="form-label mb-2">Send OTP via</label>
+            <div class="d-flex justify-content-center">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="otpMethod" id="viaEmail" value="email" checked>
+                <label class="form-check-label" for="viaEmail">
+                  <i class="fas fa-envelope me-1"></i>Email
+                </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="otpMethod" id="viaSms" value="sms">
+                <label class="form-check-label" for="viaSms">
+                  <i class="fas fa-sms me-1"></i>SMS
+                </label>
+              </div>
+            </div>
           </div>
         </div>
-        <button class="btn btn-primary w-100 mb-3" id="sendOtpBtn" type="button">Send OTP</button>
+
+        <button class="btn btn-primary w-100 mb-3" id="sendOtpBtn" type="button">
+          <i class="fas fa-paper-plane me-2"></i>
+          Send OTP
+          <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </button>
+
         <div id="otpWrapper" style="display:none">
-          <div class="d-flex justify-content-center mb-3 gap-1">
-          <input type="text" maxlength="1" class="form-control otp-input" id="otp1" />
-          <input type="text" maxlength="1" class="form-control otp-input" id="otp2" />
-          <input type="text" maxlength="1" class="form-control otp-input" id="otp3" />
-          <input type="text" maxlength="1" class="form-control otp-input" id="otp4" />
-          <input type="text" maxlength="1" class="form-control otp-input" id="otp5" />
-          <input type="text" maxlength="1" class="form-control otp-input" id="otp6" />
+          <div class="otp-container">
+            <input type="text" maxlength="1" class="form-control otp-input" id="otp1" />
+            <input type="text" maxlength="1" class="form-control otp-input" id="otp2" />
+            <input type="text" maxlength="1" class="form-control otp-input" id="otp3" />
+            <input type="text" maxlength="1" class="form-control otp-input" id="otp4" />
+            <input type="text" maxlength="1" class="form-control otp-input" id="otp5" />
+            <input type="text" maxlength="1" class="form-control otp-input" id="otp6" />
+          </div>
+          
+          <button class="btn btn-success w-100 mb-3" id="verifyOtpBtn" type="button">
+            <i class="fas fa-check-circle me-2"></i>
+            Verify OTP
+            <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+          
+          <div class="text-center">
+            <button class="btn btn-link resend-btn" id="resendOtpBtn" disabled type="button">
+              <i class="fas fa-redo me-1"></i>
+              Resend OTP (<span id="otpTimer" class="timer-text">15</span>s)
+            </button>
+          </div>
         </div>
-          <button class="btn btn-success w-100 mb-2" id="verifyOtpBtn" type="button">Verify OTP</button>
-        <button class="btn btn-link resend-btn" id="resendOtpBtn" disabled type="button">Resend OTP (<span id="otpTimer">15</span>s)</button>
-        </div>
+        
         <div id="otpMsg"></div>
       </form>
-      <p class="mt-3 text-center small">Already have an account? <a href="/citizen-login.html">Login here</a></p>
+      
+      <div class="text-center mt-4">
+        <p class="small text-muted">
+          Already have an account? 
+          <a href="/citizen-login.html" class="link-styled">Login here</a>
+        </p>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Enhanced OTP input handling
+    document.querySelectorAll('.otp-input').forEach((input, index) => {
+      input.addEventListener('input', function(e) {
+        const value = e.target.value;
+        
+        // Only allow numbers
+        if (!/^\d*$/.test(value)) {
+          e.target.value = '';
+          return;
+        }
+        
+        // Add filled class for visual feedback
+        if (value) {
+          e.target.classList.add('filled');
+          // Auto-focus next input
+          if (index < 5) {
+            document.getElementById(`otp${index + 2}`).focus();
+          }
+        } else {
+          e.target.classList.remove('filled');
+        }
+      });
+      
+      input.addEventListener('keydown', function(e) {
+        // Handle backspace
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+          document.getElementById(`otp${index}`).focus();
+        }
+      });
+      
+      // Add focus/blur animations
+      input.addEventListener('focus', function() {
+        this.style.transform = 'scale(1.05)';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.style.transform = 'scale(1)';
+      });
+    });
+
+    // Enhanced button click handling with loading states
+    document.getElementById('sendOtpBtn').addEventListener('click', function() {
+      const btn = this;
+      btn.classList.add('loading');
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        // Your existing send OTP logic would go here
+      }, 1000);
+    });
+
+    document.getElementById('verifyOtpBtn').addEventListener('click', function() {
+      const btn = this;
+      btn.classList.add('loading');
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        // Your existing verify OTP logic would go here
+      }, 1000);
+    });
+
+    // Add hover effects for radio buttons
+    document.querySelectorAll('.form-check-input').forEach(input => {
+      input.addEventListener('change', function() {
+        // Add visual feedback for selection
+        document.querySelectorAll('.form-check-label').forEach(label => {
+          label.style.color = 'var(--text-dark)';
+        });
+        if (this.checked) {
+          this.nextElementSibling.style.color = 'var(--primary-color)';
+        }
+      });
+    });
+
+    // Initialize first radio button styling
+    document.getElementById('viaEmail').nextElementSibling.style.color = 'var(--primary-color)';
+  </script>
   <script src="/js/citizen-verify.js"></script>
 </body>
 </html>
