@@ -1164,15 +1164,6 @@ function populateRecent(reports) {
     return;
   }
 
-  // Enhanced logging for reports
-  console.log('Reports Details:', reports.map(report => ({
-    id: report.id || report._id,
-    title: report.title,
-    status: report.status,
-    createdAt: report.createdAt || report.dateReported,
-    isValid: !!(report && (report.id || report._id) && (report.createdAt || report.dateReported))
-  })));
-
   // Get the recent activity container
   const recentActivityContainer = document.getElementById('recentActivityContainer');
   
@@ -1210,15 +1201,14 @@ function populateRecent(reports) {
       const hasRequiredFields = report && (report.id || report._id) && (report.createdAt || report.dateReported);
       if (!hasRequiredFields) {
         console.warn('Skipping invalid report - missing required fields:', report);
-        return false;
       }
-      return true;
+      return hasRequiredFields;
     })
     .sort((a, b) => {
       // Use dateReported as fallback for createdAt when sorting
-      const dateA = a.createdAt || a.dateReported;
-      const dateB = b.createdAt || b.dateReported;
-      return new Date(dateB) - new Date(dateA);
+      const dateA = new Date(a.createdAt || a.dateReported || Date.now());
+      const dateB = new Date(b.createdAt || b.dateReported || Date.now());
+      return dateB - dateA;
     });
 
   console.log('Sorted Reports:', sortedReports);
@@ -1255,15 +1245,30 @@ function populateRecent(reports) {
   // Create HTML for each recent report
   recentReports.forEach((report, index) => {
     try {
-      // Use dateReported as fallback if createdAt is not available
-      const reportDate = report.createdAt || report.dateReported;
-      const createdDate = new Date(reportDate);
-      if (isNaN(createdDate.getTime())) {
-        console.warn('Invalid date for report:', report.id || report._id, 'using current date');
-        createdDate = new Date(); // Fallback to current date
+      // Robust date parsing with multiple fallbacks
+      let reportDate;
+      const dateFields = ['createdAt', 'dateReported', 'updatedAt'];
+      
+      for (const field of dateFields) {
+        if (report[field]) {
+          reportDate = new Date(report[field]);
+          if (!isNaN(reportDate.getTime())) break;
+        }
       }
       
-      const timeAgo = getTimeAgo(createdDate);
+      // If no valid date found, use current date
+      if (!reportDate || isNaN(reportDate.getTime())) {
+        console.warn('No valid date found for report:', report);
+        reportDate = new Date();
+      }
+      
+      // Format the date to show full date
+      const formattedDate = reportDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
       const { icon, color } = statusIcons[report.status] || { icon: 'fa-question-circle', color: 'text-muted' };
       const statusText = report.status 
         ? report.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
@@ -1271,14 +1276,14 @@ function populateRecent(reports) {
       
       const categoryIcon = categoryIcons[report.category?.toLowerCase()] || 'fa-map-marker-alt';
       const categoryText = report.category ? report.category.charAt(0).toUpperCase() + report.category.slice(1) : 'General';
-      const locationText = formatLocation(report.location);
+      const locationText = report.location?.address || 'Unknown Location';
 
       // Create card element
       const cardCol = document.createElement('div');
       cardCol.className = `col-12 ${index < recentReports.length - 1 ? 'mb-3' : ''}`;
       
       cardCol.innerHTML = `
-        <div class="card border-0 glass-card p-3 hover-lift border-start border-4 border-primary">
+        <div class="card border-0 glass-card p-3 hover-lift border-start border-4 border-${color.replace('text-', '')}">
           <div class="d-flex align-items-center">
             <div class="me-3">
               <span class="activity-icon ${color} fs-4">
@@ -1296,7 +1301,7 @@ function populateRecent(reports) {
                 <span class="badge ${color.replace('text-', 'bg-')} text-white me-2">
                   ${statusText}
                 </span>
-                <i class="far fa-calendar me-1"></i>${timeAgo}
+                <i class="far fa-calendar me-1"></i>${formattedDate}
               </div>
               <div class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>${locationText}</div>
               ${report.description ? `
@@ -1324,39 +1329,15 @@ function populateRecent(reports) {
         });
       }
       
-      // Make the whole card clickable
-      const card = cardCol.querySelector('.card');
-      if (card) {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', (e) => {
-          if (!e.target.closest('.view-details-btn')) {
-            openReportDetailsModal(report);
-          }
-        });
-      }
-      
+      // Append to fragment
       fragment.appendChild(cardCol);
-      
     } catch (error) {
       console.error('Error creating report card:', error, 'Report:', report);
     }
   });
-  
-  // Add all cards to the container at once
-  recentActivityContainer.appendChild(fragment);
 
-  // Add a view all reports link if there are more than 3 reports
-  if (reports.length > 3) {
-    const viewAllDiv = document.createElement('div');
-    viewAllDiv.className = 'col-12 text-center mt-3';
-    viewAllDiv.innerHTML = `
-      <a href="/my-reports.html" class="btn btn-outline-primary btn-sm">
-        <i class="fas fa-list me-1"></i>View All Reports (${reports.length})
-      </a>
-    `;
-    recentActivityContainer.appendChild(viewAllDiv);
-  }
-  console.log('✅ Recent activity populated successfully');
+  // Append fragment to container
+  recentActivityContainer.appendChild(fragment);
   console.groupEnd();
 }
 
@@ -1382,6 +1363,46 @@ function openReportDetailsModal(report) {
       : description;
   }
 
+  // Enhanced date parsing function
+  function parseReportDate(report) {
+    // List of possible date fields to check
+    const dateFields = [
+      'createdAt', 
+      'dateReported', 
+      'updatedAt', 
+      'created_at', 
+      'date_reported', 
+      'timestamp'
+    ];
+
+    // Try parsing each date field
+    for (const field of dateFields) {
+      if (report[field]) {
+        const parsedDate = new Date(report[field]);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate;
+        }
+      }
+    }
+
+    // If no valid date found, check for nested date objects
+    if (report.date && typeof report.date === 'object') {
+      const nestedDateFields = ['$date', 'timestamp', 'value'];
+      for (const nestedField of nestedDateFields) {
+        if (report.date[nestedField]) {
+          const parsedDate = new Date(report.date[nestedField]);
+          if (!isNaN(parsedDate.getTime())) {
+            return parsedDate;
+          }
+        }
+      }
+    }
+
+    // Absolute last resort: use current date
+    console.warn('No valid date found for report:', report);
+    return new Date();
+  }
+
   // Prepare report details with improved formatting
   const details = {
     title: report.title || 'Civic Issue Report',
@@ -1389,16 +1410,22 @@ function openReportDetailsModal(report) {
     description: formatDescription(report.description),
     location: formatLocation(report.location),
     category: report.category || 'Uncategorized',
-    createdAt: report.createdAt 
-      ? new Date(report.createdAt).toLocaleString('en-US', {
+    createdAt: (() => {
+      try {
+        const reportDate = parseReportDate(report);
+        return reportDate.toLocaleString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
           hour12: true
-        }) 
-      : 'Date not available',
+        });
+      } catch (error) {
+        console.error('Error parsing report date:', error);
+        return 'Date not available';
+      }
+    })(),
     resolvedAt: report.resolvedAt 
       ? new Date(report.resolvedAt).toLocaleString('en-US', {
           year: 'numeric',
@@ -1507,7 +1534,7 @@ function getStatusBadgeClass(status) {
     'in-progress': 'bg-info',
     'resolved': 'bg-success'
   };
-  return statusClasses[status] || 'bg-secondary';
+  return statusClasses[status.toLowerCase()] || 'bg-secondary';
 }
 
 function updateBadges(badges = []) {
