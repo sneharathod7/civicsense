@@ -502,7 +502,11 @@
             coordinates: currentCoords ? [currentCoords.lng, currentCoords.lat] : [0, 0],
             address: addressInput.value || 'Not provided'
           },
-          images: selectedImages.map(img => img.preview),
+          images: selectedImages.length ? selectedImages.map(img => {
+            // Strip the data URL prefix (e.g., 'data:image/jpeg;base64,') to keep payload small
+            const base64Index = img.preview.indexOf(',');
+            return base64Index !== -1 ? img.preview.substring(base64Index + 1) : img.preview;
+          }) : [],
           userEmail: JSON.parse(localStorage.getItem('user')).email,
           userMobile: JSON.parse(localStorage.getItem('user')).mobile || ''
         };

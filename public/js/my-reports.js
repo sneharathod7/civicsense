@@ -278,11 +278,8 @@ function adaptReportForUI(r) {
       const cat = (r.category || 'Others').toString().toLowerCase();
       const map = {
         'roads': 'Roads',
-        'road': 'Roads',
         'water': 'Water',
         'electric': 'Electricity',
-        'electricity': 'Electricity',
-        'power': 'Electricity',
         'environment': 'Environment',
         'sanitation': 'Sanitation',
         'infrastructure': 'Infrastructure',
@@ -302,27 +299,40 @@ function adaptReportForUI(r) {
     dateResolved: resolvedDateObj ? resolvedDateObj.toISOString() : null,
     progress,
     currentStage: uiStatus === 'resolved' ? 'Resolved' : (uiStatus === 'in-progress' ? 'In Progress' : (uiStatus === 'overdue' ? 'Overdue' : 'Reported')),
+    // Build timeline stages – only include a date if the stage is actually completed
     stages: [
-      { name: 'Reported', completed: true, date: reportedDateObj.toISOString() },
-      { 
-        name: 'Verified', 
+      {
+        name: 'Reported',
+        completed: true,
+        date: reportedDateObj.toISOString()
+      },
+      {
+        name: 'Verified',
         completed: ['verified', 'assigned', 'in-progress', 'resolved'].includes(uiStatus),
-        date: updatedDateObj.toISOString() 
+        date: ['verified', 'assigned', 'in-progress', 'resolved'].includes(uiStatus)
+          ? (r.verifiedAt ? new Date(r.verifiedAt).toISOString() : updatedDateObj.toISOString())
+          : null
       },
-      { 
-        name: 'Assigned', 
+      {
+        name: 'Assigned',
         completed: ['assigned', 'in-progress', 'resolved'].includes(uiStatus),
-        date: updatedDateObj.toISOString() 
+        date: ['assigned', 'in-progress', 'resolved'].includes(uiStatus)
+          ? (r.assignedAt ? new Date(r.assignedAt).toISOString() : updatedDateObj.toISOString())
+          : null
       },
-      { 
-        name: 'In Progress', 
+      {
+        name: 'In Progress',
         completed: ['in-progress', 'resolved'].includes(uiStatus),
-        date: updatedDateObj.toISOString() 
+        date: ['in-progress', 'resolved'].includes(uiStatus)
+          ? (r.inProgressAt ? new Date(r.inProgressAt).toISOString() : updatedDateObj.toISOString())
+          : null
       },
-      { 
-        name: 'Resolved', 
+      {
+        name: 'Resolved',
         completed: uiStatus === 'resolved',
-        date: resolvedDateObj ? resolvedDateObj.toISOString() : null 
+        date: uiStatus === 'resolved'
+          ? (resolvedDateObj ? resolvedDateObj.toISOString() : null)
+          : null
       }
     ],
     assignedTo: r.assignedTo || '',
@@ -586,55 +596,47 @@ function updateStatsCards() {
   const resolutionRate = totalReports ? Math.round((statusCounts.resolved / totalReports) * 100) : 0;
   
   statsCards.innerHTML = `
-    <div class="col-md col-sm-6 mb-3">
-      <div class="card stats-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <div class="icon-circle bg-primary-subtle mb-3 mx-auto">
-            <i class="fas fa-clipboard-list fa-2x text-primary"></i>
-            </div>
+    <div class="stat-card" style="opacity: 1; transform: translateY(0px); transition: 0.6s;">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <div class="stat-icon">
+          <i class="fas fa-clipboard-list"></i>
+        </div>
           <h3 class="display-5 fw-bold metric-value text-dark">${totalReports}</h3>
-          <p class="text-muted mb-0">Total Reports</p>
-            </div>
-          </div>
-        </div>
-    <div class="col-md col-sm-6 mb-3">
-      <div class="card stats-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <div class="icon-circle bg-success-subtle mb-3 mx-auto">
-            <i class="fas fa-check-circle fa-2x text-success"></i>
-      </div>
-          <h3 class="display-5 fw-bold metric-value text-dark">${resolvedCount}</h3>
-          <p class="text-muted mb-0">Reports Resolved</p>
-    </div>
-            </div>
-            </div>
-    <div class="col-md col-sm-6 mb-3">
-      <div class="card stats-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <div class="icon-circle bg-info-subtle mb-3 mx-auto">
-            <i class="fas fa-chart-line fa-2x text-info"></i>
-          </div>
-          <h3 class="display-5 fw-bold metric-value text-dark">${resolutionRate}%</h3>
-          <p class="text-muted mb-0">Resolution Rate</p>
+          <p class="text-muted">Total Reports</p>
         </div>
       </div>
-    </div>
-    <div class="col-md col-sm-6 mb-3">
-      <div class="card stats-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <div class="icon-circle bg-warning-subtle mb-3 mx-auto">
-            <i class="fas fa-clock fa-2x text-warning"></i>
-            </div>
-          <h3 class="display-5 fw-bold metric-value text-dark">${activeCount}</h3>
-          <p class="text-muted mb-0">Active Reports</p>
-            </div>
+    <div class="stat-card" style="opacity: 1; transform: translateY(0px); transition: 0.6s;">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 class="display-5 fw-bold metric-value text-dark">${resolvedCount}</h3>
+        <p class="text-muted">Reports Resolved</p>
+        </div>
+      </div>
+    <div class="stat-card" style="opacity: 1; transform: translateY(0px); transition: 0.6s;">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <div class="stat-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3 class="display-5 fw-bold metric-value text-dark">${resolutionRate}%</h3>
+        <p class="text-muted mb-0">Resolution Rate</p>
+        </div>
+      </div>
+    <div class="stat-card" style="opacity: 1; transform: translateY(0px); transition: 0.6s;">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <div class="stat-icon">
+          <i class="fas fa-clock"></i>
+          </div>
+        <h3 class="display-5 fw-bold metric-value text-dark">${activeCount}</h3>
+        <p class="text-muted mb-0">Active Reports</p>
           </div>
         </div>
-    <div class="col-md col-sm-6 mb-3">
-      <div class="card stats-card text-center h-100">
+      </div>
+    <div class="stat-card" style="opacity: 1; transform: translateY(0px); transition: 0.6s;">
         <div class="card-body d-flex flex-column justify-content-center">
-          <div class="icon-circle bg-danger-subtle mb-3 mx-auto">
-            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+          <div class = "stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
       </div>
           <h3 class="display-5 fw-bold metric-value text-dark">${overdueCount}</h3>
           <p class="text-muted mb-0">Overdue</p>
@@ -671,22 +673,24 @@ function updatePerformanceMetrics() {
   const totalReports = sampleReports.length;
   const resolvedReports = sampleReports.filter(r => r.status === 'resolved').length;
   const resolutionRate = totalReports > 0 ? Math.round((resolvedReports / totalReports) * 100) : 0;
+  const MS_IN_DAY = 1000 * 60 * 60 * 24;
   
   // Calculate average resolution time
-  let avgResolutionTime = 5.2; // Default fallback value
+  // Calculate average resolution time (in days with one decimal place)
+  let avgResolutionTime = 0.0;
   if (resolvedReports > 0) {
     const resolvedReportsWithDates = sampleReports.filter(r => r.status === 'resolved' && r.dateReported && r.dateResolved);
     if (resolvedReportsWithDates.length > 0) {
       const totalDays = resolvedReportsWithDates.reduce((sum, report) => {
         const reportedDate = new Date(report.dateReported);
         const resolvedDate = new Date(report.dateResolved);
-        const diffTime = Math.abs(resolvedDate - reportedDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return sum + diffDays;
+        return sum + ((resolvedDate - reportedDate) / MS_IN_DAY);
       }, 0);
-      avgResolutionTime = (totalDays / resolvedReportsWithDates.length).toFixed(1);
+      avgResolutionTime = (totalDays / resolvedReportsWithDates.length);
     }
   }
+  // Keep only one decimal for display
+  const avgResolutionTimeDisplay = avgResolutionTime.toFixed(1);
   
   // Get data for last 2 months for trend calculation
   const lastTwoMonthsData = getMonthlyData(getLastMonths(2));
@@ -705,6 +709,8 @@ function updatePerformanceMetrics() {
     resolutionTrend = 100; // Significant increase if previous was zero and current is not
   }
 
+  // Round trend to 2 decimal places for display
+  const resolutionTrendDisplay = Math.abs(resolutionTrend).toFixed(2);
   const resolutionTrendClass = resolutionTrend >= 0 ? 'text-success' : 'text-danger';
   const resolutionTrendIcon = resolutionTrend >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
   
@@ -735,10 +741,10 @@ function updatePerformanceMetrics() {
               <h6 class="mb-0">Resolution Rate</h6>
             </div>
             <div class="d-flex align-items-end mt-3">
-              <h2 class="display-4 mb-0 fw-bold metric-value">${resolutionRate}%</h2>
-              <div class="ms-2 mb-1 ${resolutionTrendClass}">
-                <i class="fas ${resolutionTrendIcon} me-1"></i>
-                <small>${Math.abs(resolutionTrend)}% ${resolutionTrend >= 0 ? 'increase' : 'decrease'}</small>
+               <h2 class="display-4 mb-0 fw-bold metric-value">${resolutionRate}%</h2>
+               <div class="ms-2 mb-1 ${resolutionTrendClass}">
+                 <i class="fas ${resolutionTrendIcon} me-1"></i>
+                 <small>${resolutionTrendDisplay}% ${resolutionTrend >= 0 ? 'increase' : 'decrease'}</small>
           </div>
         </div>
             <div class="progress mt-3" style="height: 8px;">
@@ -760,7 +766,7 @@ function updatePerformanceMetrics() {
               <h6 class="mb-0">Avg. Resolution Time</h6>
             </div>
             <div class="d-flex align-items-end mt-3">
-              <h2 class="display-4 mb-0 fw-bold metric-value">${avgResolutionTime}</h2>
+               <h2 class="display-4 mb-0 fw-bold metric-value">${avgResolutionTime}</h2>
               <div class="mb-1 ms-2">days</div>
             </div>
             <div class="progress mt-3" style="height: 8px;">
@@ -949,6 +955,7 @@ function createMonthlyTrendChart(data) {
         }
       });
     }
+    
 
 // Update metrics based on selected time range
 function updateMetricsTimeRange(months) {
