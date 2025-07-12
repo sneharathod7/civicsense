@@ -5,93 +5,814 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CivicSense – Citizen Registration</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/login-signup.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+      --accent-color: #f093fb;
+      --success-color: #48bb78;
+      --error-color: #f56565;
+      --text-dark: #2d3748;
+      --text-light: #718096;
+      --bg-light: #f7fafc;
+      --border-color: #e2e8f0;
+      --shadow-soft: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .top-bar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: slideInDown 0.6s ease;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .top-bar a {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .top-bar a:hover {
+      color: var(--primary-color);
+      transform: translateX(5px);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .civic-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: var(--shadow-medium);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 48px;
+      width: 100%;
+      max-width: 600px;
+      margin: 2rem auto;
+      transition: all 0.3s ease;
+      animation: slideInUp 0.8s ease-out;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .civic-title {
+      color: var(--text-dark);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      position: relative;
+    }
+
+    .civic-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    .subtitle {
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      color: var(--text-dark);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-icon {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+
+    .form-label {
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control, .form-select {
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text-dark);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group-text {
+      background: var(--bg-light);
+      border: 2px solid var(--border-color);
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      color: var(--text-dark);
+      font-weight: 500;
+    }
+
+    .input-group .form-control {
+      border-left: none;
+      border-radius: 0 12px 12px 0;
+    }
+
+    .input-group:focus-within .input-group-text {
+      border-color: var(--primary-color);
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-outline-secondary {
+      border: 2px solid var(--border-color);
+      border-left: none;
+      border-radius: 0 12px 12px 0;
+      background: transparent;
+      color: var(--text-light);
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .form-check {
+      margin-bottom: 1rem;
+    }
+
+    .form-check-input {
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 2px solid var(--border-color);
+      border-radius: 4px;
+      margin-right: 0.5rem;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+      color: var(--text-dark);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .form-check-label a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .form-check-label a:hover {
+      color: var(--secondary-color);
+      text-decoration: underline;
+    }
+
+    .link-styled {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .link-styled::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: width 0.3s ease;
+    }
+
+    .link-styled:hover::after {
+      width: 100%;
+    }
+
+    .link-styled:hover {
+      color: var(--secondary-color);
+    }
+
+    .text-center.small {
+      color: var(--text-light);
+      margin-top: 1.5rem;
+    }
+
+    .alert {
+      border-radius: 12px;
+      border: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      animation: slideInDown 0.3s ease;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 2px;
+    }
+
+    .floating-shapes {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 5%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      top: 50%;
+      right: 5%;
+      animation-delay: 3s;
+    }
+
+    .shape:nth-child(3) {
+      width: 80px;
+      height: 80px;
+      bottom: 10%;
+      left: 15%;
+      animation-delay: 6s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .civic-card {
+        padding: 32px 24px;
+        margin: 1rem;
+        border-radius: 20px;
+      }
+
+      .civic-title {
+        font-size: 1.75rem;
+      }
+
+      .top-bar {
+        padding: 0.75rem 0;
+      }
+    }
+
+    .welcome-icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .loading-spinner {
+      display: none;
+      margin-left: 0.5rem;
+    }
+
+    .btn-primary.loading .loading-spinner {
+      display: inline-block;
+    }
+
+    .strength-meter {
+      height: 4px;
+      background: var(--border-color);
+      border-radius: 2px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .strength-weak { background: var(--error-color); }
+    .strength-medium { background: #f6ad55; }
+    .strength-strong { background: var(--success-color); }
+
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+
+    .step {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border-color);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .step.active {
+      background: var(--primary-color);
+      transform: scale(1.2);
+    }
+
+    .step.completed {
+      background: var(--success-color);
+    }
+
+    .step.completed::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8px;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
   <!-- Top Bar -->
-  <div class="bg-white border-bottom py-2 mb-3">
-    <div class="container d-flex justify-content-between small">
-      <a href="/landing.html" class="text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Back to Home</a>
-      <a href="tel:+911123456789" class="text-decoration-none">Need Help? <i class="fas fa-phone-alt"></i></a>
+  <div class="top-bar">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a href="/landing.html" class="d-flex align-items-center">
+        <i class="fas fa-arrow-left me-2"></i>
+        <span>Back to Home</span>
+      </a>
+      <a href="tel:+911123456789" class="d-flex align-items-center">
+        <span>Need Help?</span>
+        <i class="fas fa-phone-alt ms-2"></i>
+      </a>
     </div>
   </div>
+
   <div class="container pb-5">
     <div class="civic-card">
-      <h2 class="text-center civic-title mb-1">🌟 Join CivicSense Community! 🌟</h2>
-      <p class="text-center text-muted mb-4 small">Make your voice heard in city governance</p>
+      <div class="text-center mb-4">
+        <div class="welcome-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <h2 class="civic-title">🌟 Join CivicSense Community! 🌟</h2>
+        <p class="subtitle">Make your voice heard in city governance</p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar mb-4">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
       <form id="signupForm" autocomplete="on">
-        <div class="row">
-          <div class="mb-3 col-sm-6">
-            <label for="firstName" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="firstName" required />
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <div class="section-title">
+            <i class="fas fa-user section-icon"></i>
+            Personal Information
           </div>
-          <div class="mb-3 col-sm-6">
-            <label for="lastName" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="lastName" required />
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="signupEmail" class="form-label">Email</label>
-          <input type="email" class="form-control" id="signupEmail" required />
-        </div>
-        <div class="mb-3">
-          <label for="signupMobile" class="form-label">Phone Number</label>
-          <div class="input-group">
-            <span class="input-group-text">+91</span>
-            <input type="tel" class="form-control" id="signupMobile" pattern="[0-9]{10}" required />
+          <div class="row">
+            <div class="mb-3 col-sm-6">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstName" required />
+            </div>
+            <div class="mb-3 col-sm-6">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastName" required />
+            </div>
           </div>
         </div>
-                <div class="mb-3">
-          <label for="signupAddress" class="form-label">Address</label>
-          <textarea class="form-control" id="signupAddress" rows="2" required></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="pinCode" class="form-label">PIN Code</label>
-          <input type="number" class="form-control" id="pinCode" pattern="[0-9]{6}" required />
-        </div>
-        <div class="row mb-3">
-          <div class="col-sm-6">
-            <label for="stateSelect" class="form-label">State</label>
-            <select class="form-select" id="stateSelect" required>
-              <option selected disabled>Select State</option>
-            </select>
+
+        <!-- Contact Information Section -->
+        <div class="form-section">
+          <div class="section-title">
+            <i class="fas fa-envelope section-icon"></i>
+            Contact Information
           </div>
-          <div class="col-sm-6">
-            <label for="citySelect" class="form-label">City</label>
-            <select class="form-select" id="citySelect" required>
-              <option selected disabled>Select City</option>
-            </select>
+          <div class="mb-3">
+            <label for="signupEmail" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="signupEmail" required />
           </div>
-          
-        </div>
-        <div class="mb-3 position-relative">
-          <label for="signupPassword" class="form-label">Password</label>
-          <div class="input-group">
-            <input type="password" class="form-control" id="signupPassword" required minlength="6" />
-            <button class="btn btn-outline-secondary" type="button" id="togglePwd"><i class="fas fa-eye"></i></button>
+          <div class="mb-3">
+            <label for="signupMobile" class="form-label">Phone Number</label>
+            <div class="input-group">
+              <span class="input-group-text">+91</span>
+              <input type="tel" class="form-control" id="signupMobile" pattern="[0-9]{10}" required />
+            </div>
           </div>
         </div>
-        <div class="mb-3">
-          <label for="confirmPassword" class="form-label">Confirm Password</label>
-          <input type="password" class="form-control" id="confirmPassword" required minlength="6" />
+
+        <!-- Address Information Section -->
+        <div class="form-section">
+          <div class="section-title">
+            <i class="fas fa-map-marker-alt section-icon"></i>
+            Address Information
+          </div>
+          <div class="mb-3">
+            <label for="signupAddress" class="form-label">Full Address</label>
+            <textarea class="form-control" id="signupAddress" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="pinCode" class="form-label">PIN Code</label>
+            <input type="number" class="form-control" id="pinCode" pattern="[0-9]{6}" required />
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-6">
+              <label for="stateSelect" class="form-label">State</label>
+              <select class="form-select" id="stateSelect" required>
+                <option selected disabled>Select State</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label for="citySelect" class="form-label">City</label>
+              <select class="form-select" id="citySelect" required>
+                <option selected disabled>Select City</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="form-check mb-2">
-          <input class="form-check-input" type="checkbox" id="agreeTerms" required>
-          <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a></label>
+
+        <!-- Security Section -->
+        <div class="form-section">
+          <div class="section-title">
+            <i class="fas fa-shield-alt section-icon"></i>
+            Account Security
+          </div>
+          <div class="mb-3">
+            <label for="signupPassword" class="form-label">Password</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="signupPassword" required minlength="6" />
+              <button class="btn btn-outline-secondary" type="button" id="togglePwd">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="strength-meter">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <small class="text-muted" id="strengthText">Password strength will be shown here</small>
+          </div>
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword" required minlength="6" />
+          </div>
         </div>
-        <div class="form-check mb-3">
-          <input class="form-check-input" type="checkbox" id="confirmAge" required>
-          <label class="form-check-label" for="confirmAge">I confirm I am 18 years or older</label>
+
+        <!-- Terms and Conditions -->
+        <div class="form-section">
+          <div class="section-title">
+            <i class="fas fa-check-circle section-icon"></i>
+            Terms & Verification
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+            <label class="form-check-label" for="agreeTerms">
+              I agree to the <a href="#" class="link-styled">Terms & Conditions</a> and <a href="#" class="link-styled">Privacy Policy</a>
+            </label>
+          </div>
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="confirmAge" required>
+            <label class="form-check-label" for="confirmAge">
+              I confirm I am 18 years or older
+            </label>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary w-100">🚀 CREATE ACCOUNT</button>
+
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="fas fa-rocket me-2"></i>
+          CREATE ACCOUNT
+          <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </button>
+        
         <div id="signupMsg"></div>
       </form>
-      <p class="mt-3 text-center small">Already have an account? <a href="/citizen-login.html">Login here</a></p>
-      <p class="text-center small"><a href="/landing.html">Back to Home</a></p>
+      
+      <div class="text-center mt-4">
+        <p class="small text-muted">
+          Already have an account? 
+          <a href="/citizen-login.html" class="link-styled">Sign in here</a>
+        </p>
+        <p class="small">
+          <a href="/landing.html" class="link-styled">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Home
+          </a>
+        </p>
+      </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Enhanced form interactions
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('signupForm');
+      const progressFill = document.getElementById('progressFill');
+      const passwordInput = document.getElementById('signupPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      const strengthFill = document.getElementById('strengthFill');
+      const strengthText = document.getElementById('strengthText');
+      const togglePwd = document.getElementById('togglePwd');
+
+      // Password strength checker
+      function checkPasswordStrength(password) {
+        let strength = 0;
+        let feedback = '';
+
+        if (password.length >= 8) strength += 25;
+        if (password.match(/[a-z]/)) strength += 25;
+        if (password.match(/[A-Z]/)) strength += 25;
+        if (password.match(/[0-9]/)) strength += 25;
+
+        if (strength < 50) {
+          feedback = 'Weak password';
+          strengthFill.className = 'strength-fill strength-weak';
+        } else if (strength < 100) {
+          feedback = 'Medium strength';
+          strengthFill.className = 'strength-fill strength-medium';
+        } else {
+          feedback = 'Strong password';
+          strengthFill.className = 'strength-fill strength-strong';
+        }
+
+        strengthFill.style.width = strength + '%';
+        strengthText.textContent = feedback;
+      }
+
+      // Password visibility toggle
+      togglePwd.addEventListener('click', function() {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+      });
+
+      // Real-time password strength
+      passwordInput.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+        updateProgress();
+      });
+
+      // Form progress tracking
+      function updateProgress() {
+        const inputs = form.querySelectorAll('input[required], select[required]');
+        let filled = 0;
+        
+        inputs.forEach(input => {
+          if (input.type === 'checkbox') {
+            if (input.checked) filled++;
+          } else if (input.value.trim() !== '') {
+            filled++;
+          }
+        });
+
+        const progress = (filled / inputs.length) * 100;
+        progressFill.style.width = progress + '%';
+      }
+
+      // Add event listeners to all form inputs
+      form.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('input', updateProgress);
+        input.addEventListener('change', updateProgress);
+      });
+
+      // Enhanced form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const signupMsg = document.getElementById('signupMsg');
+        
+        // Password confirmation check
+        if (passwordInput.value !== confirmPasswordInput.value) {
+          signupMsg.innerHTML = '<div class="alert alert-danger">Passwords do not match!</div>';
+          return;
+        }
+
+        // Add loading state
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        // Clear previous messages
+        signupMsg.innerHTML = '';
+        
+        // Simulate API call
+        setTimeout(() => {
+          submitBtn.classList.remove('loading');
+          submitBtn.disabled = false;
+          
+          // Your existing signup logic would go here
+          if (typeof window.handleSignup === 'function') {
+            window.handleSignup(e);
+          }
+        }, 1500);
+      });
+
+      // Enhanced input animations
+      form.querySelectorAll('.form-control, .form-select').forEach(input => {
+        input.addEventListener('focus', function() {
+          this.style.transform = 'translateY(-2px)';
+          this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+          this.style.transform = 'translateY(0)';
+          this.parentElement.style.transform = 'translateY(0)';
+        });
+      });
+
+      // Initialize progress
+      updateProgress();
+    });
+  </script>
   <script src="/js/citizen-registration.js"></script>
   <script src="/js/signup-extra.js"></script>
 </body>

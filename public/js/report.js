@@ -526,25 +526,28 @@
         const result = await response.json();
 
         if (result.success) {
-          alert('Report submitted successfully!');
-          form.reset();
-          const previewWrapperEl = document.getElementById('previewWrapper');
-          const previewImageEl = document.getElementById('previewImage');
-          const aiCardEl = document.getElementById('aiCard');
-          if (previewImageEl) previewImageEl.src = '';
-          if (previewWrapperEl) previewWrapperEl.classList.add('d-none');
-          if (aiCardEl) aiCardEl.classList.add('d-none');
-          selectedImages = [];
-          if (map) {
-            map.setView([20.5937, 78.9629], 5);
-          }
+          // Store report details in localStorage for success page
+          localStorage.setItem('lastSubmittedReport', JSON.stringify({
+            id: result.data._id,
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            location: data.location.address,
+            coordinates: data.location.coordinates,
+            images: data.images
+          }));
+
+          // Redirect to report success page with report ID
+          window.location.href = `/report-success.html?reportId=${result.data._id}`;
         } else {
-          alert(`Submission failed: ${result.message || 'Unknown error'}`);
+          // Handle submission error
+          showMessage(result.message || 'Failed to submit report', true);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Submit Report';
         }
-      } catch (err) {
-        console.error('Error submitting report:', err);
-        alert('A client-side error occurred. Please try again.');
-      } finally {
+      } catch (error) {
+        console.error('Report submission error:', error);
+        showMessage('An error occurred while submitting the report', true);
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Submit Report';
       }
