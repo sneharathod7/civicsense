@@ -123,7 +123,7 @@ And empower **1000+ citizens** and **50+ municipalities** by 2026 with tools tha
 
 1. **Clone & Navigate**
    ```bash
-   git clone https://github.com/yourusername/civicsense.git
+   git clone [https://github.com/yourusername/civicsense.git](https://github.com/CtrlAlt07/civicsense.git)
    cd civicsense
    ```
 
