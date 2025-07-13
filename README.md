@@ -123,7 +123,7 @@ And empower **1000+ citizens** and **50+ municipalities** by 2026 with tools tha
 
 1. **Clone & Navigate**
    ```bash
-   git clone [https://github.com/yourusername/civicsense.git](https://github.com/CtrlAlt07/civicsense.git)
+   git clone https://github.com/CtrlAlt07/civicsense.git
    cd civicsense
    ```
 
@@ -131,11 +131,6 @@ And empower **1000+ citizens** and **50+ municipalities** by 2026 with tools tha
    ```bash
    # Node.js backend & frontend
    npm install
-
-   # Python ML service
-   cd ml_api
-   pip install -r requirements.txt
-   cd ..
    ```
 
 3. **Configure Environment**
@@ -146,17 +141,15 @@ And empower **1000+ citizens** and **50+ municipalities** by 2026 with tools tha
 
 4. **Run Services**
    ```bash
-   # Start ML microservice
-   npm run ml-api
-
    # In new terminal: Start Node.js server
    npm run dev
+   
+   cd adminportal/backend
+   npm start 
    ```
 
 5. **Access**
-   - Citizen App: http://localhost:5000
-   - Admin Portal: http://localhost:5000/adminportal
-   - API Docs (Swagger UI): http://localhost:5000/api-docs (if enabled)
+   - http://localhost:5000
 
 ## 🗂 Project Structure
 
