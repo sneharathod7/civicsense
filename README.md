@@ -124,7 +124,6 @@ And empower **1000+ citizens** and **50+ municipalities** by 2026 with tools tha
 1. **Clone & Navigate**
    ```bash
    git clone https://github.com/CtrlAlt07/civicsense.git
-   cd civicsense
    ```
 
 2. **Install Dependencies**
@@ -143,7 +142,8 @@ And empower **1000+ citizens** and **50+ municipalities** by 2026 with tools tha
    ```bash
    # In new terminal: Start Node.js server
    npm run dev
-   
+
+   In a split terminal 
    cd adminportal/backend
    npm start 
    ```
