@@ -1,7 +1,8 @@
 // apiBase.js
 // Ensures all fetch requests that target /api/* are sent to the admin backend on port 3005
 (function() {
-  const ADMIN_BASE_ORIGIN = 'http://localhost:3005';
+  const isLocalDev = /localhost|127\.0\.0\.1/.test(window.location.hostname);
+  const ADMIN_BASE_ORIGIN = isLocalDev ? 'http://localhost:3005' : window.location.origin;
   if (!window.fetch) return; // Fail-safe
 
   const originalFetch = window.fetch.bind(window);
