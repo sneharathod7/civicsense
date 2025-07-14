@@ -254,9 +254,19 @@ app.post('/api/send-complaint', express.json(), async (req, res) => {
 app.use('/api/v1/auth', require('./routes/auth.routes'));
 
 // Define routes for each page
-app.get('/', servePage('landing'));
-app.get('/login', servePage('citizen-login'));
-app.get('/signup', servePage('citizen-signup'));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../landing.html'));
+});
+app.get('/login', (req, res) => {
+  const filePath = path.join(__dirname, '../public/citizen-login.html');
+  console.log('Serving:', filePath);
+  res.sendFile(filePath);
+});
+app.get('/signup', (req, res) => {
+  const filePath = path.join(__dirname, '../public/citizen-signup.html');
+  console.log('Serving:', filePath);
+  res.sendFile(filePath);
+});
 app.get('/dashboard', servePage('citizen-dashboard'));
 app.get('/report', servePage('report'));
 app.get('/my-reports', servePage('my-reports'));
