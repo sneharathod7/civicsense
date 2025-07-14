@@ -3,7 +3,7 @@ const loginForm = document.getElementById('login-form');
 const errorMsg = document.getElementById('error-msg');
 
 // Backend API URL - pointing to admin backend
-const API_URL = 'http://localhost:3005/api/auth/login';
+const API_URL = '/api/auth/login';
 
 if (loginForm) {
   loginForm.addEventListener('submit', async function(event) {
